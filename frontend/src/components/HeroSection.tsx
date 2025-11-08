@@ -2,10 +2,12 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { Meteors } from './ui/Meteors';
 import ScrollReveal from './ui/ScrollReveal';
+import FloatingLogo from './ui/FloatingLogo';
 
 const HeroSection: React.FC = () => {
   return (
     <div className="relative min-h-[80vh] flex items-center justify-center overflow-hidden">
+  <FloatingLogo side="left" interval={4000} />
       <div className="relative z-10 text-center p-4">
         <ScrollReveal>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 dark:text-slate-100 mb-4">
