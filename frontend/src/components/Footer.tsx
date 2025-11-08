@@ -2,7 +2,7 @@ import React from 'react';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="p-8 md:p-10" style={{ backgroundColor: '#fffdeb' }}>
+    <footer className="p-8 md:p-10 rounded-t-2xl " style={{ backgroundColor: '#fffdeb' }}>
       <div className="w-full max-w-full mx-auto footer grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
         <aside className="flex flex-col items-center md:items-start space-y-2">
           <p className="text-2xl md:text-3xl font-bold text-slate-900">
