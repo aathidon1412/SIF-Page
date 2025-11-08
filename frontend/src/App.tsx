@@ -6,7 +6,6 @@ import Footer from './components/Footer';
 import Home from './pages/Home';
 import About from './pages/About';
 import Contact from './pages/Contact';
-import { CursorGlow } from './components/ui/CursorGlow';
 import { ThemeProvider, useTheme } from './hooks/useTheme';
 
 // Scroll to top on page change
@@ -28,7 +27,6 @@ const AppContent: React.FC = () => {
 
     return (
         <div className="flex flex-col min-h-screen">
-            <CursorGlow />
             <Navbar />
             <main className="flex-grow pt-20"> {/* Add padding top to avoid content being hidden by fixed navbar */}
                 <ScrollToTop />
