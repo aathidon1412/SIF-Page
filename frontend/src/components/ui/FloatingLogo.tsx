@@ -20,10 +20,12 @@ const FloatingLogo: React.FC<FloatingLogoProps> = ({ side = 'right', interval = 
   return (
     <div
       aria-hidden="false"
-      className={`fixed top-6 z-50 ${side === 'right' ? 'right-6' : 'left-6'}`}
+      className={`fixed z-50 top-4 ${
+        side === 'right' ? 'right-4 md:right-6' : 'left-4 md:left-6'
+      }`}
     >
       <a href="/" aria-label="SIF-FABLAB home" className="block">
-        <div className="relative w-16 h-16 md:w-20 md:h-20">
+        <div className="relative w-12 h-12 md:w-16 md:h-16">
           {logos.map((src, i) => (
             <img
               key={i}
