@@ -3,66 +3,68 @@ import ScrollReveal from './ui/ScrollReveal';
 
 const AboutSection: React.FC = () => {
   return (
-    <section className="py-20 bg-slate-100 dark:bg-[#101629]">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
-        {/* Section 1: About SIF */}
-        <div className="grid md:grid-cols-2 gap-12 items-center">
+    <section className="min-h-screen bg-blue-950 flex flex-col">
+      <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-10 flex-1 flex flex-col">
+        {/* Section 1: About SIF - 50% of screen */}
+        <div className="flex-1 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-8 lg:py-16">
           <ScrollReveal>
-            <img
-              src="https://picsum.photos/800/600?random=11"
-              alt="SIF Community"
-              className="rounded-2xl shadow-lg w-full h-auto object-cover"
-            />
-          </ScrollReveal>
-          <ScrollReveal delay={150}>
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">
-                About <span className="relative text-blue-600 dark:text-blue-400">SIF<span className="absolute -bottom-1 left-0 h-[6px] w-10 rounded-full bg-yellow-300/50 dark:bg-yellow-300/30"/></span>
+            <div className="text-left">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6">
+                About <span className="text-yellow-300">SIF</span>
               </h2>
-              <p className="mt-4 text-lg text-slate-700 dark:text-slate-300">
-                <span className="bg-yellow-200/40 dark:bg-yellow-300/20 px-1 rounded">Sonipat Incubation Foundation</span> (SIF) is an initiative focused on nurturing <span className="text-blue-600 dark:text-blue-400 font-medium">innovation</span>, <span className="text-blue-600 dark:text-blue-400 font-medium">entrepreneurship</span>, and research-driven problem solving. We support student founders and researchers with mentorship, infrastructure, and programs that accelerate ideas into impact.
+              <p className="text-sm lg:text-base text-blue-100 leading-relaxed mb-6">
+                <span className="font-medium text-yellow-300">Sona Incubation Foundation</span> (SIF) is an initiative focused on nurturing <span className="text-yellow-300 font-medium">innovation</span>, <span className="text-yellow-300 font-medium">entrepreneurship</span>, and research-driven problem solving. We support student founders and researchers with mentorship, infrastructure, and programs that accelerate ideas into impact.
               </p>
-              <ul className="mt-4 list-disc list-inside space-y-2 text-slate-700 dark:text-slate-300">
-                <li><span className="font-medium text-slate-800 dark:text-slate-200">Mentorship</span> and incubation programs</li>
-                <li>Access to labs, <span className="bg-blue-50 dark:bg-blue-900/30 px-1 rounded">funding</span>, and industry connects</li>
-                <li>Events, hackathons, and <span className="text-yellow-600 dark:text-yellow-400 font-medium">startup showcases</span></li>
+              
+              <ul className="list-disc list-inside space-y-2 text-blue-100 text-sm mb-8">
+                <li><span className="font-medium text-white">Mentorship</span> and incubation programs</li>
+                <li>Access to labs, <span className="font-medium text-yellow-300">funding</span>, and industry connects</li>
+                <li>Events, hackathons, and <span className="text-yellow-300 font-medium">startup showcases</span></li>
               </ul>
-              <div className="mt-6">
+              
+              <div>
                 <a
                   href="#sif-more"
-                  className="inline-flex items-center gap-2 rounded-full bg-blue-600 text-white px-5 py-2 text-sm font-medium hover:bg-blue-700 transition-colors shadow-sm"
+                  className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-blue-900 px-6 py-3 text-base font-medium rounded-sm shadow-md transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg"
                 >
                   Read more about SIF
                 </a>
               </div>
             </div>
           </ScrollReveal>
+          <ScrollReveal delay={150}>
+            <img
+              src="https://picsum.photos/800/600?random=11"
+              alt="SIF Logo"
+              className="rounded-xl shadow-lg w-full h-auto object-cover max-h-[50vh]"
+            />
+          </ScrollReveal>
         </div>
 
-        {/* Section 2: About FABLAB */}
-        <div className="grid md:grid-cols-2 gap-12 items-center">
-          <ScrollReveal className="order-2 md:order-1">
-            <div>
-              <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">
-                About <span className="relative text-blue-600 dark:text-blue-400">FABLAB<span className="absolute -bottom-1 left-0 h-[6px] w-16 rounded-full bg-yellow-300/50 dark:bg-yellow-300/30"/></span>
-              </h2>
-              <p className="mt-4 text-lg text-slate-700 dark:text-slate-300">
-                The <span className="font-semibold text-blue-600 dark:text-blue-400">FABLAB</span> is a hands-on fabrication space with 3D printers, laser cutters, PCB milling, and a full electronics bench. It enables <span className="bg-yellow-200/40 dark:bg-yellow-300/20 px-1 rounded">rapid prototyping</span>, learning by doing, and transforming ideas into functional products.
-              </p>
-              <ul className="mt-4 list-disc list-inside space-y-2 text-slate-700 dark:text-slate-300">
-                <li>Advanced digital <span className="text-blue-600 dark:text-blue-400 font-medium">fabrication tools</span></li>
-                <li>Safety and <span className="bg-blue-50 dark:bg-blue-900/30 px-1 rounded">usage trainings</span> for all users</li>
-                <li>Guided workshops and <span className="text-yellow-600 dark:text-yellow-400 font-medium">project support</span></li>
-              </ul>
-              
-            </div>
-          </ScrollReveal>
-          <ScrollReveal delay={150} className="order-1 md:order-2">
+        {/* Section 2: About FABLAB - 50% of screen */}
+        <div className="flex-1 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-8 lg:py-16">
+          <ScrollReveal className="order-2 lg:order-1">
             <img
               src="https://picsum.photos/800/600?random=22"
-              alt="FABLAB Workspace"
-              className="rounded-2xl shadow-lg w-full h-auto object-cover"
+              alt="FABLAB Logo"
+              className="rounded-xl shadow-lg w-full h-auto object-cover max-h-[50vh]"
             />
+          </ScrollReveal>
+          <ScrollReveal delay={150} className="order-1 lg:order-2">
+            <div className="text-left">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6">
+                About <span className="text-yellow-300">FABLAB</span>
+              </h2>
+              <p className="text-sm lg:text-base text-blue-100 leading-relaxed mb-6">
+                The <span className="font-semibold text-yellow-300">FABLAB</span> is a hands-on fabrication space with 3D printers, laser cutters, PCB milling, and a full electronics bench. It enables <span className="font-medium text-yellow-300">rapid prototyping</span>, learning by doing, and transforming ideas into functional products.
+              </p>
+              
+              <ul className="list-disc list-inside space-y-2 text-blue-100 text-sm mb-8">
+                <li>Advanced digital <span className="text-yellow-300 font-medium">fabrication tools</span></li>
+                <li>Safety and <span className="font-medium text-yellow-300">usage trainings</span> for all users</li>
+                <li>Guided workshops and <span className="text-yellow-300 font-medium">project support</span></li>
+              </ul>
+            </div>
           </ScrollReveal>
         </div>
       </div>

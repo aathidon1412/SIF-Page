@@ -1,145 +1,182 @@
-import { Link, NavLink, useLocation } from 'react-router-dom';
-import { useState } from 'react';
-import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'motion/react';
+import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
 
-// Floating / auto-hide Navbar (replicates FloatingNav behavior)
-// Shows only after scrolling down then up past a threshold; hidden when scrolling down.
-const Navbar = () => {
-    const { scrollYProgress } = useScroll();
-    const [visible, setVisible] = useState(true);
-    const [menuOpen, setMenuOpen] = useState(false);
+interface NavItem {
+  name: string;
+  path: string;
+}
 
-    useMotionValueEvent(scrollYProgress, 'change', (current) => {
-        if (typeof current !== 'number') return;
-        const prev = scrollYProgress.getPrevious() ?? current;
-        const direction = current - prev; // < 0 => scrolling up
+const Navbar: React.FC = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+  const [isVisible, setIsVisible] = useState<boolean>(true);
+  const [lastScrollY, setLastScrollY] = useState<number>(0);
 
-            // Always show while near the very top
-            if (scrollYProgress.get() < 0.05) {
-                setVisible(true);
-                return;
-            }
+  const toggleMenu = (): void => {
+    setIsMenuOpen(!isMenuOpen);
+  };
 
-        if (direction < 0) {
-            // scrolling up
-            setVisible(true);
-        } else {
-            // scrolling down
-            setVisible(false);
-        }
-    });
+  const closeMenu = (): void => {
+    setIsMenuOpen(false);
+  };
 
-    const navLinks = [
-        { to: '/', label: 'Home' },
-        { to: '/about', label: 'About' },
-        { to: '/contact', label: 'Contact' },
-    ];
-    const { pathname } = useLocation();
+  // Scroll detection logic
+  useEffect(() => {
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      
+      if (currentScrollY < lastScrollY) {
+        // Scrolling up
+        setIsVisible(true);
+      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
+        // Scrolling down and past 100px
+        setIsVisible(false);
+        setIsMenuOpen(false); // Close mobile menu when hiding
+      }
+      
+      setLastScrollY(currentScrollY);
+    };
 
-    // Navbar no longer includes a rotating logo; logo is shown in the Hero section.
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
-    return (
-        <AnimatePresence>
-                <motion.nav
-                key="floating-navbar"
-                initial={{ y: -100, opacity: 0 }}
-                animate={{ y: visible ? 0 : -100, opacity: visible ? 1 : 0 }}
-                exit={{ y: -100, opacity: 0 }}
-                transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-                className="fixed top-4 left-0 right-0 z-50 transition-all"
+  const navItems: NavItem[] = [
+    { name: 'Home', path: '/' },
+    { name: 'About', path: '/about' },
+    { name: 'Booking', path: '/booking' },
+    { name: 'Contact', path: '/contact' }
+  ];
+
+  return (
+    <nav
+      className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-in-out ${
+        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
+      }`}
+    >
+      {/* Floating navbar container */}
+      <div className="bg-white backdrop-blur-md border-2 border-blue-900/60 rounded-2xl shadow-lg px-4 sm:px-6 py-3 w-full max-w-sm sm:max-w-md md:w-auto md:max-w-6xl">
+        <div className="flex items-center justify-between">
+          {/* Logo/Brand - Desktop */}
+          <div className="hidden md:flex flex-shrink-0">
+            <NavLink 
+              to="/" 
+              className="text-lg font-bold text-blue-900 hover:text-blue-700 transition-colors duration-200"
+              onClick={closeMenu}
             >
-                <div className="mx-4 md:mx-auto max-w-6xl">
-                    <div className="bg-white/60 dark:bg-black/60 backdrop-blur-md rounded-full px-4 py-2 md:py-3 shadow-md border border-white/60 dark:border-black/40 flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                            <Link to="/" className="text-white font-semibold tracking-wide text-sm md:text-base">
-                                <span className="relative inline-block">
-                                    SIF
-                                </span>
-                            </Link>
-                            <span className="text-sm text-primary hidden md:inline">FABLAB</span>
-                        </div>
+              SIF-FAB LAB
+            </NavLink>
+          </div>
 
-                        {/* desktop links */}
-                        <div className="hidden md:flex items-center gap-6">
-                            {navLinks.map((l) => {
-                                const isActive = pathname === l.to;
-                                return (
-                                    <NavLink
-                                        key={l.to}
-                                        to={l.to}
-                                        className={({ isActive: active }) =>
-                                            `relative text-sm transition-colors ${
-                                                active || isActive
-                                                    ? 'text-white'
-                                                    : 'text-gray-300 hover:text-white'
-                                            }`
-                                        }
-                                    >
-                                        <span className="relative inline-block">
-                                            {l.label}
-                                            {isActive && (
-                                                <span className="pointer-events-none absolute -bottom-0.5 left-0 h-[3px] w-6 rounded-full bg-blue-400/70" />
-                                            )}
-                                        </span>
-                                    </NavLink>
-                                );
-                            })}
-                        </div>
+          {/* Vertical divider between logo and nav - Desktop */}
+          <div className="hidden md:block w-px h-8 bg-blue-900/60 ml-6"></div>
 
-                        {/* right side: login or mobile menu */}
-                        <div className="flex items-center gap-2">
-                            <div className="hidden md:block">
-                                <button
-                                    type="button"
-                                    className="ml-3 relative border border-gray-600/50 hover:border-gray-500 text-gray-100 px-5 py-2 rounded-full text-sm font-medium transition-colors"
-                                >
-                                    <span>Login</span>
-                                </button>
-                            </div>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center mx-8">
+            {navItems.map((item, index) => (
+              <React.Fragment key={item.name}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                      isActive
+                        ? 'bg-blue-900 text-white shadow-md'
+                        : 'text-blue-900 hover:bg-blue-100/50 hover:text-blue-900'
+                    }`
+                  }
+                >
+                  {item.name}
+                </NavLink>
+                {index < navItems.length - 1 && (
+                  <div className="w-px h-6 bg-blue-900 mx-4"></div>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
 
-                            {/* mobile menu button */}
-                            <div className="md:hidden">
-                                <button
-                                    aria-label={menuOpen ? 'Close menu' : 'Open menu'}
-                                    aria-expanded={menuOpen}
-                                    onClick={() => setMenuOpen((v) => !v)}
-                                    className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-primary"
-                                >
-                                    <svg className="w-5 h-5 text-gray-800 dark:text-gray-100" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                                        {menuOpen ? (
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        ) : (
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                                        )}
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+          {/* Mobile: Logo + Menu button */}
+          <div className="md:hidden flex items-center justify-between w-full">
+            <NavLink 
+              to="/" 
+              className="text-sm sm:text-lg font-bold text-blue-900 hover:text-blue-700 transition-colors duration-200 whitespace-nowrap mr-40"
+              onClick={closeMenu}
+            >
+              SIF-FAB LAB
+            </NavLink>
+            
+            <button
+              onClick={toggleMenu}
+              type="button"
+              className="bg-yellow-300/20 backdrop-blur-sm inline-flex items-center justify-center p-2 rounded-full text-blue-900 hover:bg-yellow-300/30 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 transition-all duration-200 mr-2"
+              aria-controls="mobile-menu"
+              aria-expanded={isMenuOpen}
+            >
+              <span className="sr-only">Open main menu</span>
+              {/* Hamburger icon */}
+              <svg
+                className={`${isMenuOpen ? 'hidden' : 'block'} h-5 w-5`}
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              </svg>
+              {/* Close icon */}
+              <svg
+                className={`${isMenuOpen ? 'block' : 'hidden'} h-5 w-5`}
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                aria-hidden="true"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
 
-                    {/* mobile dropdown panel */}
-                    {menuOpen && (
-                        <div className="mt-2 md:hidden">
-                            <div className="bg-white/80 dark:bg-black/70 backdrop-blur-md rounded-xl p-3 shadow-md border border-white/60 dark:border-black/40">
-                                <nav className="flex flex-col gap-2">
-                                    {navLinks.map((l) => (
-                                        <Link
-                                            key={l.to}
-                                            to={l.to}
-                                            onClick={() => setMenuOpen(false)}
-                                            className="px-3 py-2 rounded-md text-sm text-gray-800 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800"
-                                        >
-                                            {l.label}
-                                        </Link>
-                                    ))}
-                                </nav>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </motion.nav>
-        </AnimatePresence>
-    );
+      {/* Mobile Navigation Menu */}
+      {isMenuOpen && (
+        <div className="md:hidden absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-80 sm:w-96">
+          <div className="bg-yellow-200/40 backdrop-blur-md border-2 border-yellow-400/60 rounded-2xl shadow-lg p-2">
+            {navItems.map((item, index) => (
+              <React.Fragment key={item.name}>
+                <NavLink
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `block px-4 py-3 rounded-xl text-base font-medium text-center transition-all duration-200 ${
+                      isActive
+                        ? 'bg-blue-900 text-white shadow-md'
+                        : 'text-blue-900 hover:bg-yellow-200/30 hover:text-blue-900'
+                    }`
+                  }
+                  onClick={closeMenu}
+                >
+                  {item.name}
+                </NavLink>
+                {index < navItems.length - 1 && (
+                  <div className="h-px bg-blue-900 mx-2 my-1"></div>
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        </div>
+      )}
+    </nav>
+  );
 };
 
 export default Navbar;

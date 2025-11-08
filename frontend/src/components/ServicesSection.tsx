@@ -49,15 +49,15 @@ const ServicesSection: React.FC = () => {
     link: "#",
   }));
   return (
-    <section className="py-20 bg-slate-50 dark:bg-[#0A0F1E]">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-20" style={{ backgroundColor: '#fffdeb' }}>
+      <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-10">
         <ScrollReveal>
           <div className="text-center mb-12">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">
-              <span className="relative inline-block">Our Facilities<span className="absolute -bottom-1 left-0 h-[5px] w-24 rounded-full bg-yellow-300/40 dark:bg-yellow-300/30" /></span> &{' '}<span className="relative inline-block">Services<span className="absolute -bottom-1 left-0 h-[5px] w-24 rounded-full bg-blue-500/20 dark:bg-blue-400/20" /></span>
+            <h2 className="text-3xl md:text-4xl font-bold text-blue-900">
+              Our <span className="text-blue-900">Facilities</span> & <span className="text-blue-900">Services</span>
             </h2>
-            <p className="mt-4 text-lg text-slate-600 dark:text-slate-400">
-              Everything you need to <span className="bg-yellow-200/40 dark:bg-yellow-300/20 px-1 rounded">build</span> anything.
+            <p className="mt-4 text-lg text-slate-700">
+              Everything you need to <span className="font-medium text-blue-900 px-1 rounded">build</span> anything.
             </p>
           </div>
         </ScrollReveal>
