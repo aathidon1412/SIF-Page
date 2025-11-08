@@ -18,12 +18,51 @@ const HeroSection: React.FC = () => {
           </p>
         </ScrollReveal>
         <ScrollReveal delay={400}>
-          <div className="flex justify-center items-center gap-4">
-            <NavLink to="/about" className="btn btn-primary">
-              Explore Us
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
+            <NavLink
+              to="/about"
+              aria-label="Explore SIF-FABLAB"
+              className="px-6 py-3 text-base flex items-center gap-2 rounded-full shadow-sm transition-colors duration-150 bg-primary text-white hover:bg-primary/90 dark:bg-secondary dark:text-black"
+            >
+              <span>Explore Us</span>
+              <svg
+                aria-hidden="true"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4"
+              >
+                <path d="M5 12h14" />
+                <path d="M12 5l7 7-7 7" />
+              </svg>
             </NavLink>
-            <NavLink to="/contact" className="btn btn-outline btn-secondary">
-              Contact Us
+
+            <NavLink
+              to="/contact"
+              aria-label="Contact SIF-FABLAB"
+              className="px-6 py-3 text-base flex items-center gap-2 rounded-full shadow-sm transition-colors duration-150 bg-transparent border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-100 hover:bg-slate-100 dark:hover:bg-slate-800/60"
+            >
+              <span>Contact Us</span>
+              <svg
+                aria-hidden="true"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="w-4 h-4"
+              >
+                <path d="M22 2 11 13" />
+                <path d="M22 2 15 22 11 13 2 9 22 2z" />
+              </svg>
             </NavLink>
           </div>
         </ScrollReveal>

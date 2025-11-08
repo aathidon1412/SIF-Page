@@ -1,4 +1,5 @@
-import React, { useState, ReactNode } from 'react';
+import { useState } from 'react';
+import type { ReactNode, FC } from 'react';
 import { ChevronDownIcon } from '../icons';
 import { cn } from '../../lib/utils';
 
@@ -9,7 +10,7 @@ interface AccordionItemProps {
   onClick: () => void;
 }
 
-const AccordionItem: React.FC<AccordionItemProps> = ({ trigger, children, isOpen, onClick }) => {
+const AccordionItem: FC<AccordionItemProps> = ({ trigger, children, isOpen, onClick }) => {
   return (
     <div className="border-b border-slate-200 dark:border-slate-800/50 last:border-b-0">
       <h3 className="w-full">
@@ -49,7 +50,7 @@ interface AccordionProps {
   }[];
 }
 
-export const Accordion: React.FC<AccordionProps> = ({ items }) => {
+export const Accordion: FC<AccordionProps> = ({ items }) => {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
 
   const handleClick = (index: number) => {
