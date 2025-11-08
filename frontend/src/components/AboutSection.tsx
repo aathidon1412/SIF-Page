@@ -9,14 +9,14 @@ const AboutSection: React.FC = () => {
         <div className="flex-1 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-8 lg:py-16">
           <ScrollReveal>
             <div className="text-left">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6">
                 About <span className="text-yellow-300">SIF</span>
               </h2>
-              <p className="text-lg lg:text-xl text-blue-100 leading-relaxed mb-6">
-                <span className="font-medium text-yellow-300">Sonipat Incubation Foundation</span> (SIF) is an initiative focused on nurturing <span className="text-yellow-300 font-medium">innovation</span>, <span className="text-yellow-300 font-medium">entrepreneurship</span>, and research-driven problem solving. We support student founders and researchers with mentorship, infrastructure, and programs that accelerate ideas into impact.
+              <p className="text-sm lg:text-base text-blue-100 leading-relaxed mb-6">
+                <span className="font-medium text-yellow-300">Sona Incubation Foundation</span> (SIF) is an initiative focused on nurturing <span className="text-yellow-300 font-medium">innovation</span>, <span className="text-yellow-300 font-medium">entrepreneurship</span>, and research-driven problem solving. We support student founders and researchers with mentorship, infrastructure, and programs that accelerate ideas into impact.
               </p>
               
-              <ul className="list-disc list-inside space-y-3 text-blue-100 text-lg mb-8">
+              <ul className="list-disc list-inside space-y-2 text-blue-100 text-sm mb-8">
                 <li><span className="font-medium text-white">Mentorship</span> and incubation programs</li>
                 <li>Access to labs, <span className="font-medium text-yellow-300">funding</span>, and industry connects</li>
                 <li>Events, hackathons, and <span className="text-yellow-300 font-medium">startup showcases</span></li>
@@ -52,14 +52,14 @@ const AboutSection: React.FC = () => {
           </ScrollReveal>
           <ScrollReveal delay={150} className="order-1 lg:order-2">
             <div className="text-left">
-              <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6">
                 About <span className="text-yellow-300">FABLAB</span>
               </h2>
-              <p className="text-lg lg:text-xl text-blue-100 leading-relaxed mb-6">
+              <p className="text-sm lg:text-base text-blue-100 leading-relaxed mb-6">
                 The <span className="font-semibold text-yellow-300">FABLAB</span> is a hands-on fabrication space with 3D printers, laser cutters, PCB milling, and a full electronics bench. It enables <span className="font-medium text-yellow-300">rapid prototyping</span>, learning by doing, and transforming ideas into functional products.
               </p>
               
-              <ul className="list-disc list-inside space-y-3 text-blue-100 text-lg mb-8">
+              <ul className="list-disc list-inside space-y-2 text-blue-100 text-sm mb-8">
                 <li>Advanced digital <span className="text-yellow-300 font-medium">fabrication tools</span></li>
                 <li>Safety and <span className="font-medium text-yellow-300">usage trainings</span> for all users</li>
                 <li>Guided workshops and <span className="text-yellow-300 font-medium">project support</span></li>
