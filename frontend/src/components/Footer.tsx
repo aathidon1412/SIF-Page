@@ -3,7 +3,7 @@ import React from 'react';
 const Footer: React.FC = () => {
   return (
     <footer className="bg-slate-100 dark:bg-[#0A0F1E] dark:border-t dark:border-slate-800/50 p-10">
-      <div className="container mx-auto footer grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
+  <div className="container mx-auto footer grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
         <aside>
           <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
             SIF-<span className="text-primary dark:text-secondary">FABLAB</span>
