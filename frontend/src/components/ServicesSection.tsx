@@ -1,5 +1,6 @@
 import React from 'react';
 import ScrollReveal from './ui/ScrollReveal';
+import { HoverEffect } from "@/components/ui/card-hover-effect";
 
 interface Service {
   icon: string;
@@ -42,6 +43,11 @@ const services: Service[] = [
 
 
 const ServicesSection: React.FC = () => {
+  const items = services.map((s) => ({
+    title: s.title,
+    description: s.description,
+    link: "#",
+  }));
   return (
     <section className="py-20 bg-slate-50 dark:bg-[#0A0F1E]">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -53,29 +59,9 @@ const ServicesSection: React.FC = () => {
             </p>
           </div>
         </ScrollReveal>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {services.map((service, index) => (
-            <ScrollReveal key={service.title} delay={index * 100}>
-              <div className="card bg-slate-100 dark:bg-[#1A2033] dark:border dark:border-slate-800/50 shadow-lg hover:shadow-primary/20 dark:hover:shadow-secondary/10 transition-all duration-300 h-full transform hover:-translate-y-2">
-                <div className="card-body">
-                  <div className="flex items-center justify-center h-16 w-16 rounded-full bg-primary/10 dark:bg-secondary/10 mb-4">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-8 w-8 text-primary dark:text-secondary"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={service.icon} />
-                    </svg>
-                  </div>
-                  <h3 className="card-title text-xl font-semibold text-slate-800 dark:text-slate-100">{service.title}</h3>
-                  <p className="text-slate-600 dark:text-slate-400">{service.description}</p>
-                </div>
-              </div>
-            </ScrollReveal>
-          ))}
-        </div>
+        <ScrollReveal delay={100}>
+          <HoverEffect items={items} className="gap-6" />
+        </ScrollReveal>
       </div>
     </section>
   );
