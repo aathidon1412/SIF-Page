@@ -54,14 +54,7 @@ const AboutSection: React.FC = () => {
                 <li>Safety and <span className="bg-blue-50 dark:bg-blue-900/30 px-1 rounded">usage trainings</span> for all users</li>
                 <li>Guided workshops and <span className="text-yellow-600 dark:text-yellow-400 font-medium">project support</span></li>
               </ul>
-              <div className="mt-6">
-                <Link
-                  to="/about"
-                  className="inline-flex items-center gap-2 rounded-full bg-yellow-400 text-slate-900 px-5 py-2 text-sm font-medium hover:bg-yellow-500 transition-colors shadow-sm"
-                >
-                  Go to About page
-                </Link>
-              </div>
+              
             </div>
           </ScrollReveal>
           <ScrollReveal delay={150} className="order-1 md:order-2">
