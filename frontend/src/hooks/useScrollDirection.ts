@@ -1,10 +1,7 @@
 
 import { useState, useEffect } from 'react';
 
-export enum ScrollDirection {
-  up = "up",
-  down = "down",
-}
+export type ScrollDirection = 'up' | 'down';
 
 export const useScrollDirection = () => {
   const [scrollDirection, setScrollDirection] = useState<ScrollDirection | null>(null);
@@ -14,7 +11,7 @@ export const useScrollDirection = () => {
 
     const updateScrollDirection = () => {
       const scrollY = window.pageYOffset;
-      const direction = scrollY > lastScrollY ? ScrollDirection.down : ScrollDirection.up;
+      const direction: ScrollDirection = scrollY > lastScrollY ? 'down' : 'up';
       if (direction !== scrollDirection && (scrollY - lastScrollY > 5 || scrollY - lastScrollY < -5)) {
         setScrollDirection(direction);
       }

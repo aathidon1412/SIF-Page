@@ -1,5 +1,6 @@
 
-import React, { useEffect, useRef, useState, ReactNode } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import type { ReactNode, FC } from 'react';
 import { cn } from '../../lib/utils';
 
 interface ScrollRevealProps {
@@ -8,7 +9,7 @@ interface ScrollRevealProps {
   delay?: number;
 }
 
-const ScrollReveal: React.FC<ScrollRevealProps> = ({ children, className, delay = 0 }) => {
+const ScrollReveal: FC<ScrollRevealProps> = ({ children, className, delay = 0 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
