@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, NavLink, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { motion, AnimatePresence, useScroll, useMotionValueEvent } from 'motion/react';
 
@@ -33,6 +33,7 @@ const Navbar = () => {
         { to: '/about', label: 'About' },
         { to: '/contact', label: 'Contact' },
     ];
+    const { pathname } = useLocation();
 
     // Navbar no longer includes a rotating logo; logo is shown in the Hero section.
 
@@ -46,18 +47,35 @@ const Navbar = () => {
                 transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
                 className="flex max-w-fit fixed top-6 inset-x-0 mx-auto z-50 px-6 py-3 md:py-4 items-center space-x-8 rounded-full bg-gray-800/80 backdrop-blur-md border border-gray-700/40 shadow-[0_6px_18px_-4px_rgba(0,0,0,0.45)]"
             >
-                <Link to="/" className="flex items-center gap-3">
-                    <span className="text-white font-semibold tracking-wide text-base md:text-lg">SIF-FABLAB</span>
-                </Link>
-                {navLinks.map((l) => (
-                    <Link
-                        key={l.to}
-                        to={l.to}
-                        className="text-gray-300 hover:text-white transition-colors text-base md:text-base"
-                    >
-                        {l.label}
-                    </Link>
-                ))}
+                        <Link to="/" className="text-white font-semibold tracking-wide text-sm md:text-base">
+                            <span className="relative inline-block">
+                                SIF-FABLAB
+                                <span className="pointer-events-none absolute -bottom-0.5 left-0 h-[4px] w-12 rounded-full bg-yellow-300/50" />
+                            </span>
+                        </Link>
+                                {navLinks.map((l) => {
+                                        const isActive = pathname === l.to;
+                                        return (
+                                            <NavLink
+                                                key={l.to}
+                                                to={l.to}
+                                                className={({ isActive: active }) =>
+                                                    `relative text-sm transition-colors ${
+                                                        active || isActive
+                                                            ? 'text-white'
+                                                            : 'text-gray-300 hover:text-white'
+                                                    }`
+                                                }
+                                            >
+                                                <span className="relative inline-block">
+                                                    {l.label}
+                                                    {(isActive) && (
+                                                        <span className="pointer-events-none absolute -bottom-0.5 left-0 h-[3px] w-6 rounded-full bg-blue-400/70" />
+                                                    )}
+                                                </span>
+                                            </NavLink>
+                                        );
+                                })}
                 <button
                     type="button"
                     className="ml-3 relative border border-gray-600/50 hover:border-gray-500 text-gray-100 px-5 py-2 rounded-full text-sm font-medium transition-colors"

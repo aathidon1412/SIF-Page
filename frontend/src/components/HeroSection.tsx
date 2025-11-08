@@ -11,12 +11,18 @@ const HeroSection: React.FC = () => {
       <div className="relative z-10 text-center p-4">
         <ScrollReveal>
           <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold text-slate-900 dark:text-slate-100 mb-4">
-            Welcome to <span className="text-primary dark:text-secondary">SIF-FABLAB</span>
+            <span className="relative inline-block">
+              Welcome
+              <span className="absolute -bottom-1 left-0 h-[6px] w-24 rounded-full bg-yellow-300/40 dark:bg-yellow-300/30" />
+            </span>{' '}to <span className="relative text-yellow-300/40 dark:text-yellow-300">
+              SIF-FABLAB
+              <span className="absolute -bottom-1 left-0 h-[6px] w-32 rounded-full bg-blue-500/20 dark:bg-blue-400/20" />
+            </span>
           </h1>
         </ScrollReveal>
         <ScrollReveal delay={200}>
           <p className="text-lg md:text-xl max-w-3xl mx-auto text-slate-600 dark:text-slate-400 mb-8">
-            Your hub for innovation and creation. Access state-of-the-art equipment and bring your ideas to life.
+            Your hub for <span className="font-medium text-blue-600 dark:text-blue-400">innovation</span> and <span className="bg-yellow-200/40 dark:bg-yellow-300/20 px-1 rounded">creation</span>. Access state-of-the-art equipment and bring your ideas to life.
           </p>
         </ScrollReveal>
         <ScrollReveal delay={400}>
@@ -24,7 +30,7 @@ const HeroSection: React.FC = () => {
             <NavLink
               to="/about"
               aria-label="Explore SIF-FABLAB"
-              className="px-6 py-3 text-base flex items-center gap-2 rounded-full shadow-sm transition-colors duration-150 bg-primary text-white hover:bg-primary/90 dark:bg-secondary dark:text-black"
+              className="px-6 py-3 text-base flex items-center gap-2 rounded-full shadow-sm transition-colors duration-150 bg-primary text-yellow-300/40 hover:text-yellow-300 dark:bg-secondary dark:text-yellow-300"
             >
               <span>Explore Us</span>
               <svg

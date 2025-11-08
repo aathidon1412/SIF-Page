@@ -16,7 +16,7 @@ const About: React.FC = () => {
         <ScrollReveal>
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-slate-100">
-              About <span className="text-primary dark:text-secondary">SIF-FABLAB</span>
+              About <span className="text-yellow-300/40 dark:text-yellow-300">SIF-FABLAB</span>
             </h1>
             <p className="mt-4 text-lg max-w-3xl mx-auto text-slate-600 dark:text-slate-400">
               Discover our mission, our history, and the team that makes innovation happen every day.
@@ -31,11 +31,11 @@ const About: React.FC = () => {
           </ScrollReveal>
           <ScrollReveal delay={200}>
             <div className="text-slate-700 dark:text-slate-300">
-              <h2 className="text-3xl font-bold mb-4 text-primary dark:text-secondary">Our Mission</h2>
+              <h2 className="text-3xl font-bold mb-4 text-blue-600 dark:text-blue-400">Our Mission</h2>
               <p className="mb-6">
                 To democratize access to digital fabrication technologies, fostering a culture of innovation, collaboration, and lifelong learning. We aim to empower individuals to turn their creative ideas into reality, driving both personal growth and technological advancement.
               </p>
-              <h2 className="text-3xl font-bold mb-4 text-primary dark:text-secondary">Our Vision</h2>
+              <h2 className="text-3xl font-bold mb-4 text-blue-600 dark:text-blue-400">Our Vision</h2>
               <p>
                 To be a leading hub for digital fabrication and interdisciplinary research, recognized for its contribution to education, entrepreneurship, and community development. We envision a future where anyone can design and create solutions to the world's challenges.
               </p>

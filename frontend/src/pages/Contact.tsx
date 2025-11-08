@@ -14,7 +14,7 @@ const Contact: React.FC = () => {
         <ScrollReveal>
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-slate-100">
-              Get In <span className="text-primary dark:text-secondary">Touch</span>
+              Get In <span className="text-blue-600 dark:text-blue-400">Touch</span>
             </h1>
             <p className="mt-4 text-lg max-w-3xl mx-auto text-slate-600 dark:text-slate-400">
               We're here to help and answer any questions you might have. We look forward to hearing from you.
@@ -53,7 +53,7 @@ const Contact: React.FC = () => {
           {/* Contact Form */}
           <ScrollReveal delay={200}>
             <div className="bg-white/90 dark:bg-[#0f1724]/60 dark:border dark:border-slate-800/50 p-10 md:p-12 rounded-2xl shadow-xl">
-              <h2 className="text-3xl md:text-4xl font-extrabold mb-4 text-slate-900 dark:text-slate-100 tracking-tight leading-tight">Send us a <span className="text-primary dark:text-secondary">Message</span></h2>
+              <h2 className="text-3xl md:text-4xl font-extrabold mb-4 text-slate-900 dark:text-slate-100 tracking-tight leading-tight">Send us a <span className="text-blue-600 dark:text-blue-400">Message</span></h2>
               <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 max-w-xl">Have a question, project idea or need assistance? Send us a message and our team will get back to you shortly.</p>
 
               <form onSubmit={handleSubmit} className="space-y-6">
