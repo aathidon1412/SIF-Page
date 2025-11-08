@@ -6,7 +6,9 @@ const Footer: React.FC = () => {
   <div className="container mx-auto footer grid grid-cols-1 md:grid-cols-3 gap-8 text-center md:text-left">
         <aside>
           <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
-            SIF-<span className="text-primary dark:text-secondary">FABLAB</span>
+            <span className="relative inline-block">SIF-<span className="text-yellow-300/40 dark:text-yellow-300">FABLAB</span>
+              <span className="absolute -bottom-1 left-0 h-[4px] w-16 rounded-full bg-yellow-300/50 dark:bg-yellow-300/30" />
+            </span>
           </p>
           <p className="text-slate-600 dark:text-slate-400">© 2024 SIF-FABLAB. All rights reserved.</p>
         </aside>
