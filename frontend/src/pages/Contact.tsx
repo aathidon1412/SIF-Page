@@ -52,30 +52,56 @@ const Contact: React.FC = () => {
 
           {/* Contact Form */}
           <ScrollReveal delay={200}>
-            <div className="bg-slate-100 dark:bg-[#1A2033] dark:border dark:border-slate-800/50 p-8 rounded-lg shadow-lg">
-              <h2 className="text-2xl font-bold mb-6 text-slate-900 dark:text-slate-100">Send us a Message</h2>
+            <div className="bg-white/90 dark:bg-[#0f1724]/60 dark:border dark:border-slate-800/50 p-10 md:p-12 rounded-2xl shadow-xl">
+              <h2 className="text-3xl md:text-4xl font-extrabold mb-4 text-slate-900 dark:text-slate-100 tracking-tight leading-tight">Send us a <span className="text-primary dark:text-secondary">Message</span></h2>
+              <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 max-w-xl">Have a question, project idea or need assistance? Send us a message and our team will get back to you shortly.</p>
+
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
-                  <label htmlFor="name" className="label">
-                    <span className="label-text text-slate-700 dark:text-slate-300">Full Name</span>
+                  <label htmlFor="name" className="block mb-2">
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Full name</span>
                   </label>
-                  <input type="text" id="name" placeholder="Your Name" className="input input-bordered w-full bg-white/50 dark:bg-slate-900/50 dark:border-slate-700" required />
+                  <input
+                    type="text"
+                    id="name"
+                    placeholder="Your name"
+                    className="w-full rounded-xl border border-slate-200 bg-white/80 dark:bg-white/3 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
+                    required
+                  />
                 </div>
+
                 <div>
-                  <label htmlFor="email" className="label">
-                    <span className="label-text text-slate-700 dark:text-slate-300">Email Address</span>
+                  <label htmlFor="email" className="block mb-2">
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Email address</span>
                   </label>
-                  <input type="email" id="email" placeholder="your.email@example.com" className="input input-bordered w-full bg-white/50 dark:bg-slate-900/50 dark:border-slate-700" required />
+                  <input
+                    type="email"
+                    id="email"
+                    placeholder="you@company.com"
+                    className="w-full rounded-xl border border-slate-200 bg-white/80 dark:bg-white/3 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
+                    required
+                  />
                 </div>
+
                 <div>
-                  <label htmlFor="message" className="label">
-                    <span className="label-text text-slate-700 dark:text-slate-300">Message</span>
+                  <label htmlFor="message" className="block mb-2">
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Message</span>
                   </label>
-                  <textarea id="message" className="textarea textarea-bordered w-full h-32 bg-white/50 dark:bg-slate-900/50 dark:border-slate-700" placeholder="Your message..." required></textarea>
+                  <textarea
+                    id="message"
+                    className="w-full rounded-xl border border-slate-200 bg-white/85 dark:bg-white/4 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 transition h-40 resize-y"
+                    placeholder="Write your message..."
+                    required
+                  ></textarea>
                 </div>
+
                 <div>
-                  <button type="submit" className="btn btn-primary w-full">
-                    Send Message
+                  <button
+                    type="submit"
+                    className="w-full rounded-full px-6 py-3 bg-transparent border-2 border-primary dark:border-secondary text-slate-900 dark:text-slate-100 font-semibold hover:bg-primary/10 dark:hover:bg-secondary/10 transition-shadow focus:outline-none focus:ring-2 focus:ring-primary/30"
+                  >
+                    <span>Send </span>
+                    <span className="text-primary dark:text-secondary">Message</span>
                   </button>
                 </div>
               </form>
