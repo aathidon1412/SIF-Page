@@ -1,9 +1,11 @@
 
 import React, { useEffect } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
+import Navbar from './components/Navbar';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import About from './pages/About';
+import Booking from './pages/Booking';
 import Contact from './pages/Contact';
 import { ThemeProvider, useTheme } from './hooks/useTheme';
 
@@ -26,11 +28,13 @@ const AppContent: React.FC = () => {
 
     return (
         <div className="flex flex-col min-h-screen">
-            <main className="flex-grow"> {/* Removed navbar and padding */}
+            <Navbar />
+            <main className="flex-grow pt-16"> {/* Added padding-top for fixed navbar */}
                 <ScrollToTop />
                 <Routes>
                     <Route path="/" element={<Home />} />
                     <Route path="/about" element={<About />} />
+                    <Route path="/booking" element={<Booking />} />
                     <Route path="/contact" element={<Contact />} />
                 </Routes>
             </main>
