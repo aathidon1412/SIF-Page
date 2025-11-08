@@ -54,14 +54,14 @@ const FAQSection: React.FC = () => {
   const items = faqData[activeCategory];
 
   return (
-    <section className="py-20 bg-slate-100 dark:bg-[#101629]">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+    <section className="py-20 bg-blue-900">
+      <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-10">
         <ScrollReveal>
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold text-slate-900 dark:text-slate-100">
-              <span className="relative inline-block">Frequently<span className="absolute -bottom-1 left-0 h-[5px] w-28 rounded-full bg-yellow-300/40 dark:bg-yellow-300/30" /></span> Asked <span className="relative inline-block">Questions<span className="absolute -bottom-1 left-0 h-[5px] w-32 rounded-full bg-blue-500/20 dark:bg-blue-400/20" /></span>
+            <h2 className="text-3xl md:text-4xl font-bold text-white">
+              Frequently Asked <span className="text-yellow-300">Questions</span>
             </h2>
-            <p className="mt-4 text-lg text-slate-600 dark:text-slate-400">Have questions? We have answers.</p>
+            <p className="mt-4 text-lg text-blue-100">Have questions? We have answers.</p>
           </div>
         </ScrollReveal>
 
@@ -76,10 +76,10 @@ const FAQSection: React.FC = () => {
                   type="button"
                   onClick={() => setActiveCategory(key)}
                   className={
-                    'relative px-5 py-2 rounded-full text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ' +
+                    'relative px-5 py-2 rounded-sm text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 ' +
                     (active
-                      ? 'bg-blue-600 text-white shadow-sm'
-                      : 'bg-white/70 dark:bg-slate-800/60 text-slate-700 dark:text-slate-200 hover:bg-white dark:hover:bg-slate-800 border border-slate-300/60 dark:border-slate-700/60 backdrop-blur')
+                      ? 'bg-yellow-400 text-blue-900 shadow-md'
+                      : 'bg-blue-800 text-blue-100 hover:bg-blue-700 border border-blue-600 shadow-sm hover:shadow-md transform hover:-translate-y-0.5')
                   }
                 >
                   {label}

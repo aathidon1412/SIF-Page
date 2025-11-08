@@ -13,16 +13,16 @@ const HeroSection: React.FC = () => {
   return (
     <section className="min-h-screen w-full font-sans flex items-center py-8 lg:py-0" style={{ backgroundColor: '#fffdeb' }} >
 
-      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex flex-col-reverse lg:flex-row gap-8 lg:gap-12 items-stretch">
+      <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-10">
+        <div className="flex flex-col-reverse lg:flex-row gap-6 lg:gap-8 items-stretch">
           {/* Left - Content */}
-          <div className="lg:w-7/12 flex flex-col justify-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight animate-fade-in-up" style={{ animationDelay: '0ms' }}>
-              Book lab time for <span className="text-blue-800 px-1 rounded">equipment</span> and <span className="text-blue-800 px-1 rounded">workspace</span> instantly.
+          <div className="lg:w-6/12 flex flex-col justify-center">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight animate-fade-in-up mt-12 sm:mt-16 lg:mt-0" style={{ animationDelay: '0ms' }}>
+              Book lab time for <span className="text-blue-900 px-1 rounded">equipment</span> and <span className="text-blue-900 px-1 rounded">workspace</span> instantly.
             </h1>
 
             <p className="text-slate-700 max-w-2xl mt-6 sm:mt-8 text-base sm:text-lg animate-fade-in-up" style={{ animationDelay: '120ms' }}>
-  Reserve instruments, workstations and labs quickly. Manage schedules, track availability and <span className="font-medium text-blue-800 px-1 rounded">start experiments</span> without the wait.
+  Reserve instruments, workstations and labs quickly. Manage schedules, track availability and <span className="font-medium text-blue-900 px-1 rounded">start experiments</span> without the wait.
 </p>
 
             {/* Images card - Mobile only */}
@@ -87,26 +87,26 @@ const HeroSection: React.FC = () => {
           </div>
 
           {/* Right - Images card - Desktop only */}
-          <div className="hidden lg:flex lg:w-5/12 items-center justify-center">
-            <div className="bg-white rounded-3xl shadow-2xl p-6 w-full animate-scale-in hover:shadow-3xl transition-all duration-500" style={{ animationDelay: '200ms' }}>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-4">
+          <div className="hidden lg:flex lg:w-6/12 items-center justify-center">
+            <div className="bg-white rounded-3xl shadow-2xl p-8 w-full animate-scale-in hover:shadow-3xl transition-all duration-500" style={{ animationDelay: '200ms' }}>
+              <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-6">
                   <img
-                    src="/api/placeholder/280/200"
+                    src="../src/assets/hero1.jpeg"
                     alt="Laboratory Equipment"
-                    className="w-full h-48 object-cover rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105"
+                    className="w-full h-56 object-cover rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105"
                   />
                   <img
-                    src="/api/placeholder/280/200"
+                    src="../src/assets/hero2.png"
                     alt="Research Workspace"
-                    className="w-full h-48 object-cover rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105"
+                    className="w-full h-56 object-cover rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105"
                   />
                 </div>
                 <div className="flex items-center justify-center">
                   <img
-                    src="/api/placeholder/280/400"
+                    src="../src/assets/hero3.png"
                     alt="Advanced Lab Setup"
-                    className="w-full h-96 object-cover rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105"
+                    className="w-full h-[28rem] object-cover rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105"
                   />
                 </div>
               </div>

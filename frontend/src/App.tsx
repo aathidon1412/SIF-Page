@@ -29,7 +29,7 @@ const AppContent: React.FC = () => {
     return (
         <div className="flex flex-col min-h-screen">
             <Navbar />
-            <main className="flex-grow pt-16"> {/* Added padding-top for fixed navbar */}
+            <main className="flex-grow"> {/* Removed padding-top for floating navbar */}
                 <ScrollToTop />
                 <Routes>
                     <Route path="/" element={<Home />} />

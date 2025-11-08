@@ -12,17 +12,17 @@ interface AccordionItemProps {
 
 const AccordionItem: FC<AccordionItemProps> = ({ trigger, children, isOpen, onClick }) => {
   return (
-    <div className="border-b border-slate-200 dark:border-slate-800/50 last:border-b-0">
+    <div className="border-b border-blue-200/30 last:border-b-0">
       <h3 className="w-full">
         <button
           onClick={onClick}
           aria-expanded={isOpen}
-          className="flex w-full items-center justify-between py-4 text-left text-lg font-medium text-slate-800 dark:text-slate-100"
+          className="flex w-full items-center justify-between py-4 text-left text-lg font-medium text-white hover:text-yellow-300 transition-colors duration-200"
         >
           <span>{trigger}</span>
           <ChevronDownIcon
             className={cn(
-              "h-5 w-5 shrink-0 transition-transform duration-200",
+              "h-5 w-5 shrink-0 transition-transform duration-200 text-yellow-300",
               isOpen && "rotate-180"
             )}
           />
@@ -34,7 +34,7 @@ const AccordionItem: FC<AccordionItemProps> = ({ trigger, children, isOpen, onCl
           isOpen ? "max-h-96" : "max-h-0"
         )}
       >
-        <div className="pb-4 pt-0 text-slate-600 dark:text-slate-400">
+        <div className="pb-4 pt-0 text-blue-100">
             {children}
         </div>
       </div>
