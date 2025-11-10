@@ -1,5 +1,6 @@
 import React from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import { MdEmail, MdPhone, MdLocationOn } from 'react-icons/md';
 
 const Contact: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
@@ -9,87 +10,101 @@ const Contact: React.FC = () => {
   };
 
   return (
-    <div className="bg-slate-50 dark:bg-[#0A0F1E]">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16">
+  <div className="bg-blue-950 py-14 text-[#fffdeb] dark:bg-blue-950">
+      <div className="w-full">
         <ScrollReveal>
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-slate-100">
-              Get In <span className="text-blue-600 dark:text-blue-400">Touch</span>
-            </h1>
-            <p className="mt-4 text-lg max-w-3xl mx-auto text-slate-600 dark:text-slate-400">
-              We're here to help and answer any questions you might have. We look forward to hearing from you.
-            </p>
+          <div className="mb-16 mt-8 mx-4 sm:mx-6 lg:mx-8 border-2 border-[#fffdeb] rounded-2xl p-8 lg:p-12 bg-transparent">
+            <div className="text-center">
+              <h1 className="text-4xl md:text-5xl font-extrabold text-[#fffdeb] inline-block border-b-4 border-[#fffdeb]">
+                Get In <span className="text-yellow-300">Touch</span>
+              </h1>
+              <p className="mt-6 text-lg max-w-3xl mx-auto text-[#fffdeb]">
+                We're here to help and answer any questions you might have. We look forward to hearing from you.
+              </p>
+            </div>
           </div>
         </ScrollReveal>
 
-        <div className="grid lg:grid-cols-2 gap-12">
+        <div className="mx-4 sm:mx-6 lg:mx-8 grid lg:grid-cols-2 gap-12 items-stretch">
           {/* Contact Information */}
           <ScrollReveal>
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-2xl font-bold mb-2 text-slate-900 dark:text-slate-100">Contact Details</h2>
-                <ul className="space-y-2 text-lg text-slate-700 dark:text-slate-300">
+            <div className="space-y-8 h-full flex flex-col">
+              <div className="p-6 rounded-2xl border-2 border-[#fffdeb] bg-transparent flex-1 flex flex-col">
+                <h2 className="text-2xl font-bold mb-4 text-[#fffdeb] underline decoration-[#fffdeb] underline-offset-4">Contact <span className="text-yellow-300">Details</span></h2>
+                <p className="text-sm text-[#fffdeb] mb-4 max-w-prose">Reach out to our team for questions about workshops, lab access, or partnerships. We typically respond <span className="bg-yellow-300 text-blue-950 px-2 rounded font-semibold">within 1–2 business days</span> — please include a short summary of your request.</p>
+                <ul className="space-y-4 text-lg text-[#fffdeb] mt-auto">
                   <li className="flex items-center">
-                    <span className="mr-3 text-primary dark:text-secondary">📧</span> Email: info@sif-fablab.edu
+                    <MdEmail className="mr-3 text-[#fffdeb]" /> <span className="font-medium">Email:</span>&nbsp; info@sif-fablab.edu
                   </li>
                   <li className="flex items-center">
-                    <span className="mr-3 text-primary dark:text-secondary">📞</span> Phone: (123) 456-7890
+                    <MdPhone className="mr-3 text-[#fffdeb]" /> <span className="font-medium">Phone:</span>&nbsp; (123) 456-7890
                   </li>
                   <li className="flex items-center">
-                    <span className="mr-3 text-primary dark:text-secondary">📍</span> Address: 123 Innovation Drive, Tech Campus, Sonipat
+                    <MdLocationOn className="mr-3 text-[#fffdeb]" /> <span className="font-medium">Address:</span>&nbsp; 123 Innovation Drive, Tech Campus, Sonipat
                   </li>
                 </ul>
               </div>
-              <div>
-                <h2 className="text-2xl font-bold mb-2 text-slate-900 dark:text-slate-100">Location</h2>
-                {/* Placeholder for a map */}
-                <div className="aspect-w-16 aspect-h-9 bg-base-200 dark:bg-neutral-focus rounded-lg shadow-md flex items-center justify-center">
-                   <img src="https://picsum.photos/1200/600?random=3" alt="Map placeholder" className="rounded-lg object-cover w-full h-full"/>
+
+              <div className="p-6 rounded-2xl border-2 border-[#fffdeb] bg-transparent flex-1 flex flex-col">
+                <h2 className="text-2xl font-bold mb-4 text-[#fffdeb] underline decoration-[#fffdeb] underline-offset-4">Location</h2>
+                <div className="rounded-lg shadow-md overflow-hidden flex-1">
+                   <iframe
+                     title="SIF-FABLAB location"
+                     src="https://www.google.com/maps?q=Sonipat&output=embed"
+                     className="w-full h-full border-0"
+                     allowFullScreen
+                     loading="lazy"
+                     referrerPolicy="no-referrer-when-downgrade"
+                   />
                 </div>
+
+                <p className="mt-4 text-[#fffdeb]">
+                  Our lab is located at <span className="font-semibold">123 Innovation Drive, Tech Campus, Sonipat</span>. We welcome visitors <span className="bg-yellow-300 text-blue-950 px-2 rounded font-semibold">Monday–Friday, 9:00 AM — 6:00 PM</span>. Drop by for hands-on <span className="bg-blue-950 text-[#fffdeb] px-2 rounded">workshops</span>, <span className="bg-blue-950 text-[#fffdeb] px-2 rounded">prototyping help</span>, and <span className="bg-blue-950 text-[#fffdeb] px-2 rounded">community meetups</span> — or reach out to <span className="bg-yellow-300 text-blue-950 px-2 rounded font-semibold">schedule a dedicated session</span>.
+                </p>
               </div>
             </div>
           </ScrollReveal>
 
           {/* Contact Form */}
           <ScrollReveal delay={200}>
-            <div className="bg-white/90 dark:bg-[#0f1724]/60 dark:border dark:border-slate-800/50 p-10 md:p-12 rounded-2xl shadow-xl">
-              <h2 className="text-3xl md:text-4xl font-extrabold mb-4 text-slate-900 dark:text-slate-100 tracking-tight leading-tight">Send us a <span className="text-blue-600 dark:text-blue-400">Message</span></h2>
-              <p className="text-sm text-slate-600 dark:text-slate-400 mb-6 max-w-xl">Have a question, project idea or need assistance? Send us a message and our team will get back to you shortly.</p>
+            <div className="p-10 md:p-12 rounded-2xl shadow-xl border-2 border-[#fffdeb] bg-transparent h-full flex flex-col">
+              <h2 className="text-3xl md:text-4xl font-extrabold mb-4 text-[#fffdeb] tracking-tight leading-tight underline decoration-[#fffdeb] underline-offset-4">Send us a <span className="text-yellow-300">Message</span></h2>
+              <p className="text-sm text-[#fffdeb] mb-6 max-w-xl">Have a question, project idea or need assistance? Send us a message and our team will get back to you shortly.</p>
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
                   <label htmlFor="name" className="block mb-2">
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Full name</span>
+                    <span className="text-sm font-medium text-[#fffdeb]">Full name</span>
                   </label>
                   <input
                     type="text"
                     id="name"
                     placeholder="Your name"
-                    className="w-full rounded-xl border border-slate-200 bg-white/80 dark:bg-white/3 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
+                    className="w-full rounded-xl border border-slate-200 bg-[#fffdeb] px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-950/30 transition"
                     required
                   />
                 </div>
 
                 <div>
                   <label htmlFor="email" className="block mb-2">
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Email address</span>
+                    <span className="text-sm font-medium text-[#fffdeb]">Email address</span>
                   </label>
                   <input
                     type="email"
                     id="email"
                     placeholder="you@company.com"
-                    className="w-full rounded-xl border border-slate-200 bg-white/80 dark:bg-white/3 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 transition"
+                    className="w-full rounded-xl border border-slate-200 bg-[#fffdeb] px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-950/30 transition"
                     required
                   />
                 </div>
 
                 <div>
                   <label htmlFor="message" className="block mb-2">
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Message</span>
+                    <span className="text-sm font-medium text-[#fffdeb]">Message</span>
                   </label>
                   <textarea
                     id="message"
-                    className="w-full rounded-xl border border-slate-200 bg-white/85 dark:bg-white/4 dark:border-slate-700 px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/30 transition h-40 resize-y"
+                    className="w-full rounded-xl border border-slate-200 bg-[#fffdeb] px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-950/30 transition h-40 resize-y"
                     placeholder="Write your message..."
                     required
                   ></textarea>
@@ -98,13 +113,14 @@ const Contact: React.FC = () => {
                 <div>
                   <button
                     type="submit"
-                    className="w-full rounded-full px-6 py-3 bg-transparent border-2 border-primary dark:border-secondary text-slate-900 dark:text-slate-100 font-semibold hover:bg-primary/10 dark:hover:bg-secondary/10 transition-shadow focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      className="w-full rounded-full px-6 py-3 bg-[#fffdeb] text-blue-950 font-semibold hover:bg-yellow-200 transition-shadow focus:outline-none focus:ring-2 focus:ring-[#fffdeb]/40"
                   >
                     <span>Send </span>
-                    <span className="text-primary dark:text-secondary">Message</span>
+                      <span>Message</span>
                   </button>
                 </div>
               </form>
+                <div className="mt-auto" />
             </div>
           </ScrollReveal>
         </div>
