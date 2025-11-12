@@ -1,6 +1,6 @@
 ✔ Change Navbar to float on scroll down and hide on scroll up @done (11/8/2025, 10:35:45 AM)
 ✔ Remove Cursor Effects @done (11/8/2025, 10:24:39 AM)
-☐ Contrast mode in each page
+✔ Contrast mode in each page @done (11/12/2025, 5:49:59 PM)
 ✔ Footer alignment fix @done (11/8/2025, 10:30:54 AM)
 ✔ Add buton for cta's @done (11/8/2025, 11:25:47 AM)
 ✔ Add Higlihting wherever needed @done (11/8/2025, 12:27:38 PM)
@@ -11,5 +11,14 @@
 ✔ Logo to be added in navbar @done (11/8/2025, 12:30:40 PM)
 ✔ meet our team ku cards testimonaials @done (11/8/2025, 3:45:14 PM)
 ✔ our mission and vision grid design @done (11/8/2025, 3:45:20 PM)
-☐ use iframe for the map in the contact use section
+✔ use iframe for the map in the contact use section @done (11/12/2025, 5:49:55 PM)
 ✔ alter the footer for also mobile responsive @done (11/8/2025, 3:45:25 PM)
+☐ add logo and favicon to the website 
+☐ underline all the headings in the home page
+☐ update the footer with available links with social media icons
+☐ add social media connections in the meet our team section and the contact page
+☐ change the btns "Book Now" in cooking page to blue-950 with text cream yellow
+☐ implement CRUDE operations in the admin page to update labs, equipments use local json db
+☐ export the excel data for the reports in the admin page
+☐ add a loader animation while the page is loading
+

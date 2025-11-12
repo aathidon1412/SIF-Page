@@ -1,41 +1,111 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../lib/auth';
+import { SAMPLE_EQUIPMENTS, SAMPLE_LABS } from '../lib/data';
 
 const Booking: React.FC = () => {
+  const navigate = useNavigate();
+  const auth = useAuth();
+
+  const handleCardClick = async () => {
+    try {
+      if (!auth.user) {
+        await auth.signInWithGoogle();
+      }
+    } catch (e) {
+      // ignore sign-in errors for now
+    }
+    navigate('/main-booking');
+  };
+
+  // now sourced from shared data module
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center">
-          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl">
-            Lab Booking System
-          </h1>
-          <p className="mt-4 text-xl text-gray-600">
-            Reserve your lab time and equipment easily
-          </p>
-        </div>
+    <div className="bg-yellow-50 pt-14 dark:bg-yellow-50 min-h-screen">
+      <div className="w-full">
+        {/* Hero block removed per request */}
         
-        <div className="mt-12">
-          <div className="bg-white shadow rounded-lg p-6">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              Coming Soon
-            </h2>
-            <p className="text-gray-600">
-              Our lab booking system is currently under development. 
-              Please contact us directly to schedule your lab time.
-            </p>
-            
-            <div className="mt-6">
-              <a
-                href="#/contact"
-                className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md shadow-sm text-white bg-blue-900 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-              >
-                Contact Us
-              </a>
+
+  {/* Equipment section (separate) */}
+  <section className="w-full px-6 pb-12">
+    <div className="max-w-7xl mx-auto">
+      <div className="flex items-center justify-between mb-6">
+        <h2 className="text-2xl font-semibold text-blue-900 underline decoration-blue-950 decoration-2">Available Equipment</h2>
+        <div>
+          <button className="bg-blue-950 text-white px-4 py-2 rounded-lg">View more</button>
+        </div>
+      </div>
+
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {SAMPLE_EQUIPMENTS.map((eq) => (
+          <article key={eq.id} role="button" tabIndex={0} onClick={handleCardClick} onKeyDown={(e) => { if (e.key === 'Enter') handleCardClick(); }} className="bg-white rounded-2xl shadow p-4 border cursor-pointer">
+            <div className="relative rounded-lg overflow-hidden h-44 mb-4">
+              <img src={eq.image} alt={eq.title} className="w-full h-full object-cover" />
+              <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full">EQUIPMENT</span>
+              <span className="absolute top-3 right-3 bg-white px-2 py-1 rounded-full text-xs">● Available</span>
             </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-1">{eq.title}</h3>
+            <p className="text-sm text-gray-600 mb-3">{eq.description}</p>
+            <div className="flex items-center justify-between">
+              <div>
+                <div className="text-2xl font-bold text-slate-900">${eq.pricePerDay.toFixed(2)}</div>
+                <div className="text-xs text-gray-500">/ day</div>
+              </div>
+              <button onClick={async () => {
+                try {
+                  // Attempt sign-in then navigate to main booking
+                  if (!auth.user) {
+                    await auth.signInWithGoogle();
+                  }
+                } catch (e) {
+                  // ignore
+                }
+                navigate('/main-booking');
+              }} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Book Now</button>
+            </div>
+          </article>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  {/* Labs section (separate) - full-bleed (no left/right space) */}
+  <section className="w-full ">
+    <div className="w-full rounded-xl overflow-hidden bg-blue-950 text-white">
+      <div className="max-w-7xl mx-auto px-6 py-10">
+          <div className="flex items-center justify-between mb-6">
+          <h2 className="text-2xl font-semibold underline decoration-blue-950 decoration-2">Available Labs</h2>
+          <div>
+            <button className="bg-[#fffdeb] text-blue-950 px-4 py-2 rounded-lg">View more</button>
           </div>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {SAMPLE_LABS.map((lab) => (
+            <article key={lab.id} role="button" tabIndex={0} onClick={handleCardClick} onKeyDown={(e) => { if (e.key === 'Enter') handleCardClick(); }} className="bg-[#fffdeb] text-blue-950 rounded-2xl p-4 shadow-md border cursor-pointer">
+              <div className="relative rounded-lg overflow-hidden h-44 mb-4">
+                <img src={lab.image} alt={lab.name} className="w-full h-full object-cover" />
+                <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full">LAB</span>
+                <span className="absolute top-3 right-3 bg-white px-2 py-1 rounded-full text-xs">● Available</span>
+              </div>
+              <h3 className="text-lg font-semibold text-blue-950 mb-1">{lab.name}</h3>
+              <p className="text-sm text-slate-700 mb-3">{lab.desc}</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-2xl font-bold text-blue-950">${lab.pricePerHour.toFixed(0)}</div>
+                  <div className="text-xs text-slate-700">/ hour · Capacity {lab.capacity}</div>
+                </div>
+                <button className="bg-blue-950 text-white px-4 py-2 rounded-lg">Book Lab</button>
+              </div>
+            </article>
+          ))}
         </div>
       </div>
     </div>
-  );
-};
+  </section>
+      </div>
+    </div>
+  )
+        }
 
-export default Booking;
+        export default Booking

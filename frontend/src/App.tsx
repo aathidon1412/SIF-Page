@@ -7,6 +7,9 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Booking from './pages/Booking';
 import Contact from './pages/Contact';
+import MainBooking from './pages/MainBooking';
+import Admin from './pages/Admin';
+import { AuthProvider } from './lib/auth';
 import { ThemeProvider, useTheme } from './hooks/useTheme';
 
 // Scroll to top on page change
@@ -26,30 +29,40 @@ const AppContent: React.FC = () => {
         document.documentElement.setAttribute('data-theme', theme);
     }, [theme]);
 
-    return (
-        <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex-grow"> {/* Removed padding-top for floating navbar */}
-                <ScrollToTop />
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/booking" element={<Booking />} />
-                    <Route path="/contact" element={<Contact />} />
-                </Routes>
-            </main>
-            <Footer />
-        </div>
-    );
+  const hideFooterOn = ['/main-booking', '/admin'];
+  const hideNavbarOn = ['/main-booking', '/admin'];
+  const { pathname } = useLocation();
+  const hideFooter = hideFooterOn.includes(pathname);
+  const hideNavbar = hideNavbarOn.includes(pathname);
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      {!hideNavbar && <Navbar />}
+      <main className="flex-grow"> {/* Removed padding-top for floating navbar */}
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/booking" element={<Booking />} />
+          <Route path="/main-booking" element={<MainBooking />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
+      </main>
+      {!hideFooter && <Footer />}
+    </div>
+  );
 };
 
 
 const App: React.FC = () => {
   return (
     <ThemeProvider>
+      <AuthProvider>
         <HashRouter>
-            <AppContent />
+          <AppContent />
         </HashRouter>
+      </AuthProvider>
     </ThemeProvider>
   );
 };
