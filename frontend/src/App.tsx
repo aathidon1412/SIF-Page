@@ -29,13 +29,15 @@ const AppContent: React.FC = () => {
         document.documentElement.setAttribute('data-theme', theme);
     }, [theme]);
 
-  const hideFooterOn = ['/main-booking'];
+  const hideFooterOn = ['/main-booking', '/admin'];
+  const hideNavbarOn = ['/main-booking', '/admin'];
   const { pathname } = useLocation();
   const hideFooter = hideFooterOn.includes(pathname);
+  const hideNavbar = hideNavbarOn.includes(pathname);
 
   return (
     <div className="flex flex-col min-h-screen">
-      <Navbar />
+      {!hideNavbar && <Navbar />}
       <main className="flex-grow"> {/* Removed padding-top for floating navbar */}
         <ScrollToTop />
         <Routes>
