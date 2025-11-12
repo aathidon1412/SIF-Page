@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { useAuth } from '../lib/auth';
 import { FaBell } from 'react-icons/fa';
+import { SAMPLE_EQUIPMENTS, SAMPLE_LABS } from '../lib/data';
 
 const MainBooking: React.FC = () => {
   const { user, signOut } = useAuth();
@@ -9,19 +10,11 @@ const MainBooking: React.FC = () => {
   const [showEquipment, setShowEquipment] = useState(true);
   // notifications toggle is handled inline
 
-  const sampleCombined = useMemo(() => {
-    // In a real app you'd fetch these; we'll reuse local sample data.
-    return {
-      equipments: [
-        { id: 'e1', title: 'Advanced Microscopy System' },
-        { id: 'e2', title: 'Professional 3D Printer' },
-      ],
-      labs: [
-        { id: 'l1', name: 'Electronics Lab' },
-        { id: 'l2', name: 'Fabrication Lab' },
-      ],
-    };
-  }, []);
+  // use shared data
+  const sampleCombined = useMemo(() => ({
+    equipments: SAMPLE_EQUIPMENTS.map((e) => ({ id: e.id, title: e.title })),
+    labs: SAMPLE_LABS.map((l) => ({ id: l.id, name: l.name })),
+  }), []);
 
   const results = useMemo(() => {
     const eq = showEquipment ? sampleCombined.equipments.filter((x) => x.title.toLowerCase().includes(query.toLowerCase())) : [];

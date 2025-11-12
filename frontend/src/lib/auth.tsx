@@ -108,6 +108,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = () => {
     setUser(null);
     localStorage.removeItem('auth_user');
+    // Redirect to home (using hash router) so app shows the public homepage on sign out
+    try {
+      window.location.hash = '#/';
+    } catch (e) {
+      // ignore
+    }
   };
 
   return <AuthContext.Provider value={{ user, signInWithGoogle, signOut }}>{children}</AuthContext.Provider>;

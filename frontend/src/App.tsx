@@ -29,23 +29,27 @@ const AppContent: React.FC = () => {
         document.documentElement.setAttribute('data-theme', theme);
     }, [theme]);
 
-    return (
-        <div className="flex flex-col min-h-screen">
-            <Navbar />
-            <main className="flex-grow"> {/* Removed padding-top for floating navbar */}
-                <ScrollToTop />
-                <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/about" element={<About />} />
-                    <Route path="/booking" element={<Booking />} />
+  const hideFooterOn = ['/main-booking'];
+  const { pathname } = useLocation();
+  const hideFooter = hideFooterOn.includes(pathname);
+
+  return (
+    <div className="flex flex-col min-h-screen">
+      <Navbar />
+      <main className="flex-grow"> {/* Removed padding-top for floating navbar */}
+        <ScrollToTop />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/booking" element={<Booking />} />
           <Route path="/main-booking" element={<MainBooking />} />
           <Route path="/admin" element={<Admin />} />
-                    <Route path="/contact" element={<Contact />} />
-                </Routes>
-            </main>
-            <Footer />
-        </div>
-    );
+          <Route path="/contact" element={<Contact />} />
+        </Routes>
+      </main>
+      {!hideFooter && <Footer />}
+    </div>
+  );
 };
 
 
