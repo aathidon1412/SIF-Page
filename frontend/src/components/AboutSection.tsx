@@ -24,7 +24,10 @@ const AboutSection: React.FC = () => {
               
               <div>
                 <a
-                  href="#sif-more"
+                  href="https://www.sonaincubations.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Read more about SIF (opens in a new tab)"
                   className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-blue-900 px-6 py-3 text-base font-medium rounded-sm shadow-md transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg"
                 >
                   Read more about SIF
