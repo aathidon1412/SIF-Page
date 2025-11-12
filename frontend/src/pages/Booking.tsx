@@ -32,7 +32,7 @@ const Booking: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold text-blue-900 underline decoration-blue-950 decoration-2">Available Equipment</h2>
         <div>
-          <button className="bg-blue-950 text-white px-4 py-2 rounded-lg">View more</button>
+          <button className="bg-blue-950 text-[#fffdeb] px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">View more</button>
         </div>
       </div>
 
@@ -61,7 +61,7 @@ const Booking: React.FC = () => {
                   // ignore
                 }
                 navigate('/main-booking');
-              }} className="bg-blue-600 text-white px-4 py-2 rounded-lg">Book Now</button>
+              }} className="bg-blue-950 text-[#fffdeb] px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">Book Now</button>
             </div>
           </article>
         ))}
@@ -76,7 +76,7 @@ const Booking: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-semibold underline decoration-blue-950 decoration-2">Available Labs</h2>
           <div>
-            <button className="bg-[#fffdeb] text-blue-950 px-4 py-2 rounded-lg">View more</button>
+            <button className="bg-blue-950 text-[#fffdeb] px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">View more</button>
           </div>
         </div>
 
@@ -95,7 +95,7 @@ const Booking: React.FC = () => {
                   <div className="text-2xl font-bold text-blue-950">${lab.pricePerHour.toFixed(0)}</div>
                   <div className="text-xs text-slate-700">/ hour · Capacity {lab.capacity}</div>
                 </div>
-                <button className="bg-blue-950 text-white px-4 py-2 rounded-lg">Book Lab</button>
+                <button className="bg-blue-950 text-[#fffdeb] px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">Book Lab</button>
               </div>
             </article>
           ))}
