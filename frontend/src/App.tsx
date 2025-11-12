@@ -7,6 +7,9 @@ import Home from './pages/Home';
 import About from './pages/About';
 import Booking from './pages/Booking';
 import Contact from './pages/Contact';
+import MainBooking from './pages/MainBooking';
+import Admin from './pages/Admin';
+import { AuthProvider } from './lib/auth';
 import { ThemeProvider, useTheme } from './hooks/useTheme';
 
 // Scroll to top on page change
@@ -35,6 +38,8 @@ const AppContent: React.FC = () => {
                     <Route path="/" element={<Home />} />
                     <Route path="/about" element={<About />} />
                     <Route path="/booking" element={<Booking />} />
+          <Route path="/main-booking" element={<MainBooking />} />
+          <Route path="/admin" element={<Admin />} />
                     <Route path="/contact" element={<Contact />} />
                 </Routes>
             </main>
@@ -47,9 +52,11 @@ const AppContent: React.FC = () => {
 const App: React.FC = () => {
   return (
     <ThemeProvider>
+      <AuthProvider>
         <HashRouter>
-            <AppContent />
+          <AppContent />
         </HashRouter>
+      </AuthProvider>
     </ThemeProvider>
   );
 };
