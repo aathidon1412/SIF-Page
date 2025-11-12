@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils";
 import { AnimatePresence, motion } from "motion/react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export const HoverEffect = ({
   items,
@@ -14,7 +14,22 @@ export const HoverEffect = ({
   }[];
   className?: string;
 }) => {
-  let [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
+  let [hoveredIndex, setHoveredIndex] = useState<number | null>(0);
+  let [isPaused, setIsPaused] = useState(false);
+
+  // Auto-rotate through cards
+  useEffect(() => {
+    if (isPaused) return;
+    
+    const interval = setInterval(() => {
+      setHoveredIndex(prevIndex => {
+        if (prevIndex === null) return 0;
+        return (prevIndex + 1) % items.length;
+      });
+    }, 2000); // Change card every 2 seconds
+
+    return () => clearInterval(interval);
+  }, [items.length, isPaused]);
 
   return (
     <div
@@ -28,8 +43,13 @@ export const HoverEffect = ({
           href={item?.link}
           key={item?.link}
           className="relative group  block p-2 h-full w-full"
-          onMouseEnter={() => setHoveredIndex(idx)}
-          onMouseLeave={() => setHoveredIndex(null)}
+          onMouseEnter={() => {
+            setHoveredIndex(idx);
+            setIsPaused(true);
+          }}
+          onMouseLeave={() => {
+            setIsPaused(false);
+          }}
         >
           <AnimatePresence>
             {hoveredIndex === idx && (
