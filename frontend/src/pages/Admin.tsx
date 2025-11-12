@@ -24,7 +24,16 @@ const Admin: React.FC = () => {
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>(() => {
     try {
       const raw = localStorage.getItem('booking_requests');
-      return raw ? JSON.parse(raw) : [];
+      if (raw) {
+        const requests = JSON.parse(raw);
+        // Sort by most recent activity (reviewedAt or submittedAt)
+        return requests.sort((a: BookingRequest, b: BookingRequest) => {
+          const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
+          const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
+          return dateB - dateA; // Most recent first
+        });
+      }
+      return [];
     } catch {
       return [];
     }
@@ -41,7 +50,14 @@ const Admin: React.FC = () => {
     if (auth) {
       const raw = localStorage.getItem('booking_requests');
       if (raw) {
-        setBookingRequests(JSON.parse(raw));
+        const requests = JSON.parse(raw);
+        // Sort by most recent activity (reviewedAt or submittedAt)
+        const sortedRequests = requests.sort((a: BookingRequest, b: BookingRequest) => {
+          const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
+          const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
+          return dateB - dateA; // Most recent first
+        });
+        setBookingRequests(sortedRequests);
       }
     }
   }, [auth]);
@@ -75,7 +91,14 @@ const Admin: React.FC = () => {
       return request;
     });
 
-    setBookingRequests(updatedRequests);
+    // Sort updated requests by most recent activity
+    const sortedRequests = updatedRequests.sort((a, b) => {
+      const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
+      const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
+      return dateB - dateA; // Most recent first
+    });
+
+    setBookingRequests(sortedRequests);
     localStorage.setItem('booking_requests', JSON.stringify(updatedRequests));
     setSelectedRequest(null);
     setAdminNote('');

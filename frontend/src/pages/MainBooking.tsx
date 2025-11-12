@@ -14,6 +14,8 @@ const MainBooking: React.FC = () => {
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [userBookingRequests, setUserBookingRequests] = useState<any[]>([]);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [successMessageText, setSuccessMessageText] = useState('');
 
   // Filter results based on active tab and search query
   const filteredResults = useMemo(() => {
@@ -34,7 +36,14 @@ const MainBooking: React.FC = () => {
       const loadUserBookings = () => {
         try {
           const allRequests = JSON.parse(localStorage.getItem('booking_requests') || '[]');
-          const userRequests = allRequests.filter((req: any) => req.userEmail === user.email);
+          const userRequests = allRequests
+            .filter((req: any) => req.userEmail === user.email)
+            .sort((a: any, b: any) => {
+              // Sort by most recent activity (reviewedAt or submittedAt)
+              const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
+              const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
+              return dateB - dateA; // Most recent first
+            });
           setUserBookingRequests(userRequests);
         } catch {
           setUserBookingRequests([]);
@@ -86,6 +95,18 @@ const MainBooking: React.FC = () => {
       case 'declined': return 'bg-red-50 border-red-500';
       default: return 'bg-yellow-50 border-yellow-500';
     }
+  };
+
+  const handleBookingSuccess = (itemTitle: string) => {
+    setSuccessMessageText(`Your booking request for "${itemTitle}" has been submitted successfully!`);
+    setShowSuccessMessage(true);
+    setShowBookingModal(false);
+    setSelectedItem(null);
+    
+    // Auto-hide success message after 5 seconds
+    setTimeout(() => {
+      setShowSuccessMessage(false);
+    }, 5000);
   };
 
   if (!user) return null; // should be protected route
@@ -146,7 +167,7 @@ const MainBooking: React.FC = () => {
           
           {/* Side Panel */}
           <div className="fixed right-0 top-0 h-full w-80 bg-white shadow-2xl z-50 transform transition-transform duration-300 ease-in-out">
-            <div className="p-6">
+            <div className="px-6 pt-6 pb-0 h-full flex flex-col">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-xl font-bold text-blue-950">Notifications</h2>
                 <button 
@@ -158,7 +179,7 @@ const MainBooking: React.FC = () => {
               </div>
               
               {/* Notification Items */}
-              <div className="space-y-4 max-h-96 overflow-y-auto">
+              <div className="flex-1 space-y-4 overflow-y-auto scrollbar-hide">
                 {userBookingRequests.length === 0 ? (
                   <div className="text-center py-8">
                     <p className="text-gray-500">No notifications at the moment.</p>
@@ -221,7 +242,7 @@ const MainBooking: React.FC = () => {
               
               {/* Action Buttons */}
               {userBookingRequests.length > 0 && (
-                <div className="mt-6 space-y-2">
+                <div className="mt-auto pb-6 space-y-2">
                   <button 
                     onClick={() => {
                       // Mark all as read (remove notification dots)
@@ -451,9 +472,68 @@ const MainBooking: React.FC = () => {
             setShowBookingModal(false);
             setSelectedItem(null);
           }}
+          onSuccess={handleBookingSuccess}
           item={selectedItem}
           itemType={activeTab === 'labs' ? 'lab' : 'equipment'}
         />
+      )}
+
+      {/* Success Message Popup */}
+      {showSuccessMessage && (
+        <>
+          {/* Overlay */}
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+            {/* Success Modal */}
+            <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full mx-4 transform transition-all duration-300 scale-100">
+              <div className="text-center">
+                {/* Success Icon */}
+                <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <svg className="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                
+                {/* Success Title */}
+                <h3 className="text-2xl font-bold text-blue-950 mb-3">
+                  Booking Submitted!
+                </h3>
+                
+                {/* Success Message */}
+                <p className="text-gray-600 mb-6 leading-relaxed">
+                  {successMessageText}
+                </p>
+                
+                {/* Additional Info */}
+                <div className="bg-blue-50 rounded-xl p-4 mb-6">
+                  <p className="text-sm text-blue-800">
+                    <strong>What happens next?</strong><br />
+                    Our admin team will review your request and send you a confirmation email within 24 hours.
+                  </p>
+                </div>
+                
+                {/* Action Buttons */}
+                <div className="space-y-3">
+                  <button
+                    onClick={() => setShowSuccessMessage(false)}
+                    className="w-full bg-blue-950 text-white py-3 px-6 rounded-xl hover:bg-blue-900 transition-all duration-200 font-medium shadow-lg hover:shadow-xl"
+                  >
+                    Continue Browsing
+                  </button>
+                  
+                  <button
+                    onClick={() => {
+                      setShowSuccessMessage(false);
+                      setShowNotifications(true);
+                    }}
+                    className="w-full border-2 border-blue-950 text-blue-950 py-3 px-6 rounded-xl hover:bg-blue-50 transition-all duration-200 font-medium"
+                  >
+                    View Notifications
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

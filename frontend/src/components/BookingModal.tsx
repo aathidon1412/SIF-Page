@@ -5,6 +5,7 @@ import { useAuth } from '../lib/auth';
 interface BookingModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: (itemTitle: string) => void;
   item: {
     id: string;
     title?: string;
@@ -15,7 +16,7 @@ interface BookingModalProps {
   itemType: 'lab' | 'equipment';
 }
 
-const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, item, itemType }) => {
+const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess, item, itemType }) => {
   const { user } = useAuth();
   const [formData, setFormData] = useState<BookingFormData>({
     startDate: '',
@@ -80,8 +81,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, item, item
       existingRequests.push(bookingRequest);
       localStorage.setItem('booking_requests', JSON.stringify(existingRequests));
       
-      alert('Booking request submitted successfully! You will receive a confirmation email once reviewed.');
-      onClose();
+      // Call success callback if provided, otherwise use default alert
+      if (onSuccess) {
+        onSuccess(bookingRequest.itemTitle);
+      } else {
+        alert('Booking request submitted successfully! You will receive a confirmation email once reviewed.');
+        onClose();
+      }
       
       // Reset form
       setFormData({
