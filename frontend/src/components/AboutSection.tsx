@@ -13,7 +13,7 @@ const AboutSection: React.FC = () => {
                 <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white">
                   About <span className="text-yellow-300">SIF</span>
                 </h2>
-                <span className="absolute left-0 -bottom-3 w-16 h-1 rounded bg-gradient-to-r from-yellow-300 to-blue-900" />
+                <span className="absolute inset-x-0 -bottom-3 h-1 rounded bg-yellow-300" />
               </div>
               <p className="text-sm lg:text-base text-blue-100 leading-relaxed mb-6">
                 <span className="font-medium text-yellow-300">Sona Incubation Foundation</span> (SIF) is an initiative focused on nurturing <span className="text-yellow-300 font-medium">innovation</span>, <span className="text-yellow-300 font-medium">entrepreneurship</span>, and research-driven problem solving. We support student founders and researchers with mentorship, infrastructure, and programs that accelerate ideas into impact.
@@ -62,7 +62,7 @@ const AboutSection: React.FC = () => {
                 <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white">
                   About <span className="text-yellow-300">FABLAB</span>
                 </h2>
-                <span className="absolute left-0 -bottom-3 w-16 h-1 rounded bg-gradient-to-r from-yellow-300 to-blue-900" />
+                <span className="absolute inset-x-0 -bottom-3 h-1 rounded bg-yellow-300" />
               </div>
               <p className="text-sm lg:text-base text-blue-100 leading-relaxed mb-6">
                 The <span className="font-semibold text-yellow-300">FABLAB</span> is a hands-on fabrication space with 3D printers, laser cutters, PCB milling, and a full electronics bench. It enables <span className="font-medium text-yellow-300">rapid prototyping</span>, learning by doing, and transforming ideas into functional products.

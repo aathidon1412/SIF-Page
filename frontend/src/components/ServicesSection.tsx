@@ -53,11 +53,11 @@ const ServicesSection: React.FC = () => {
       <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-10">
         <ScrollReveal>
           <div className="text-center mb-12">
-            <div className="relative inline-block mx-auto mb-4">
+            <div className="relative inline-block mx-auto mb-6">
               <h2 className="text-3xl md:text-4xl font-bold text-blue-900">
                 Our <span className="text-blue-900">Facilities</span> & <span className="text-blue-900">Services</span>
               </h2>
-              <span className="absolute left-0 -bottom-3 w-24 h-1 rounded bg-gradient-to-r from-yellow-300 to-blue-900" />
+              <span className="absolute inset-x-0 -bottom-3 h-1 rounded bg-blue-900" />
             </div>
             <p className="mt-4 text-lg text-slate-700">
               Everything you need to <span className="font-medium text-blue-900 px-1 rounded">build</span> anything.

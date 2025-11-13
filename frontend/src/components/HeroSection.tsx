@@ -31,7 +31,7 @@ const HeroSection: React.FC = () => {
           src={logos[index]}
           alt="SIF logo"
           key={index}
-          className="w-12 h-12 sm:w-16 sm:h-16 object-contain rounded-md shadow-md transition-opacity duration-700 ease-in-out"
+          className="w-16 h-16 sm:w-20 sm:h-20 object-contain rounded-md shadow-md transition-opacity duration-700 ease-in-out"
         />
       </div>
 
@@ -39,11 +39,11 @@ const HeroSection: React.FC = () => {
         <div className="flex flex-col-reverse lg:flex-row gap-6 lg:gap-8 items-stretch">
           {/* Left - Content */}
           <div className="lg:w-6/12 flex flex-col justify-center">
-            <div className="relative inline-block">
+            <div className="relative inline-block mb-6">
               <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight animate-fade-in-up mt-12 sm:mt-16 lg:mt-0" style={{ animationDelay: '0ms' }}>
                 Book lab time for <span className="text-blue-900 px-1 rounded">equipment</span> and <span className="text-blue-900 px-1 rounded">workspace</span> instantly.
               </h1>
-              <span className="absolute left-0 -bottom-3 w-20 h-1 rounded bg-gradient-to-r from-yellow-300 to-blue-900" />
+              <span className="absolute inset-x-0 -bottom-3 h-1 rounded bg-blue-900" />
             </div>
 
             <p className="text-slate-700 max-w-2xl mt-6 sm:mt-8 text-base sm:text-lg animate-fade-in-up" style={{ animationDelay: '120ms' }}>
