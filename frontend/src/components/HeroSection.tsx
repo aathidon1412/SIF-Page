@@ -1,4 +1,7 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import sifLogo from '../assets/SIF logo.png';
+import tempLogo1 from '../assets/temp lorem logo 1.png';
+import tempLogo2 from '../assets/temp lorem logo 2.png';
 import { NavLink } from 'react-router-dom';
 import CountUp from 'react-countup';
 
@@ -10,16 +13,38 @@ const stats = [
 ];
 
 const HeroSection: React.FC = () => {
+  const logos = [sifLogo, tempLogo1, tempLogo2];
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setIndex((i) => (i + 1) % logos.length);
+    }, 4000); // change every 4s
+    return () => clearInterval(interval);
+  }, []);
   return (
-    <section className="min-h-screen w-full font-sans flex items-center py-8 lg:py-0" style={{ backgroundColor: '#fffdeb' }} >
+    <section className="relative min-h-screen w-full font-sans flex items-center py-8 lg:py-0" style={{ backgroundColor: '#fffdeb' }} >
+
+      {/* Rotating logo - top left */}
+      <div className="absolute top-4 left-4 z-50">
+        <img
+          src={logos[index]}
+          alt="SIF logo"
+          key={index}
+          className="w-12 h-12 sm:w-16 sm:h-16 object-contain rounded-md shadow-md transition-opacity duration-700 ease-in-out"
+        />
+      </div>
 
       <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-10">
         <div className="flex flex-col-reverse lg:flex-row gap-6 lg:gap-8 items-stretch">
           {/* Left - Content */}
           <div className="lg:w-6/12 flex flex-col justify-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight animate-fade-in-up mt-12 sm:mt-16 lg:mt-0" style={{ animationDelay: '0ms' }}>
-              Book lab time for <span className="text-blue-900 px-1 rounded">equipment</span> and <span className="text-blue-900 px-1 rounded">workspace</span> instantly.
-            </h1>
+            <div className="relative inline-block">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight animate-fade-in-up mt-12 sm:mt-16 lg:mt-0" style={{ animationDelay: '0ms' }}>
+                Book lab time for <span className="text-blue-900 px-1 rounded">equipment</span> and <span className="text-blue-900 px-1 rounded">workspace</span> instantly.
+              </h1>
+              <span className="absolute left-0 -bottom-3 w-20 h-1 rounded bg-gradient-to-r from-yellow-300 to-blue-900" />
+            </div>
 
             <p className="text-slate-700 max-w-2xl mt-6 sm:mt-8 text-base sm:text-lg animate-fade-in-up" style={{ animationDelay: '120ms' }}>
   Reserve instruments, workstations and labs quickly. Manage schedules, track availability and <span className="font-medium text-blue-900 px-1 rounded">start experiments</span> without the wait.
