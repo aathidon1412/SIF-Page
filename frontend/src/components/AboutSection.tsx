@@ -9,7 +9,7 @@ const AboutSection: React.FC = () => {
         <div className="flex-1 grid lg:grid-cols-2 gap-8 lg:gap-12 items-center py-8 lg:py-16">
           <ScrollReveal>
             <div className="text-left">
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 inline-block border-b-4 border-yellow-300">
                 About <span className="text-yellow-300">SIF</span>
               </h2>
               <p className="text-sm lg:text-base text-blue-100 leading-relaxed mb-6">
@@ -55,7 +55,7 @@ const AboutSection: React.FC = () => {
           </ScrollReveal>
           <ScrollReveal delay={150} className="order-1 lg:order-2">
             <div className="text-left">
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6">
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 inline-block border-b-4 border-yellow-300">
                 About <span className="text-yellow-300">FABLAB</span>
               </h2>
               <p className="text-sm lg:text-base text-blue-100 leading-relaxed mb-6">
@@ -67,6 +67,16 @@ const AboutSection: React.FC = () => {
                 <li>Safety and <span className="font-medium text-yellow-300">usage trainings</span> for all users</li>
                 <li>Guided workshops and <span className="text-yellow-300 font-medium">project support</span></li>
               </ul>
+              
+              <div>
+                <a
+                  href="#/about"
+                  aria-label="Learn more about FABLAB (opens About page)"
+                  className="inline-flex items-center gap-2 bg-yellow-400 hover:bg-yellow-300 text-blue-900 px-6 py-3 text-base font-medium rounded-sm shadow-md transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg"
+                >
+                  Learn more about FABLAB
+                </a>
+              </div>
             </div>
           </ScrollReveal>
         </div>

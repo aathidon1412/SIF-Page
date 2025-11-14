@@ -103,7 +103,7 @@ const FAQSection: React.FC = () => {
       <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         <ScrollReveal>
           <div className="text-center mb-10">
-            <h2 className="text-3xl md:text-4xl font-bold text-white">
+            <h2 className="text-3xl md:text-4xl font-bold text-white inline-block border-b-4 border-yellow-300">
               Frequently Asked <span className="text-yellow-300">Questions</span>
             </h2>
             <p className="mt-4 text-lg text-blue-100">Have questions? We have answers.</p>
