@@ -1,5 +1,6 @@
 import React from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import { FaLinkedin, FaXTwitter, FaInstagram } from 'react-icons/fa6';
 
 
 
@@ -164,29 +165,23 @@ const About: React.FC = () => {
                         <a
                           href="#"
                           aria-label="Rahman on LinkedIn"
-                          className="hover:text-yellow-300 transition-colors inline-flex items-center justify-center w-7 h-7"
+                          className="hover:text-yellow-300 transition-colors"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM0 8h5v16H0V8zm7.5 0h4.7v2.2h.1c.7-1.3 2.5-2.7 5.1-2.7 5.5 0 6.5 3.6 6.5 8.4V24h-5v-7.1c0-1.7 0-3.9-2.4-3.9s-2.8 1.9-2.8 3.8V24h-5V8z"/>
-                          </svg>
+                          <FaLinkedin size={24} />
                         </a>
                         <a
                           href="#"
                           aria-label="Rahman on X"
-                          className="hover:text-yellow-300 transition-colors inline-flex items-center justify-center w-7 h-7"
+                          className="hover:text-yellow-300 transition-colors"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M3 3h4.6l4.3 5.7L17.9 3H21l-6.6 8.2L21 21h-4.6l-4.6-6-5 6H3l7-8.4L3 3z"/>
-                          </svg>
+                          <FaXTwitter size={24} />
                         </a>
                         <a
                           href="#"
                           aria-label="Rahman on Instagram"
-                          className="hover:text-yellow-300 transition-colors inline-flex items-center justify-center w-7 h-7"
+                          className="hover:text-yellow-300 transition-colors"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2.2A2.8 2.8 0 1 0 12 16.8 2.8 2.8 0 0 0 12 9.2zm5.5-2.7a1.3 1.3 0 1 1 0 2.6 1.3 1.3 0 0 1 0-2.6z"/>
-                          </svg>
+                          <FaInstagram size={24} />
                         </a>
                       </div>
                     </div>
@@ -223,29 +218,23 @@ const About: React.FC = () => {
                         <a
                           href="#"
                           aria-label="Maya on LinkedIn"
-                          className="hover:text-yellow-300 transition-colors inline-flex items-center justify-center w-7 h-7"
+                          className="hover:text-yellow-300 transition-colors"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM0 8h5v16H0V8zm7.5 0h4.7v2.2h.1c.7-1.3 2.5-2.7 5.1-2.7 5.5 0 6.5 3.6 6.5 8.4V24h-5v-7.1c0-1.7 0-3.9-2.4-3.9s-2.8 1.9-2.8 3.8V24h-5V8z"/>
-                          </svg>
+                          <FaLinkedin size={24} />
                         </a>
                         <a
                           href="#"
                           aria-label="Maya on X"
-                          className="hover:text-yellow-300 transition-colors inline-flex items-center justify-center w-7 h-7"
+                          className="hover:text-yellow-300 transition-colors"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M3 3h4.6l4.3 5.7L17.9 3H21l-6.6 8.2L21 21h-4.6l-4.6-6-5 6H3l7-8.4L3 3z"/>
-                          </svg>
+                          <FaXTwitter size={24} />
                         </a>
                         <a
                           href="#"
                           aria-label="Maya on Instagram"
-                          className="hover:text-yellow-300 transition-colors inline-flex items-center justify-center w-7 h-7"
+                          className="hover:text-yellow-300 transition-colors"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2.2A2.8 2.8 0 1 0 12 16.8 2.8 2.8 0 0 0 12 9.2zm5.5-2.7a1.3 1.3 0 1 1 0 2.6 1.3 1.3 0 0 1 0-2.6z"/>
-                          </svg>
+                          <FaInstagram size={24} />
                         </a>
                       </div>
                     </div>
