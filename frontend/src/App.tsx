@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -11,6 +11,7 @@ import MainBooking from './pages/MainBooking';
 import Admin from './pages/Admin';
 import { AuthProvider } from './lib/auth';
 import { ThemeProvider, useTheme } from './hooks/useTheme';
+import Loader from './components/ui/loader';
 
 // Scroll to top on page change
 const ScrollToTop = () => {
@@ -23,15 +24,26 @@ const ScrollToTop = () => {
 
 const AppContent: React.FC = () => {
     const { theme } = useTheme();
+    const [isLoading, setIsLoading] = useState(true);
+    const { pathname } = useLocation();
 
     // This is to ensure the daisyUI theme attribute is updated on the html tag
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
     }, [theme]);
 
+    // Handle page navigation loading
+    useEffect(() => {
+        setIsLoading(true);
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 2000); // Show loader for 2 seconds
+
+        return () => clearTimeout(timer);
+    }, [pathname]);
+
   const hideFooterOn = ['/main-booking', '/admin'];
   const hideNavbarOn = ['/main-booking', '/admin'];
-  const { pathname } = useLocation();
   const hideFooter = hideFooterOn.includes(pathname);
   const hideNavbar = hideNavbarOn.includes(pathname);
 
@@ -50,6 +62,13 @@ const AppContent: React.FC = () => {
         </Routes>
       </main>
       {!hideFooter && <Footer />}
+      
+      {/* Loader overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/20 backdrop-blur-md">
+          <Loader />
+        </div>
+      )}
     </div>
   );
 };
