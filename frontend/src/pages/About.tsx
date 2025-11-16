@@ -1,4 +1,5 @@
 import React from 'react';
+import { FaCircle } from 'react-icons/fa';
 import ScrollReveal from '../components/ui/ScrollReveal';
 import { FaLinkedin, FaXTwitter, FaInstagram } from 'react-icons/fa6';
 
@@ -55,19 +56,19 @@ const About: React.FC = () => {
                     <div className="space-y-3 text-blue-100">
                       <ul className="space-y-3 text-base">
                         <li className="flex items-start">
-                          <span className="text-yellow-300 mr-3 mt-1">•</span>
+                          <span className="text-yellow-300 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-yellow-300 font-medium">Universal Access</span> - Making cutting-edge tools available to everyone</span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-yellow-300 mr-3 mt-1">•</span>
+                          <span className="text-yellow-300 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-yellow-300 font-medium">Inclusive Learning</span> - Creating environments where experimentation thrives</span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-yellow-300 mr-3 mt-1">•</span>
+                          <span className="text-yellow-300 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-yellow-300 font-medium">Breaking Barriers</span> - Empowering creators from all backgrounds</span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-yellow-300 mr-3 mt-1">•</span>
+                          <span className="text-yellow-300 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-yellow-300 font-medium">Community Building</span> - Fostering collaboration and knowledge sharing</span>
                         </li>
                       </ul>
@@ -97,19 +98,19 @@ const About: React.FC = () => {
                     <div className="space-y-3 text-blue-900">
                       <ul className="space-y-3 text-base">
                         <li className="flex items-start">
-                          <span className="text-blue-950 mr-3 mt-1">•</span>
+                          <span className="text-blue-950 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-blue-950 font-medium">Research Excellence</span> - Driving interdisciplinary innovation and discovery</span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-blue-950 mr-3 mt-1">•</span>
+                          <span className="text-blue-950 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-blue-950 font-medium">Educational Impact</span> - Transforming learning through hands-on experience</span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-blue-950 mr-3 mt-1">•</span>
+                          <span className="text-blue-950 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-blue-950 font-medium">Entrepreneurial Growth</span> - Nurturing startups and business innovation</span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-blue-950 mr-3 mt-1">•</span>
+                          <span className="text-blue-950 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-blue-950 font-medium">Community Leadership</span> - Inspiring regional and global development</span>
                         </li>
                       </ul>
@@ -155,9 +156,9 @@ const About: React.FC = () => {
                       <p className="text-lg text-yellow-200 mb-4 font-medium">Founder & Director</p>
                       
                       <div className="space-y-2 text-sm text-blue-200 text-left">
-                        <p>• PhD in Mechanical Engineering</p>
-                        <p>• Former MIT Research Fellow</p>
-                        <p>• 20+ Patents in Digital Fabrication</p>
+                        <p className="flex items-center gap-2"><FaCircle size={6} /> PhD in Mechanical Engineering</p>
+                        <p className="flex items-center gap-2"><FaCircle size={6} /> Former MIT Research Fellow</p>
+                        <p className="flex items-center gap-2"><FaCircle size={6} /> 20+ Patents in Digital Fabrication</p>
                       </div>
 
                       {/* Social connections */}
@@ -208,9 +209,9 @@ const About: React.FC = () => {
                       <p className="text-lg text-yellow-200 mb-4 font-medium">Co-Founder & Innovation Lead</p>
                       
                       <div className="space-y-2 text-sm text-blue-200 text-left">
-                        <p>• MBA from Stanford Business School</p>
-                        <p>• Serial Tech Entrepreneur</p>
-                        <p>• 3 Successful Exits in DeepTech</p>
+                        <p className="flex items-center gap-2"><FaCircle size={6} /> MBA from Stanford Business School</p>
+                        <p className="flex items-center gap-2"><FaCircle size={6} /> Serial Tech Entrepreneur</p>
+                        <p className="flex items-center gap-2"><FaCircle size={6} /> 3 Successful Exits in DeepTech</p>
                       </div>
 
                       {/* Social connections */}

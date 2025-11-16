@@ -2,12 +2,6 @@
 
 ## 🔐 Authentication System
 
-### Google OAuth Integration
-- **Client ID**: `586269199959-tq4s2nqscbuo9jir0v8nbi1541rsbapq.apps.googleusercontent.com`
-- **Scopes**: `profile email openid`
-- **Implementation**: Google Identity Services (GIS)
-- **Storage**: localStorage (`auth_user`)
-
 ### User Flow
 1. Users can browse equipment/labs without authentication
 2. Google sign-in required for:

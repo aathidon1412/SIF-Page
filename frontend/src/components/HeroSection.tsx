@@ -100,7 +100,7 @@ const HeroSection: React.FC = () => {
               {stats.map((s) => (
                 <div key={s.label} className="bg-blue-900 rounded-lg p-3 sm:p-4 lg:p-6 flex flex-col items-center justify-center shadow-md hover:shadow-lg transition-shadow duration-300">
                   <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
-                    <CountUp start={0} end={Number(s.value)} duration={2.5} separator="," />
+                    <CountUp start={0} end={Number(s.value)} duration={8.5} separator="," />
                   </div>
                   <div className="text-xs sm:text-sm text-blue-300 mt-1 text-center">{s.label}</div>
                 </div>
