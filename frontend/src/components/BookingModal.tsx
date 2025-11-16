@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import type { BookingFormData, BookingRequest } from '../types/booking';
+import { createBooking } from '../services/api';
 import { useAuth } from '../lib/auth';
 
 interface BookingModalProps {
@@ -76,20 +77,13 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
     };
 
     try {
-      // Save to localStorage (in a real app, this would be an API call)
-      const existingRequests = JSON.parse(localStorage.getItem('booking_requests') || '[]');
-      existingRequests.push(bookingRequest);
-      localStorage.setItem('booking_requests', JSON.stringify(existingRequests));
-      
-      // Call success callback if provided, otherwise use default alert
+      await createBooking(bookingRequest);
       if (onSuccess) {
         onSuccess(bookingRequest.itemTitle);
       } else {
         alert('Booking request submitted successfully! You will receive a confirmation email once reviewed.');
         onClose();
       }
-      
-      // Reset form
       setFormData({
         startDate: '',
         endDate: '',
