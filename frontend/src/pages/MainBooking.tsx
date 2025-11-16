@@ -1,15 +1,15 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { useAuth } from '../lib/auth';
-import { useItems } from '../lib/itemsContext';
+import { fetchItems, fetchBookings } from '../services/api';
 import { useNavigate } from 'react-router-dom';
-import { FaBell, FaCog } from 'react-icons/fa';
 import { FaBell, FaCog, FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa';
-import { SAMPLE_EQUIPMENTS, SAMPLE_LABS } from '../lib/data';
 import BookingModal from '../components/BookingModal';
 
 const MainBooking: React.FC = () => {
   const { user, signOut, signInWithGoogle } = useAuth();
-  const { equipments, labs } = useItems();
+  const [items, setItems] = useState<any[]>([]);
+  const equipments = items.filter(i => i.type === 'equipment');
+  const labs = items.filter(i => i.type === 'lab');
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'labs' | 'equipment'>('labs');
@@ -22,44 +22,50 @@ const MainBooking: React.FC = () => {
 
   // Filter results based on active tab and search query
   const filteredResults = useMemo(() => {
+    const q = query.toLowerCase();
     if (activeTab === 'equipment') {
-      return equipments.filter((eq) => 
-        eq.title.toLowerCase().includes(query.toLowerCase())
-      );
+      return equipments.filter((eq) => (eq.title || '').toLowerCase().includes(q));
     } else {
-      return labs.filter((lab) => 
-        lab.name.toLowerCase().includes(query.toLowerCase())
-      );
+      return labs.filter((lab) => (lab.title || lab.name || '').toLowerCase().includes(q));
     }
   }, [query, activeTab, equipments, labs]);
 
-  // Load user's booking requests
-  React.useEffect(() => {
-    if (user) {
-      const loadUserBookings = () => {
-        try {
-          const allRequests = JSON.parse(localStorage.getItem('booking_requests') || '[]');
-          const userRequests = allRequests
-            .filter((req: any) => req.userEmail === user.email)
-            .sort((a: any, b: any) => {
-              // Sort by most recent activity (reviewedAt or submittedAt)
-              const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
-              const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
-              return dateB - dateA; // Most recent first
-            });
-          setUserBookingRequests(userRequests);
-        } catch {
-          setUserBookingRequests([]);
-        }
-      };
-      
-      loadUserBookings();
-      
-      // Set up interval to check for updates every 5 seconds
-      const interval = setInterval(loadUserBookings, 5000);
-      
-      return () => clearInterval(interval);
+  // Load items once
+  useEffect(() => {
+    async function loadItems() {
+      try {
+        const data = await fetchItems();
+        const normalized = data.map((d: any) => ({ ...d, id: d._id || d.id }));
+        setItems(normalized);
+      } catch (e) {
+        // silently ignore
+      }
     }
+    loadItems();
+  }, []);
+
+  // Load user's booking requests from backend
+  useEffect(() => {
+    if (!user) { setUserBookingRequests([]); return; }
+    let cancelled = false;
+    async function load() {
+      try {
+        const data = await fetchBookings(user!.email);
+        if (cancelled) return;
+        const normalized = data.map((r: any) => ({ ...r, id: r._id || r.id }));
+        const sorted = normalized.sort((a: any, b: any) => {
+          const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
+          const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
+          return dateB - dateA;
+        });
+        setUserBookingRequests(sorted);
+      } catch {
+        setUserBookingRequests([]);
+      }
+    }
+    load();
+    const interval = setInterval(load, 7000);
+    return () => { cancelled = true; clearInterval(interval); };
   }, [user]);
 
   // Get notification count (pending + recently reviewed)
@@ -275,16 +281,7 @@ const MainBooking: React.FC = () => {
                 <div className="mt-auto pb-6 space-y-2">
                   <button 
                     onClick={() => {
-                      // Clear all booking requests for this user from localStorage
-                      try {
-                        const allRequests = JSON.parse(localStorage.getItem('booking_requests') || '[]');
-                        if (user) {
-                          const remaining = allRequests.filter((r: any) => r.userEmail !== user.email);
-                          localStorage.setItem('booking_requests', JSON.stringify(remaining));
-                        }
-                      } catch {
-                        // ignore parse errors
-                      }
+                      // In backend mode, we simply clear local state view.
                       setUserBookingRequests([]);
                       
                     }}
@@ -461,7 +458,7 @@ const MainBooking: React.FC = () => {
                   onClick={() => handleCardClick(lab)}
                 >
                   <div className="relative rounded-lg overflow-hidden h-44 mb-4">
-                    <img src={lab.image} alt={lab.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                    <img src={lab.image} alt={lab.title || lab.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
                     <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">LAB</span>
                     <span className="absolute top-3 right-3 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"><FaCheckCircle size={10} /> Available</span>
                     <div className="absolute inset-0 bg-blue-950 bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
@@ -474,7 +471,7 @@ const MainBooking: React.FC = () => {
                       </div>
                     </div>
                   </div>
-                  <h3 className="text-lg font-semibold text-blue-950 mb-1 group-hover:text-blue-800 transition-colors">{lab.name}</h3>
+                  <h3 className="text-lg font-semibold text-blue-950 mb-1 group-hover:text-blue-800 transition-colors">{lab.title || lab.name}</h3>
                   <p className="text-sm text-gray-600 mb-3">{lab.desc}</p>
                   <div className="flex items-center justify-between">
                     <div>

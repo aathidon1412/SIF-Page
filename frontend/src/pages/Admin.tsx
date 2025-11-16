@@ -2,15 +2,15 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { BookingRequest } from '../types/booking';
 import { toast } from 'react-hot-toast';
-import { useItems } from '../lib/itemsContext';
-import { exportDataAsJson } from '../lib/dataManager';
+import { adminLogin, fetchBookings, updateBookingStatus, fetchItems, createItem, deleteItem, updateItem } from '../services/api';
+import { exportToExcel } from '../lib/exportExcel';
 
-const ADMIN_USER = import.meta.env.VITE_ADMIN_USER || 'thiganth';
-const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASS || 'thiganth';
+// Backend API handles admin credentials (seeded); env fallback removed.
 
 const Admin: React.FC = () => {
   const navigate = useNavigate();
-  const { equipments, labs, addItem: addItemToContext, removeItem: removeItemFromContext, updateItem: updateItemInContext } = useItems();
+  // Items managed via backend API instead of local context
+  const [items, setItems] = useState<any[]>([]);
   const [auth, setAuth] = useState(false);
   const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
@@ -26,8 +26,10 @@ const Admin: React.FC = () => {
   const [itemFilter, setItemFilter] = useState<'equipment' | 'labs'>('equipment');
   const [searchQuery, setSearchQuery] = useState('');
   
-  // Get all items
-  const allItems = [...equipments, ...labs];
+  // Separate items by type
+  const equipments = items.filter(i => i.type === 'equipment');
+  const labs = items.filter(i => i.type === 'lab');
+  const allItems = items;
   
   // Filter items based on search query and toggle selection
   const baseFilteredItems = itemFilter === 'equipment' ? equipments : labs;
@@ -37,23 +39,7 @@ const Admin: React.FC = () => {
     const searchText = `${title} ${desc}`.toLowerCase();
     return searchText.includes(searchQuery.toLowerCase());
   });
-  const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>(() => {
-    try {
-      const raw = localStorage.getItem('booking_requests');
-      if (raw) {
-        const requests = JSON.parse(raw);
-        // Sort by most recent activity (reviewedAt or submittedAt)
-        return requests.sort((a: BookingRequest, b: BookingRequest) => {
-          const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
-          const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
-          return dateB - dateA; // Most recent first
-        });
-      }
-      return [];
-    } catch {
-      return [];
-    }
-  });
+  const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<BookingRequest | null>(null);
   const [adminNote, setAdminNote] = useState('');
   const [adminLogs, setAdminLogs] = useState<{ type: 'login' | 'logout'; timestamp: string }[]>(() => {
@@ -71,21 +57,25 @@ const Admin: React.FC = () => {
   const [filterEndDate, setFilterEndDate] = useState('');
 
   useEffect(() => {
-    // Refresh booking requests when admin panel is loaded
     if (auth) {
-      const raw = localStorage.getItem('booking_requests');
-      if (raw) {
-        const requests = JSON.parse(raw);
-        // Sort by most recent activity (reviewedAt or submittedAt)
-        const sortedRequests = requests.sort((a: BookingRequest, b: BookingRequest) => {
-          const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
-          const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
-          return dateB - dateA; // Most recent first
-        });
-        setBookingRequests(sortedRequests);
-      }
+      loadBookings();
     }
   }, [auth]);
+
+  async function loadBookings() {
+    try {
+      const data = await fetchBookings();
+      const normalized = data.map((b: any) => ({ ...b, id: b.id || b._id }));
+      const sorted = normalized.sort((a: BookingRequest, b: BookingRequest) => {
+        const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
+        const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
+        return dateB - dateA;
+      });
+      setBookingRequests(sorted);
+    } catch {
+      toast.error('Failed to load bookings');
+    }
+  }
 
   // Hydrate saved filters on mount
   useEffect(() => {
@@ -120,9 +110,11 @@ const Admin: React.FC = () => {
     }
   }, [searchTerm, filterType, filterName, filterStartDate, filterEndDate]);
 
-  const login = (e: React.FormEvent) => {
+  const login = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (user === ADMIN_USER && pass === ADMIN_PASS) {
+    try {
+      const token = await adminLogin(user, pass);
+      localStorage.setItem('admin_token', token);
       setAuth(true);
       toast.success('Admin login successful');
       const newLogs = [
@@ -130,13 +122,12 @@ const Admin: React.FC = () => {
         { type: 'login' as const, timestamp: new Date().toISOString() }
       ];
       setAdminLogs(newLogs);
-      localStorage.setItem('admin_logs', JSON.stringify(newLogs));
-    } else {
+    } catch {
       toast.error('Invalid credentials');
     }
   };
 
-  const addItem = () => {
+  const addItem = async () => {
     if (!newItemTitle.trim()) {
       toast.error('Please enter a title');
       return;
@@ -160,7 +151,15 @@ const Admin: React.FC = () => {
       itemData.image = newItemImage;
     }
 
-    addItemToContext(itemData);
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const created = await createItem(token, itemData);
+      setItems(prev => [created, ...prev]);
+      toast.success(`${newItemType} added successfully`);
+    } catch (e:any) {
+      toast.error(e.message || 'Failed to add item');
+      return;
+    }
     
     // Reset form
     setNewItemTitle('');
@@ -169,7 +168,6 @@ const Admin: React.FC = () => {
     setNewItemCapacity('');
     setNewItemImage('');
     
-    toast.success(`${newItemType} added successfully`);
   };
 
   const handleEditItem = (item: any) => {
@@ -177,7 +175,7 @@ const Admin: React.FC = () => {
     setShowEditModal(true);
   };
 
-  const handleSaveEdit = () => {
+  const handleSaveEdit = async () => {
     if (!editingItem) return;
     
     const updates: any = {};
@@ -199,31 +197,55 @@ const Admin: React.FC = () => {
       updates.image = editingItem.image;
     }
     
-    updateItemInContext(editingItem.id, updates);
-    
-    setShowEditModal(false);
-    setEditingItem(null);
-    toast.success('Item updated successfully');
-  };
-
-  const handleDeleteItem = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
-      removeItemFromContext(id);
-      toast.success('Item deleted successfully');
-    }
-  };
-
-  const handleExportData = async () => {
     try {
-      await exportDataAsJson();
-      toast.success('Data exported successfully! Replace /src/data/items.json with the downloaded file to persist changes.');
-    } catch (error) {
-      toast.error('Failed to export data');
-      console.error('Export error:', error);
+      const token = localStorage.getItem('admin_token') || '';
+      const updated = await updateItem(token, editingItem.id, updates);
+      setItems(prev => prev.map(i => i._id === editingItem.id || i.id === editingItem.id ? updated : i));
+      setShowEditModal(false);
+      setEditingItem(null);
+      toast.success('Item updated successfully');
+    } catch (e:any) {
+      toast.error(e.message || 'Failed to update item');
     }
   };
 
-  const handleBookingAction = (requestId: string, action: 'approved' | 'declined') => {
+  const handleDeleteItem = async (id: string) => {
+    if (!window.confirm('Delete this item permanently?')) return;
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      await deleteItem(token, id);
+      setItems(prev => prev.filter(i => i._id !== id && i.id !== id));
+      toast.success('Item deleted successfully');
+    } catch (e:any) {
+      toast.error(e.message || 'Failed to delete item');
+    }
+  };
+
+  const handleExportData = () => {
+    try {
+      exportToExcel(items, bookingRequests);
+      toast.success('Excel exported successfully');
+    } catch {
+      toast.error('Failed to export Excel');
+    }
+  };
+  // Load items when authenticated
+  useEffect(() => {
+    async function load() {
+      if (!auth) return;
+      try {
+        const data = await fetchItems();
+        // Normalize id for React keys
+        const normalized = data.map((d: any) => ({ ...d, id: d._id || d.id }));
+        setItems(normalized);
+      } catch {
+        toast.error('Failed to load items');
+      }
+    }
+    load();
+  }, [auth]);
+
+  const handleBookingAction = async (requestId: string, action: 'approved' | 'declined') => {
     // Validate request exists and is actionable
     const target = bookingRequests.find(r => r.id === requestId);
     if (!target) {
@@ -238,35 +260,21 @@ const Admin: React.FC = () => {
       toast.error('Please add an admin note before proceeding');
       return;
     }
-    const updatedRequests = bookingRequests.map(request => {
-      if (request.id === requestId) {
-        return {
-          ...request,
-          status: action,
-          adminNote: adminNote,
-          reviewedAt: new Date().toISOString()
-        };
-      }
-      return request;
-    });
-
-    // Sort updated requests by most recent activity
-    const sortedRequests = updatedRequests.sort((a, b) => {
-      const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
-      const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
-      return dateB - dateA; // Most recent first
-    });
-
-    setBookingRequests(sortedRequests);
-    localStorage.setItem('booking_requests', JSON.stringify(updatedRequests));
-    setSelectedRequest(null);
-    setAdminNote('');
-    
-    // In a real app, you would send an email notification to the user here
-    if (action === 'approved') {
-      toast.success('Booking request approved');
-    } else {
-      toast.error('Booking request declined');
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const updated = await updateBookingStatus(token, requestId, action, adminNote);
+      const next = bookingRequests.map(r => r.id === requestId ? { ...r, ...updated } : r);
+      const sortedRequests = next.sort((a, b) => {
+        const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
+        const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
+        return dateB - dateA;
+      });
+      setBookingRequests(sortedRequests);
+      setSelectedRequest(null);
+      setAdminNote('');
+      toast[action === 'approved' ? 'success' : 'error'](`Booking request ${action}`);
+    } catch {
+      toast.error('Failed to update booking');
     }
   };
 
@@ -467,13 +475,13 @@ const Admin: React.FC = () => {
                 className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl transition-colors font-medium shadow-lg flex items-center space-x-2" 
                 onClick={() => { 
                   setAuth(false); 
-                  toast.success('Logged out'); 
+                  toast.success('Logged out');
+                  localStorage.removeItem('admin_token');
                   const newLogs = [
                     ...adminLogs,
                     { type: 'logout' as const, timestamp: new Date().toISOString() }
                   ];
                   setAdminLogs(newLogs);
-                  localStorage.setItem('admin_logs', JSON.stringify(newLogs));
                 }}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -872,7 +880,7 @@ const Admin: React.FC = () => {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
-                <span>Export Data</span>
+                <span>Export Excel</span>
               </button>
             </div>
 
@@ -1087,7 +1095,7 @@ const Admin: React.FC = () => {
                             Edit
                           </button>
                           <button
-                            onClick={() => handleDeleteItem(item.id)}
+                            onClick={() => handleDeleteItem((item as any).id)}
                             className="bg-red-50 text-red-700 px-3 py-2 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium"
                           >
                             Delete
