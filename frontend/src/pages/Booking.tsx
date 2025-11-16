@@ -33,7 +33,13 @@ const Booking: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold text-blue-900 underline decoration-blue-950 decoration-2">Available Equipment</h2>
         <div>
-          <button className="bg-blue-950 text-[#fffdeb] px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">View more</button>
+          <button
+            type="button"
+            onClick={handleCardClick}
+            className="bg-blue-950 text-[#fffdeb] px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors"
+          >
+            View more
+          </button>
         </div>
       </div>
 
@@ -79,7 +85,13 @@ const Booking: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-semibold underline decoration-blue-950 decoration-2">Available Labs</h2>
           <div>
-            <button className="bg-blue-950 text-[#fffdeb] px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">View more</button>
+            <button
+              type="button"
+              onClick={handleCardClick}
+              className="bg-blue-950 text-[#fffdeb] px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors"
+            >
+              View more
+            </button>
           </div>
         </div>
 

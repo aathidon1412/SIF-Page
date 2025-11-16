@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { BookingRequest } from '../types/booking';
 import { toast } from 'react-hot-toast';
@@ -41,6 +41,19 @@ const Admin: React.FC = () => {
   });
   const [selectedRequest, setSelectedRequest] = useState<BookingRequest | null>(null);
   const [adminNote, setAdminNote] = useState('');
+  const [adminLogs, setAdminLogs] = useState<{ type: 'login' | 'logout'; timestamp: string }[]>(() => {
+    try {
+      const raw = localStorage.getItem('admin_logs');
+      return raw ? JSON.parse(raw) : [];
+    } catch {
+      return [];
+    }
+  });
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<'all' | 'lab' | 'equipment'>('all');
+  const [filterName, setFilterName] = useState('');
+  const [filterStartDate, setFilterStartDate] = useState('');
+  const [filterEndDate, setFilterEndDate] = useState('');
 
   useEffect(() => {
     localStorage.setItem('admin_items', JSON.stringify(items));
@@ -63,11 +76,50 @@ const Admin: React.FC = () => {
     }
   }, [auth]);
 
+  // Hydrate saved filters on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('admin_filters');
+      if (raw) {
+        const f = JSON.parse(raw);
+        setSearchTerm(f.searchTerm ?? '');
+        setFilterType(f.filterType ?? 'all');
+        setFilterName(f.filterName ?? '');
+        setFilterStartDate(f.filterStartDate ?? '');
+        setFilterEndDate(f.filterEndDate ?? '');
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Persist filters on change
+  useEffect(() => {
+    const payload = {
+      searchTerm,
+      filterType,
+      filterName,
+      filterStartDate,
+      filterEndDate,
+    };
+    try {
+      localStorage.setItem('admin_filters', JSON.stringify(payload));
+    } catch {
+      // ignore
+    }
+  }, [searchTerm, filterType, filterName, filterStartDate, filterEndDate]);
+
   const login = (e: React.FormEvent) => {
     e.preventDefault();
     if (user === ADMIN_USER && pass === ADMIN_PASS) {
       setAuth(true);
       toast.success('Admin login successful');
+      const newLogs = [
+        ...adminLogs,
+        { type: 'login' as const, timestamp: new Date().toISOString() }
+      ];
+      setAdminLogs(newLogs);
+      localStorage.setItem('admin_logs', JSON.stringify(newLogs));
     } else {
       toast.error('Invalid credentials');
     }
@@ -138,6 +190,92 @@ const Admin: React.FC = () => {
       default: return 'text-yellow-600 bg-yellow-100';
     }
   };
+
+  // Helpers for quick filter presets
+  const formatInputDate = (d: Date) => d.toISOString().slice(0, 10);
+  const getToday = () => formatInputDate(new Date());
+  const getWeekRange = () => {
+    const now = new Date();
+    const day = now.getDay(); // 0 Sun - 6 Sat
+    const diffToMonday = ((day + 6) % 7); // 0 for Mon, 6 for Sun
+    const start = new Date(now);
+    start.setDate(now.getDate() - diffToMonday);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+    return { start: formatInputDate(start), end: formatInputDate(end) };
+  };
+
+  const applyPreset = (preset: 'pendingThisWeek' | 'labsToday' | 'equipmentToday') => {
+    if (preset === 'pendingThisWeek') {
+      const { start, end } = getWeekRange();
+      setFilterStartDate(start);
+      setFilterEndDate(end);
+      setFilterType('all');
+      setFilterName('');
+      setSearchTerm('pending');
+      return;
+    }
+    if (preset === 'labsToday') {
+      const t = getToday();
+      setFilterStartDate(t);
+      setFilterEndDate(t);
+      setFilterType('lab');
+      setFilterName('');
+      return;
+    }
+    if (preset === 'equipmentToday') {
+      const t = getToday();
+      setFilterStartDate(t);
+      setFilterEndDate(t);
+      setFilterType('equipment');
+      setFilterName('');
+    }
+  };
+
+  // Filter booking requests based on search term + filters (date range, type, name)
+  const filteredRequests = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    const n = filterName.trim().toLowerCase();
+
+    const hasStart = !!filterStartDate;
+    const hasEnd = !!filterEndDate;
+    const fStart = hasStart ? new Date(filterStartDate + 'T00:00:00') : null;
+    const fEnd = hasEnd ? new Date(filterEndDate + 'T23:59:59') : null;
+
+    const matchesDate = (r: BookingRequest) => {
+      if (!hasStart && !hasEnd) return true;
+      const rs = new Date(r.startDate);
+      const re = new Date(r.endDate);
+      if (hasStart && hasEnd) {
+        // overlap: re >= fStart && rs <= fEnd
+        return (re >= (fStart as Date)) && (rs <= (fEnd as Date));
+      }
+      if (hasStart) return re >= (fStart as Date);
+      // only end
+      return rs <= (fEnd as Date);
+    };
+
+    return bookingRequests.filter(r => {
+      // search across multiple fields
+      const matchesSearch = !q || (
+        r.userName.toLowerCase().includes(q) ||
+        r.userEmail.toLowerCase().includes(q) ||
+        r.itemTitle.toLowerCase().includes(q) ||
+        r.itemType.toLowerCase().includes(q) ||
+        r.status.toLowerCase().includes(q)
+      );
+
+      // type filter
+      const matchesType = filterType === 'all' || r.itemType === filterType;
+
+      // name filter (lab/equipment title)
+      const matchesName = !n || r.itemTitle.toLowerCase().includes(n);
+
+      return matchesSearch && matchesType && matchesName && matchesDate(r);
+    });
+  }, [bookingRequests, searchTerm, filterType, filterName, filterStartDate, filterEndDate]);
 
   if (!auth) {
     return (
@@ -236,7 +374,16 @@ const Admin: React.FC = () => {
               </div>
               <button 
                 className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl transition-colors font-medium shadow-lg flex items-center space-x-2" 
-                onClick={() => { setAuth(false); toast.success('Logged out'); }}
+                onClick={() => { 
+                  setAuth(false); 
+                  toast.success('Logged out'); 
+                  const newLogs = [
+                    ...adminLogs,
+                    { type: 'logout' as const, timestamp: new Date().toISOString() }
+                  ];
+                  setAdminLogs(newLogs);
+                  localStorage.setItem('admin_logs', JSON.stringify(newLogs));
+                }}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -250,7 +397,7 @@ const Admin: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Dashboard Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
             <div className="flex items-center justify-between">
               <div>
@@ -306,6 +453,23 @@ const Admin: React.FC = () => {
               </div>
             </div>
           </div>
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Admin Sessions</p>
+                <p className="text-3xl font-bold text-blue-950">{adminLogs.filter(l => l.type === 'login').length}</p>
+              </div>
+              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+            </div>
+            <div className="mt-4 text-xs text-gray-600 space-y-1">
+              <div><strong>Last Login:</strong> {adminLogs.filter(l => l.type === 'login').length === 0 ? '—' : new Date([...adminLogs.filter(l => l.type === 'login')].slice(-1)[0].timestamp).toLocaleString()}</div>
+              <div><strong>Last Logout:</strong> {adminLogs.filter(l => l.type === 'logout').length === 0 ? '—' : new Date([...adminLogs.filter(l => l.type === 'logout')].slice(-1)[0].timestamp).toLocaleString()}</div>
+            </div>
+          </div>
         </div>
         {/* Enhanced Tab Navigation */}
         <div className="bg-white rounded-2xl shadow-lg p-2 mb-8 border border-blue-100">
@@ -356,14 +520,136 @@ const Admin: React.FC = () => {
           /* Booking Requests Tab */
           <div>
             <h2 className="text-2xl font-semibold text-blue-950 mb-6">Booking Requests</h2>
-            
+            {/* Search + Filters */}
+            <div className="bg-white rounded-xl p-4 mb-6 border border-blue-100 shadow-sm">
+              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
+                <div className="md:col-span-5 relative">
+                  <label className="block text-xs font-semibold text-blue-950 mb-1">Search</label>
+                  <input
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    placeholder="User, email, item, type, status"
+                    className="w-full border-2 border-blue-200 text-blue-950 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors"
+                  />
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchTerm('')}
+                      className="absolute right-2 bottom-2 text-xs bg-blue-100 hover:bg-blue-200 text-blue-900 px-2 py-1 rounded"
+                    >
+                      Clear
+                    </button>
+                  )}
+                  <svg className="w-5 h-5 absolute right-12 bottom-2.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M9.5 17A7.5 7.5 0 109.5 2a7.5 7.5 0 000 15z" />
+                  </svg>
+                </div>
+
+                <div className="md:col-span-3">
+                  <label className="block text-xs font-semibold text-blue-950 mb-1">Type</label>
+                  <select
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value as 'all' | 'lab' | 'equipment')}
+                    className="w-full border-2 border-blue-200 text-blue-950 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors bg-white"
+                  >
+                    <option value="all">All</option>
+                    <option value="lab">Labs</option>
+                    <option value="equipment">Equipment</option>
+                  </select>
+                </div>
+
+                <div className="md:col-span-4">
+                  <label className="block text-xs font-semibold text-blue-950 mb-1">Name</label>
+                  <div className="relative">
+                    <input
+                      value={filterName}
+                      onChange={(e) => setFilterName(e.target.value)}
+                      placeholder="Lab/Equipment name"
+                      className="w-full border-2 border-blue-200 text-blue-950 rounded-lg px-4 py-2 pr-16 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors"
+                    />
+                    {filterName && (
+                      <button
+                        type="button"
+                        onClick={() => setFilterName('')}
+                        className="absolute right-2 bottom-2 text-xs bg-blue-100 hover:bg-blue-200 text-blue-900 px-2 py-1 rounded"
+                      >
+                        Clear
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                <div className="md:col-span-3">
+                  <label className="block text-xs font-semibold text-blue-950 mb-1">Start Date</label>
+                  <input
+                    type="date"
+                    value={filterStartDate}
+                    onChange={(e) => setFilterStartDate(e.target.value)}
+                    className="w-full border-2 border-blue-200 text-blue-950 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors"
+                  />
+                </div>
+                <div className="md:col-span-3">
+                  <label className="block text-xs font-semibold text-blue-950 mb-1">End Date</label>
+                  <input
+                    type="date"
+                    value={filterEndDate}
+                    onChange={(e) => setFilterEndDate(e.target.value)}
+                    className="w-full border-2 border-blue-200 text-blue-950 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors"
+                  />
+                </div>
+
+                <div className="md:col-span-3 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => { setFilterType('all'); setFilterName(''); setFilterStartDate(''); setFilterEndDate(''); }}
+                    className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-950 px-3 py-2 rounded-lg font-medium transition-colors"
+                  >
+                    Clear Filters
+                  </button>
+                </div>
+
+                {/* Quick Presets */}
+                <div className="md:col-span-12 flex flex-wrap gap-2 mt-2">
+                  <span className="text-xs font-semibold text-blue-950 self-center">Quick Filters:</span>
+                  <button
+                    type="button"
+                    onClick={() => applyPreset('pendingThisWeek')}
+                    className="px-3 py-1.5 text-sm rounded-lg bg-yellow-100 hover:bg-yellow-200 text-blue-950 border border-yellow-200"
+                  >
+                    Pending This Week
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyPreset('labsToday')}
+                    className="px-3 py-1.5 text-sm rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-950 border border-blue-200"
+                  >
+                    Labs Today
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => applyPreset('equipmentToday')}
+                    className="px-3 py-1.5 text-sm rounded-lg bg-green-100 hover:bg-green-200 text-blue-950 border border-green-200"
+                  >
+                    Equipment Today
+                  </button>
+                </div>
+
+                <div className="md:col-span-12 text-sm text-blue-950 font-medium">
+                  Showing {filteredRequests.length} of {bookingRequests.length} requests
+                </div>
+              </div>
+            </div>
             {bookingRequests.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-lg">
                 <p className="text-gray-600 text-lg">No booking requests found.</p>
               </div>
+            ) : filteredRequests.length === 0 ? (
+              <div className="text-center py-12 bg-white rounded-lg">
+                <p className="text-gray-600 text-lg">No booking requests match your search.</p>
+              </div>
             ) : (
               <div className="grid gap-6">
-                {bookingRequests.map((request) => (
+                {filteredRequests.map((request) => (
                   <div key={request.id} className="bg-white rounded-2xl shadow-lg p-6 border">
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex-1">

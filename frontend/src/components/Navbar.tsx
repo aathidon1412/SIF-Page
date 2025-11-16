@@ -152,7 +152,7 @@ const Navbar: React.FC = () => {
       {/* Mobile Navigation Menu */}
       {isMenuOpen && (
         <div className="md:hidden absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-80 sm:w-96">
-          <div className="bg-yellow-200/40 backdrop-blur-md border-2 border-yellow-400/60 rounded-2xl shadow-lg p-2">
+          <div className="bg-yellow-200/40 backdrop-blur-sm border-2 border-yellow-400/60 rounded-2xl shadow-lg p-2">
             {navItems.map((item, index) => (
               <React.Fragment key={item.name}>
                 <NavLink
