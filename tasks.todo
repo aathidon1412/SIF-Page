@@ -23,3 +23,6 @@
 ✔ add a loader animation while the page is loading @done (11/15/2025, 10:06:10 AM)
 ✔ make the booking page left and right padding to be same @done (11/15/2025, 3:44:21 PM)
 ✔ LinkedIn icon alignment issue in footer, team section, contact page @done (11/15/2025, 10:06:13 AM)
+☐ add pop-up accept and decline for the admin page 
+☐ enchance the loading animation in the website(loading animation for home page about page booking page and the contact page and not for the main booking page)
+☐ remove the emojis and use react-icons for all pages check where we use the emojis and replace then
