@@ -28,3 +28,7 @@
 ✔ enchance the loading animation in the website(loading animation for home page about page booking page and the contact page and not for the main booking page) @done (11/16/2025, 8:22:21 PM)
 ✔ remove the emojis and use react-icons for all pages check where we use the emojis and replace then @done (11/16/2025, 8:23:03 PM)
 ✔ fix the coordinates to the sona college of technology in the contact page map @done (11/16/2025, 9:06:55 PM)
+✔ remove the close notification btn and instead of that give a clear notification btn in the mainbooking notification panel @done (11/16/2025, 9:37:59 PM)
+✔ add admin login and logout record in the admin page @done (11/16/2025, 9:37:53 PM)
+✔ add search bar for the user booking requests in the admin page @done (11/16/2025, 9:37:48 PM)
+✔ add filter for the user booking requests in the admin page based on date and lab name or equipments @done (11/16/2025, 9:50:19 PM)

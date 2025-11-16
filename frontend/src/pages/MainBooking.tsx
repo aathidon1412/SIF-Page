@@ -272,12 +272,22 @@ const MainBooking: React.FC = () => {
                 <div className="mt-auto pb-6 space-y-2">
                   <button 
                     onClick={() => {
-                      // Mark all as read (remove notification dots)
-                      setShowNotifications(false);
+                      // Clear all booking requests for this user from localStorage
+                      try {
+                        const allRequests = JSON.parse(localStorage.getItem('booking_requests') || '[]');
+                        if (user) {
+                          const remaining = allRequests.filter((r: any) => r.userEmail !== user.email);
+                          localStorage.setItem('booking_requests', JSON.stringify(remaining));
+                        }
+                      } catch {
+                        // ignore parse errors
+                      }
+                      setUserBookingRequests([]);
+                      
                     }}
                     className="w-full bg-blue-950 text-white py-2 px-4 rounded-lg hover:bg-blue-900 transition-colors"
                   >
-                    Close Notifications
+                    Clear Notifications
                   </button>
                   <div className="text-center">
                     <span className="text-xs text-gray-500">
