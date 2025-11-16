@@ -158,7 +158,7 @@ const Contact: React.FC = () => {
                   </label>
                   <textarea
                     id="message"
-                    className="w-full rounded-xl border border-slate-200 bg-[#fffdeb] px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-950/30 transition h-40 resize-y"
+                    className="w-full rounded-xl border border-slate-200 bg-[#fffdeb] px-4 py-3 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-950/30 transition h-80 resize-y"
                     placeholder="Write your message..."
                     required
                   ></textarea>
