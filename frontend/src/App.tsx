@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { HashRouter, Routes, Route, useLocation } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
@@ -12,6 +12,7 @@ import Admin from './pages/Admin';
 import { AuthProvider } from './lib/auth';
 import { ThemeProvider, useTheme } from './hooks/useTheme';
 import { Toaster } from 'react-hot-toast';
+import Loader from './components/ui/loader';
 
 
 // Scroll to top on page change
@@ -26,11 +27,28 @@ const ScrollToTop = () => {
 const AppContent: React.FC = () => {
     const { theme } = useTheme();
     const { pathname } = useLocation();
+    const [isLoading, setIsLoading] = useState(false);
 
     // This is to ensure the daisyUI theme attribute is updated on the html tag
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
     }, [theme]);
+
+    // Handle page navigation loading
+    useEffect(() => {
+        // Don't show loader for main-booking page
+        if (pathname === '/main-booking') {
+            setIsLoading(false);
+            return;
+        }
+        
+        setIsLoading(true);
+        const timer = setTimeout(() => {
+            setIsLoading(false);
+        }, 2000); // Show loader for 2 seconds
+
+        return () => clearTimeout(timer);
+    }, [pathname]);
 
   const hideFooterOn = ['/main-booking', '/admin'];
   const hideNavbarOn = ['/main-booking', '/admin'];
@@ -40,7 +58,7 @@ const AppContent: React.FC = () => {
   return (
     <div className="flex flex-col min-h-screen">
       {!hideNavbar && <Navbar />}
-      <main className="flex-grow"> {/* Removed padding-top for floating navbar */}
+      <main className="flex-grow">
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Home />} />
@@ -52,6 +70,13 @@ const AppContent: React.FC = () => {
         </Routes>
       </main>
       {!hideFooter && <Footer />}
+      
+      {/* Loader overlay */}
+      {isLoading && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/20 backdrop-blur-md">
+          <Loader />
+        </div>
+      )}
     </div>
   );
 };

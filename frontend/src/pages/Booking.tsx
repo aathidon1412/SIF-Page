@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaCheckCircle } from 'react-icons/fa';
 import { useAuth } from '../lib/auth';
 import { SAMPLE_EQUIPMENTS, SAMPLE_LABS } from '../lib/data';
 
@@ -42,7 +43,7 @@ const Booking: React.FC = () => {
             <div className="relative rounded-lg overflow-hidden h-44 mb-4">
               <img src={eq.image} alt={eq.title} className="w-full h-full object-cover" />
               <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full">EQUIPMENT</span>
-              <span className="absolute top-3 right-3 bg-white px-2 py-1 rounded-full text-xs">● Available</span>
+              <span className="absolute top-3 right-3 bg-white px-2 py-1 rounded-full text-xs flex items-center gap-1"><FaCheckCircle className="text-green-600" size={10} /> Available</span>
             </div>
             <div className="p-4 flex flex-col flex-grow">
               <h3 className="text-lg font-semibold text-slate-900 mb-2">{eq.title}</h3>
@@ -88,7 +89,7 @@ const Booking: React.FC = () => {
               <div className="relative rounded-lg overflow-hidden h-44 mb-4">
                 <img src={lab.image} alt={lab.name} className="w-full h-full object-cover" />
                 <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full">LAB</span>
-                <span className="absolute top-3 right-3 bg-white px-2 py-1 rounded-full text-xs">● Available</span>
+                <span className="absolute top-3 right-3 bg-white px-2 py-1 rounded-full text-xs flex items-center gap-1"><FaCheckCircle className="text-green-600" size={10} /> Available</span>
               </div>
               <div className="p-4 flex flex-col flex-grow">
                 <h3 className="text-lg font-semibold text-blue-950 mb-2">{lab.name}</h3>
