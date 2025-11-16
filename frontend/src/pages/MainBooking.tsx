@@ -1,12 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { useAuth } from '../lib/auth';
+import { useItems } from '../lib/itemsContext';
 import { useNavigate } from 'react-router-dom';
+import { FaBell, FaCog } from 'react-icons/fa';
 import { FaBell, FaCog, FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa';
 import { SAMPLE_EQUIPMENTS, SAMPLE_LABS } from '../lib/data';
 import BookingModal from '../components/BookingModal';
 
 const MainBooking: React.FC = () => {
   const { user, signOut, signInWithGoogle } = useAuth();
+  const { equipments, labs } = useItems();
   const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'labs' | 'equipment'>('labs');
@@ -20,15 +23,15 @@ const MainBooking: React.FC = () => {
   // Filter results based on active tab and search query
   const filteredResults = useMemo(() => {
     if (activeTab === 'equipment') {
-      return SAMPLE_EQUIPMENTS.filter((eq) => 
+      return equipments.filter((eq) => 
         eq.title.toLowerCase().includes(query.toLowerCase())
       );
     } else {
-      return SAMPLE_LABS.filter((lab) => 
+      return labs.filter((lab) => 
         lab.name.toLowerCase().includes(query.toLowerCase())
       );
     }
-  }, [query, activeTab]);
+  }, [query, activeTab, equipments, labs]);
 
   // Load user's booking requests
   React.useEffect(() => {
