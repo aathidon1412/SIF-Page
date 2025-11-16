@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { BookingRequest } from '../types/booking';
+import { toast } from 'react-hot-toast';
 
 type Item = { id: string; title: string; type: 'lab' | 'equipment'; desc?: string };
 
@@ -66,8 +67,9 @@ const Admin: React.FC = () => {
     e.preventDefault();
     if (user === ADMIN_USER && pass === ADMIN_PASS) {
       setAuth(true);
+      toast.success('Admin login successful');
     } else {
-      alert('Invalid credentials');
+      toast.error('Invalid credentials');
     }
   };
 
@@ -79,6 +81,20 @@ const Admin: React.FC = () => {
   const removeItem = (id: string) => setItems((s) => s.filter((it) => it.id !== id));
 
   const handleBookingAction = (requestId: string, action: 'approved' | 'declined') => {
+    // Validate request exists and is actionable
+    const target = bookingRequests.find(r => r.id === requestId);
+    if (!target) {
+      toast.error('Request not found');
+      return;
+    }
+    if (target.status !== 'pending') {
+      toast.error('Action invalid: already processed');
+      return;
+    }
+    if (!adminNote.trim()) {
+      toast.error('Please add an admin note before proceeding');
+      return;
+    }
     const updatedRequests = bookingRequests.map(request => {
       if (request.id === requestId) {
         return {
@@ -104,7 +120,11 @@ const Admin: React.FC = () => {
     setAdminNote('');
     
     // In a real app, you would send an email notification to the user here
-    alert(`Booking request ${action}. User will be notified via email.`);
+    if (action === 'approved') {
+      toast.success('Booking request approved');
+    } else {
+      toast.error('Booking request declined');
+    }
   };
 
   const formatDate = (dateString: string) => {
@@ -216,7 +236,7 @@ const Admin: React.FC = () => {
               </div>
               <button 
                 className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl transition-colors font-medium shadow-lg flex items-center space-x-2" 
-                onClick={() => setAuth(false)}
+                onClick={() => { setAuth(false); toast.success('Logged out'); }}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
@@ -400,7 +420,7 @@ const Admin: React.FC = () => {
                                 <p className="text-blue-800 leading-relaxed">{request.adminNote}</p>
                                 {request.reviewedAt && (
                                   <p className="text-xs text-blue-600 mt-3 font-medium">
-                                    📅 Reviewed: {formatDate(request.reviewedAt)}
+                                    Reviewed: {formatDate(request.reviewedAt)}
                                   </p>
                                 )}
                               </div>
