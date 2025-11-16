@@ -109,7 +109,7 @@ const HeroSection: React.FC = () => {
 
             <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 mt-6 sm:mt-8 animate-fade-in-up" style={{ animationDelay: '240ms' }}>
               <NavLink
-                to="/book"
+                to="/booking"
                 className="inline-flex items-center justify-center gap-2 sm:gap-3 bg-blue-900 hover:bg-blue-700 text-white px-4 sm:px-6 py-3 sm:py-3 text-sm sm:text-base rounded-sm shadow-md transition-all duration-300 transform hover:-translate-y-0.5 hover:shadow-lg border border-blue-900"
                 aria-label="Book Now"
               >
