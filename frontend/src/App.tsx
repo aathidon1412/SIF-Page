@@ -11,6 +11,7 @@ import MainBooking from './pages/MainBooking';
 import Admin from './pages/Admin';
 import { AuthProvider } from './lib/auth';
 import { ThemeProvider, useTheme } from './hooks/useTheme';
+import { ItemsProvider } from './lib/itemsContext';
 import { Toaster } from 'react-hot-toast';
 
 
@@ -61,35 +62,37 @@ const App: React.FC = () => {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <HashRouter>
-          <AppContent />
-          <Toaster
-            position="top-right"
-            gutter={12}
-            toastOptions={{
-              style: {
-                background: '#FEFCE8', // Tailwind yellow-50 equivalent
-                color: '#0A1F44', // dark blue tone (approx blue-950)
-                border: '1px solid #0A1F44',
-                fontWeight: 500,
-              },
-              success: {
+        <ItemsProvider>
+          <HashRouter>
+            <AppContent />
+            <Toaster
+              position="top-right"
+              gutter={12}
+              toastOptions={{
                 style: {
-                  background: '#ECFDF5', // green-50ish
-                  color: '#065F46',
-                  border: '1px solid #065F46'
+                  background: '#FEFCE8', // Tailwind yellow-50 equivalent
+                  color: '#0A1F44', // dark blue tone (approx blue-950)
+                  border: '1px solid #0A1F44',
+                  fontWeight: 500,
+                },
+                success: {
+                  style: {
+                    background: '#ECFDF5', // green-50ish
+                    color: '#065F46',
+                    border: '1px solid #065F46'
+                  }
+                },
+                error: {
+                  style: {
+                    background: '#FEF2F2', // red-50ish
+                    color: '#7F1D1D',
+                    border: '1px solid #7F1D1D'
+                  }
                 }
-              },
-              error: {
-                style: {
-                  background: '#FEF2F2', // red-50ish
-                  color: '#7F1D1D',
-                  border: '1px solid #7F1D1D'
-                }
-              }
-            }}
-          />
-        </HashRouter>
+              }}
+            />
+          </HashRouter>
+        </ItemsProvider>
       </AuthProvider>
     </ThemeProvider>
   );

@@ -2,25 +2,40 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { BookingRequest } from '../types/booking';
 import { toast } from 'react-hot-toast';
-
-type Item = { id: string; title: string; type: 'lab' | 'equipment'; desc?: string };
+import { useItems } from '../lib/itemsContext';
+import { exportDataAsJson } from '../lib/dataManager';
 
 const ADMIN_USER = import.meta.env.VITE_ADMIN_USER || 'thiganth';
 const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASS || 'thiganth';
 
 const Admin: React.FC = () => {
   const navigate = useNavigate();
+  const { equipments, labs, addItem: addItemToContext, removeItem: removeItemFromContext, updateItem: updateItemInContext } = useItems();
   const [auth, setAuth] = useState(false);
   const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
   const [activeTab, setActiveTab] = useState<'items' | 'bookings'>('bookings');
-  const [items, setItems] = useState<Item[]>(() => {
-    try {
-      const raw = localStorage.getItem('admin_items');
-      return raw ? JSON.parse(raw) : [];
-    } catch {
-      return [];
-    }
+  const [newItemTitle, setNewItemTitle] = useState('');
+  const [newItemType, setNewItemType] = useState<'lab' | 'equipment'>('equipment');
+  const [newItemDesc, setNewItemDesc] = useState('');
+  const [newItemPrice, setNewItemPrice] = useState<number>(0);
+  const [newItemCapacity, setNewItemCapacity] = useState('');
+  const [newItemImage, setNewItemImage] = useState('');
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [itemFilter, setItemFilter] = useState<'equipment' | 'labs'>('equipment');
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Get all items
+  const allItems = [...equipments, ...labs];
+  
+  // Filter items based on search query and toggle selection
+  const baseFilteredItems = itemFilter === 'equipment' ? equipments : labs;
+  const filteredItems = baseFilteredItems.filter(item => {
+    const title = 'title' in item ? item.title : (item as any).name;
+    const desc = 'description' in item ? item.description : (item as any).desc;
+    const searchText = `${title} ${desc}`.toLowerCase();
+    return searchText.includes(searchQuery.toLowerCase());
   });
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>(() => {
     try {
@@ -41,10 +56,6 @@ const Admin: React.FC = () => {
   });
   const [selectedRequest, setSelectedRequest] = useState<BookingRequest | null>(null);
   const [adminNote, setAdminNote] = useState('');
-
-  useEffect(() => {
-    localStorage.setItem('admin_items', JSON.stringify(items));
-  }, [items]);
 
   useEffect(() => {
     // Refresh booking requests when admin panel is loaded
@@ -74,11 +85,91 @@ const Admin: React.FC = () => {
   };
 
   const addItem = () => {
-    const id = 'i' + Date.now();
-    setItems((s) => [...s, { id, title: 'New Item', type: 'equipment', desc: 'Description' }]);
+    if (!newItemTitle.trim()) {
+      toast.error('Please enter a title');
+      return;
+    }
+    
+    const itemData: any = {
+      title: newItemTitle,
+      type: newItemType,
+      desc: newItemDesc || 'No description provided'
+    };
+
+    // Add type-specific properties
+    if (newItemType === 'equipment') {
+      itemData.pricePerDay = newItemPrice || 50;
+    } else {
+      itemData.pricePerHour = newItemPrice || 25;
+      itemData.capacity = newItemCapacity || '4-8';
+    }
+
+    if (newItemImage) {
+      itemData.image = newItemImage;
+    }
+
+    addItemToContext(itemData);
+    
+    // Reset form
+    setNewItemTitle('');
+    setNewItemDesc('');
+    setNewItemPrice(0);
+    setNewItemCapacity('');
+    setNewItemImage('');
+    
+    toast.success(`${newItemType} added successfully`);
   };
 
-  const removeItem = (id: string) => setItems((s) => s.filter((it) => it.id !== id));
+  const handleEditItem = (item: any) => {
+    setEditingItem(item);
+    setShowEditModal(true);
+  };
+
+  const handleSaveEdit = () => {
+    if (!editingItem) return;
+    
+    const updates: any = {};
+    
+    if ('title' in editingItem) {
+      // Equipment item
+      updates.title = editingItem.title;
+      updates.description = editingItem.description;
+      updates.pricePerDay = editingItem.pricePerDay;
+    } else {
+      // Lab item
+      updates.title = editingItem.name;
+      updates.desc = editingItem.desc;
+      updates.pricePerHour = editingItem.pricePerHour;
+      updates.capacity = editingItem.capacity;
+    }
+    
+    if (editingItem.image) {
+      updates.image = editingItem.image;
+    }
+    
+    updateItemInContext(editingItem.id, updates);
+    
+    setShowEditModal(false);
+    setEditingItem(null);
+    toast.success('Item updated successfully');
+  };
+
+  const handleDeleteItem = (id: string) => {
+    if (window.confirm('Are you sure you want to delete this item? This action cannot be undone.')) {
+      removeItemFromContext(id);
+      toast.success('Item deleted successfully');
+    }
+  };
+
+  const handleExportData = async () => {
+    try {
+      await exportDataAsJson();
+      toast.success('Data exported successfully! Replace /src/data/items.json with the downloaded file to persist changes.');
+    } catch (error) {
+      toast.error('Failed to export data');
+      console.error('Export error:', error);
+    }
+  };
 
   const handleBookingAction = (requestId: string, action: 'approved' | 'declined') => {
     // Validate request exists and is actionable
@@ -346,7 +437,7 @@ const Admin: React.FC = () => {
               <span className={`px-2 py-1 rounded-full text-xs font-bold ${
                 activeTab === 'items' ? 'bg-yellow-400 text-blue-950' : 'bg-blue-100 text-blue-950'
               }`}>
-                {items.length}
+                {allItems.length}
               </span>
             </button>
           </div>
@@ -488,46 +579,368 @@ const Admin: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold text-blue-950">Manage Items</h2>
-              <button 
-                className="bg-blue-950 text-white px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors" 
-                onClick={addItem}
+              <button
+                onClick={handleExportData}
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
               >
-                Add Item
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <span>Export Data</span>
               </button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {items.map((it) => (
-                <div key={it.id} className="bg-white rounded-2xl shadow-lg p-6 border">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-slate-900">{it.title}</h3>
-                      <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full mt-2">
-                        {it.type.toUpperCase()}
-                      </span>
-                      {it.desc && (
-                        <p className="text-sm text-gray-600 mt-2">{it.desc}</p>
-                      )}
-                    </div>
-                    <button 
-                      className="ml-4 text-red-500 hover:text-red-700 px-3 py-1 border border-red-500 rounded-lg hover:bg-red-50 transition-colors" 
-                      onClick={() => removeItem(it.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
+            {/* Data Persistence Info */}
+            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded-lg">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
                 </div>
-              ))}
+                <div className="ml-3">
+                  <p className="text-sm text-blue-700">
+                    <strong>Data Persistence:</strong> Changes are saved to browser storage and persist between sessions. 
+                    To make changes permanent across deployments, use the <strong>"Export Data"</strong> button to download the updated JSON file, 
+                    then replace <code className="bg-blue-100 px-1 rounded">/src/data/items.json</code> with the downloaded file.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Add Item Form */}
+            <div className="bg-white rounded-2xl shadow-lg p-6 border mb-8">
+              <h3 className="text-lg font-semibold text-blue-950 mb-4">Add New Item</h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Item Type</label>
+                  <select
+                    value={newItemType}
+                    onChange={(e) => setNewItemType(e.target.value as 'lab' | 'equipment')}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors text-gray-900 placeholder-gray-500"
+                  >
+                    <option value="equipment">Equipment</option>
+                    <option value="lab">Lab</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+                  <input
+                    type="text"
+                    value={newItemTitle}
+                    onChange={(e) => setNewItemTitle(e.target.value)}
+                    placeholder="Enter item title"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors text-gray-900 placeholder-gray-500"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                  <textarea
+                    value={newItemDesc}
+                    onChange={(e) => setNewItemDesc(e.target.value)}
+                    placeholder="Enter item description"
+                    rows={2}
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors text-gray-900 placeholder-gray-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Price ({newItemType === 'equipment' ? 'per day' : 'per hour'})
+                  </label>
+                  <input
+                    type="number"
+                    value={newItemPrice}
+                    onChange={(e) => setNewItemPrice(Number(e.target.value))}
+                    placeholder="Enter price"
+                    min="0"
+                    step="0.01"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors text-gray-900 placeholder-gray-500"
+                  />
+                </div>
+                {newItemType === 'lab' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Capacity</label>
+                    <input
+                      type="text"
+                      value={newItemCapacity}
+                      onChange={(e) => setNewItemCapacity(e.target.value)}
+                      placeholder="e.g., 4-8"
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors text-gray-900 placeholder-gray-500"
+                    />
+                  </div>
+                )}
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Image URL (optional)</label>
+                  <input
+                    type="url"
+                    value={newItemImage}
+                    onChange={(e) => setNewItemImage(e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors text-gray-900 placeholder-gray-500"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <button
+                    onClick={addItem}
+                    className="bg-blue-950 text-white px-6 py-2 rounded-lg hover:bg-blue-900 transition-colors font-medium"
+                  >
+                    Add {newItemType}
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-6">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xl font-semibold text-blue-950">All Items</h3>
+                <div className="text-sm text-gray-600">
+                  {allItems.length} total items ({equipments.length} equipment, {labs.length} labs)
+                </div>
+              </div>
               
-              {items.length === 0 && (
-                <div className="col-span-2 text-center py-12 bg-white rounded-lg">
-                  <p className="text-gray-600 text-lg">No items found. Add some items to get started.</p>
+              {/* Search Bar */}
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search items by title or description..."
+                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors text-gray-900 placeholder-gray-500"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                  >
+                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                )}
+              </div>
+              
+              {/* Filter Toggle */}
+              <div className="flex justify-center">
+                <div className="bg-gray-100 p-1 rounded-lg inline-flex">
+                  <button
+                    onClick={() => setItemFilter('equipment')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      itemFilter === 'equipment'
+                        ? 'bg-blue-950 text-white shadow-lg'
+                        : 'text-gray-600 hover:text-blue-950 hover:bg-white'
+                    }`}
+                  >
+                    Equipment ({equipments.length})
+                  </button>
+                  <button
+                    onClick={() => setItemFilter('labs')}
+                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                      itemFilter === 'labs'
+                        ? 'bg-blue-950 text-white shadow-lg'
+                        : 'text-gray-600 hover:text-blue-950 hover:bg-white'
+                    }`}
+                  >
+                    Labs ({labs.length})
+                  </button>
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredItems.map((item) => {
+                  const isEquipment = 'title' in item;
+                  const title = isEquipment ? item.title : (item as any).name;
+                  const desc = isEquipment ? item.description : (item as any).desc;
+                  const price = isEquipment ? `$${(item as any).pricePerDay}/day` : `$${(item as any).pricePerHour}/hour`;
+                  const image = (item as any).image;
+                  
+                  return (
+                    <div key={item.id} className="bg-white rounded-2xl shadow-lg border overflow-hidden">
+                      {/* Item Image */}
+                      <div className="relative h-48 bg-gray-100">
+                        {image ? (
+                          <img 
+                            src={image} 
+                            alt={title} 
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-200">
+                            <span className="text-gray-500">No Image</span>
+                          </div>
+                        )}
+                        <div className="absolute top-3 left-3">
+                          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
+                            {isEquipment ? 'EQUIPMENT' : 'LAB'}
+                          </span>
+                        </div>
+                      </div>
+                      
+                      {/* Item Details */}
+                      <div className="p-6">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-2">{title}</h4>
+                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{desc}</p>
+                        
+                        <div className="flex items-center justify-between mb-4">
+                          <div className="text-lg font-bold text-blue-950">{price}</div>
+                          {!isEquipment && (item as any).capacity && (
+                            <div className="text-sm text-gray-500">Capacity: {(item as any).capacity}</div>
+                          )}
+                        </div>
+                        
+                        {/* Action Buttons */}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEditItem(item)}
+                            className="flex-1 bg-blue-50 text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteItem(item.id)}
+                            className="bg-red-50 text-red-700 px-3 py-2 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {filteredItems.length === 0 && (
+                <div className="text-center py-12 col-span-full">
+                  <div className="text-gray-400 mb-4">
+                    <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-500 text-lg">
+                    {searchQuery ? 
+                      `No ${itemFilter === 'equipment' ? 'equipment' : 'labs'} found matching "${searchQuery}"` :
+                      itemFilter === 'equipment' ? 'No equipment found' : 'No labs found'}
+                  </p>
+                  <p className="text-gray-400 text-sm mt-2">
+                    {searchQuery ? 
+                      'Try adjusting your search terms or clear the search to see all items' :
+                      'Add new items using the form above or switch to the other category'}
+                  </p>
                 </div>
               )}
             </div>
           </div>
         )}
       </div>
+      
+      {/* Edit Modal */}
+      {showEditModal && editingItem && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-blue-950">Edit Item</h2>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Title/Name</label>
+                <input
+                  type="text"
+                  value={'title' in editingItem ? editingItem.title : editingItem.name}
+                  onChange={(e) => setEditingItem((prev: any) => 
+                    'title' in prev 
+                      ? { ...prev, title: e.target.value }
+                      : { ...prev, name: e.target.value }
+                  )}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 text-gray-900"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea
+                  value={'description' in editingItem ? editingItem.description : editingItem.desc}
+                  onChange={(e) => setEditingItem((prev: any) => 
+                    'description' in prev 
+                      ? { ...prev, description: e.target.value }
+                      : { ...prev, desc: e.target.value }
+                  )}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 text-gray-900"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Price ({'title' in editingItem ? 'per day' : 'per hour'})
+                  </label>
+                  <input
+                    type="number"
+                    value={'title' in editingItem ? editingItem.pricePerDay : editingItem.pricePerHour}
+                    onChange={(e) => setEditingItem((prev: any) => 
+                      'title' in prev 
+                        ? { ...prev, pricePerDay: Number(e.target.value) }
+                        : { ...prev, pricePerHour: Number(e.target.value) }
+                    )}
+                    min="0"
+                    step="0.01"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 text-gray-900"
+                  />
+                </div>
+                
+                {'capacity' in editingItem && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Capacity</label>
+                    <input
+                      type="text"
+                      value={editingItem.capacity}
+                      onChange={(e) => setEditingItem((prev: any) => ({ ...prev, capacity: e.target.value }))}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 text-gray-900"
+                    />
+                  </div>
+                )}
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
+                <input
+                  type="url"
+                  value={editingItem.image || ''}
+                  onChange={(e) => setEditingItem((prev: any) => ({ ...prev, image: e.target.value }))}
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 text-gray-900"
+                />
+              </div>
+              
+              <div className="flex gap-4 pt-6">
+                <button
+                  onClick={handleSaveEdit}
+                  className="flex-1 bg-blue-950 text-white py-3 px-6 rounded-lg hover:bg-blue-900 transition-colors font-medium"
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 border border-gray-300 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
