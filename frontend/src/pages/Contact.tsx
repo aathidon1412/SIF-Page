@@ -102,13 +102,14 @@ const Contact: React.FC = () => {
                 <h2 className="text-2xl font-bold mb-4 text-[#fffdeb] underline decoration-[#fffdeb] underline-offset-4">Location</h2>
                 <div className="rounded-lg shadow-md overflow-hidden flex-1">
                    <iframe
-                     title="SIF-FABLAB location"
-                     src="https://www.google.com/maps?q=Sonipat&output=embed"
-                     className="w-full h-full border-0"
-                     allowFullScreen
-                     loading="lazy"
-                     referrerPolicy="no-referrer-when-downgrade"
-                   />
+  title="Sona College of Technology Location"
+  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3895.40!2d78.12461046136933!3d11.67845960906935!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x0:0x0!2sSona%20College%20of%20Technology!5e0!3m2!1sen!2sin!4v1731787777000!5m2!1sen!2sin"
+  className="w-full h-full border-0"
+  allowFullScreen
+  loading="lazy"
+  referrerPolicy="no-referrer-when-downgrade"
+/>
+
                 </div>
 
                 <p className="mt-4 text-[#fffdeb]">
