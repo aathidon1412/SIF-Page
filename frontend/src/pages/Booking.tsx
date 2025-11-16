@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FaCheckCircle } from 'react-icons/fa';
 import { useAuth } from '../lib/auth';
 import { useItems } from '../lib/itemsContext';
 
@@ -33,7 +34,13 @@ const Booking: React.FC = () => {
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold text-blue-900 underline decoration-blue-950 decoration-2">Available Equipment</h2>
         <div>
-          <button className="bg-blue-950 text-[#fffdeb] px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">View more</button>
+          <button
+            type="button"
+            onClick={handleCardClick}
+            className="bg-blue-950 text-[#fffdeb] px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors"
+          >
+            View more
+          </button>
         </div>
       </div>
 
@@ -43,7 +50,7 @@ const Booking: React.FC = () => {
             <div className="relative rounded-lg overflow-hidden h-44 mb-4">
               <img src={eq.image} alt={eq.title} className="w-full h-full object-cover" />
               <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full">EQUIPMENT</span>
-              <span className="absolute top-3 right-3 bg-white px-2 py-1 rounded-full text-xs">● Available</span>
+              <span className="absolute top-3 right-3 bg-white px-2 py-1 rounded-full text-xs flex items-center gap-1"><FaCheckCircle className="text-green-600" size={10} /> Available</span>
             </div>
             <h3 className="text-lg font-semibold text-slate-900 mb-1">{eq.title}</h3>
             <p className="text-sm text-gray-600 mb-3">{eq.description}</p>
@@ -77,7 +84,13 @@ const Booking: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
           <h2 className="text-2xl font-semibold underline decoration-blue-950 decoration-2">Available Labs</h2>
           <div>
-            <button className="bg-blue-950 text-[#fffdeb] px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors">View more</button>
+            <button
+              type="button"
+              onClick={handleCardClick}
+              className="bg-blue-950 text-[#fffdeb] px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors"
+            >
+              View more
+            </button>
           </div>
         </div>
 
@@ -87,7 +100,7 @@ const Booking: React.FC = () => {
               <div className="relative rounded-lg overflow-hidden h-44 mb-4">
                 <img src={lab.image} alt={lab.name} className="w-full h-full object-cover" />
                 <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full">LAB</span>
-                <span className="absolute top-3 right-3 bg-white px-2 py-1 rounded-full text-xs">● Available</span>
+                <span className="absolute top-3 right-3 bg-white px-2 py-1 rounded-full text-xs flex items-center gap-1"><FaCheckCircle className="text-green-600" size={10} /> Available</span>
               </div>
               <h3 className="text-lg font-semibold text-blue-950 mb-1">{lab.name}</h3>
               <p className="text-sm text-slate-700 mb-3">{lab.desc}</p>

@@ -3,6 +3,8 @@ import { useAuth } from '../lib/auth';
 import { useItems } from '../lib/itemsContext';
 import { useNavigate } from 'react-router-dom';
 import { FaBell, FaCog } from 'react-icons/fa';
+import { FaBell, FaCog, FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa';
+import { SAMPLE_EQUIPMENTS, SAMPLE_LABS } from '../lib/data';
 import BookingModal from '../components/BookingModal';
 
 const MainBooking: React.FC = () => {
@@ -84,9 +86,9 @@ const MainBooking: React.FC = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case 'approved': return '✅';
-      case 'declined': return '❌';
-      default: return '⏳';
+      case 'approved': return <FaCheckCircle className="text-green-600" />;
+      case 'declined': return <FaTimesCircle className="text-red-600" />;
+      default: return <FaClock className="text-yellow-600" />;
     }
   };
 
@@ -219,7 +221,7 @@ const MainBooking: React.FC = () => {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
-                            <span className="text-lg">{getStatusIcon(request.status)}</span>
+                            <span className="text-lg flex items-center">{getStatusIcon(request.status)}</span>
                             <h3 className="font-semibold text-gray-800">
                               Booking Request {request.status === 'pending' ? 'Submitted' : 
                                 request.status === 'approved' ? 'Approved' : 'Declined'}
@@ -273,12 +275,22 @@ const MainBooking: React.FC = () => {
                 <div className="mt-auto pb-6 space-y-2">
                   <button 
                     onClick={() => {
-                      // Mark all as read (remove notification dots)
-                      setShowNotifications(false);
+                      // Clear all booking requests for this user from localStorage
+                      try {
+                        const allRequests = JSON.parse(localStorage.getItem('booking_requests') || '[]');
+                        if (user) {
+                          const remaining = allRequests.filter((r: any) => r.userEmail !== user.email);
+                          localStorage.setItem('booking_requests', JSON.stringify(remaining));
+                        }
+                      } catch {
+                        // ignore parse errors
+                      }
+                      setUserBookingRequests([]);
+                      
                     }}
                     className="w-full bg-blue-950 text-white py-2 px-4 rounded-lg hover:bg-blue-900 transition-colors"
                   >
-                    Close Notifications
+                    Clear Notifications
                   </button>
                   <div className="text-center">
                     <span className="text-xs text-gray-500">
@@ -410,7 +422,7 @@ const MainBooking: React.FC = () => {
                   <div className="relative rounded-lg overflow-hidden h-44 mb-4">
                     <img src={eq.image} alt={eq.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
                     <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">EQUIPMENT</span>
-                    <span className="absolute top-3 right-3 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">● Available</span>
+                    <span className="absolute top-3 right-3 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"><FaCheckCircle size={10} /> Available</span>
                     <div className="absolute inset-0 bg-blue-950 bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-center">
                         <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -451,7 +463,7 @@ const MainBooking: React.FC = () => {
                   <div className="relative rounded-lg overflow-hidden h-44 mb-4">
                     <img src={lab.image} alt={lab.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
                     <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">LAB</span>
-                    <span className="absolute top-3 right-3 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">● Available</span>
+                    <span className="absolute top-3 right-3 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"><FaCheckCircle size={10} /> Available</span>
                     <div className="absolute inset-0 bg-blue-950 bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
                       <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-center">
                         <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
