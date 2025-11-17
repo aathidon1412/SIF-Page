@@ -50,7 +50,7 @@ const MainBooking: React.FC = () => {
     loadItems();
   }, []);
 
-  // Load user's booking requests from backend
+  // Load user's booking requests from backend with real-time polling
   useEffect(() => {
     if (!user) { setUserBookingRequests([]); return; }
     let cancelled = false;
@@ -69,12 +69,12 @@ const MainBooking: React.FC = () => {
         setUserBookingRequests([]);
       }
     }
-    load();
-    const interval = setInterval(load, 7000);
+    load(); // Initial load
+    const interval = setInterval(load, 5000); // Poll every 5 seconds for real-time updates
     return () => { cancelled = true; clearInterval(interval); };
   }, [user]);
 
-  // Get notification count (pending + recently reviewed)
+  // Get notification count (pending + recently reviewed + revoked)
   const getNotificationCount = () => {
     const recentlyReviewed = userBookingRequests.filter(req => {
       if (!req.reviewedAt) return false;
@@ -84,7 +84,8 @@ const MainBooking: React.FC = () => {
     });
     
     const pending = userBookingRequests.filter(req => req.status === 'pending');
-    return pending.length + recentlyReviewed.length;
+    const revoked = userBookingRequests.filter(req => req.declinedAfterApproval || req.wasApprovedBefore);
+    return pending.length + recentlyReviewed.length + revoked.length;
   };
 
   const formatDate = (dateString: string) => {
@@ -104,7 +105,10 @@ const MainBooking: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: string, isRevoked?: boolean) => {
+    if (isRevoked) {
+      return 'bg-orange-50 border-orange-600 border-2';
+    }
     switch (status) {
       case 'approved': return 'bg-green-50 border-green-500';
       case 'declined': return 'bg-red-50 border-red-500';
@@ -228,14 +232,25 @@ const MainBooking: React.FC = () => {
                     <p className="text-sm text-gray-400 mt-1">Your booking requests will appear here.</p>
                   </div>
                 ) : (
-                  userBookingRequests.map((request: any) => (
-                    <div key={request.id} className={`p-4 border-l-4 rounded ${getStatusColor(request.status)}`}>
+                  userBookingRequests.map((request: any) => {
+                    const isRevoked = request.declinedAfterApproval || (request.wasApprovedBefore && request.status === 'declined');
+                    return (
+                    <div key={request.id} className={`p-4 border-l-4 rounded ${getStatusColor(request.status, isRevoked)}`}>
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
+                          {isRevoked && (
+                            <div className="flex items-center gap-2 mb-2 bg-orange-100 border border-orange-300 rounded px-2 py-1">
+                              <svg className="w-4 h-4 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                              <span className="text-xs font-bold text-orange-800">BOOKING REVOKED</span>
+                            </div>
+                          )}
                           <div className="flex items-center gap-2 mb-1">
                             <span className="text-lg flex items-center">{getStatusIcon(request.status)}</span>
                             <h3 className="font-semibold text-gray-800">
-                              Booking Request {request.status === 'pending' ? 'Submitted' : 
+                              Booking Request {isRevoked ? 'Revoked' :
+                                request.status === 'pending' ? 'Submitted' : 
                                 request.status === 'approved' ? 'Approved' : 'Declined'}
                             </h3>
                           </div>
@@ -248,12 +263,29 @@ const MainBooking: React.FC = () => {
                             {formatDate(request.startDate)} 
                             {request.startTime && ` at ${formatTime(request.startTime)}`}
                             {request.endDate !== request.startDate && ` - ${formatDate(request.endDate)}`}
+                            {request.endTime && ` at ${formatTime(request.endTime)}`}
                           </p>
 
                           {request.status !== 'pending' && request.adminNote && (
-                            <div className="bg-white bg-opacity-50 p-2 rounded text-sm mt-2">
-                              <strong>Admin Note:</strong>
-                              <p className="text-gray-700 mt-1">{request.adminNote}</p>
+                            <div className={`p-2 rounded text-sm mt-2 ${
+                              isRevoked 
+                                ? 'bg-orange-100 border border-orange-300' 
+                                : 'bg-white bg-opacity-50'
+                            }`}>
+                              <strong className={isRevoked ? 'text-orange-800' : ''}>
+                                {isRevoked ? 'Revocation Reason:' : 'Admin Note:'}
+                              </strong>
+                              <p className={`mt-1 ${isRevoked ? 'text-orange-900' : 'text-gray-700'}`}>
+                                {request.adminNote}
+                              </p>
+                            </div>
+                          )}
+
+                          {isRevoked && !request.adminNote && (
+                            <div className="bg-orange-100 border border-orange-300 p-2 rounded text-sm mt-2">
+                              <p className="text-orange-900">
+                                <strong>Important:</strong> This booking was previously approved but has been revoked by the administrator.
+                              </p>
                             </div>
                           )}
 
@@ -270,15 +302,19 @@ const MainBooking: React.FC = () => {
                           </div>
                         </div>
                         
-                        {request.status === 'pending' && (
+                        {isRevoked && (
+                          <div className="w-3 h-3 bg-orange-600 rounded-full mt-2 ml-3 animate-pulse"></div>
+                        )}
+                        {!isRevoked && request.status === 'pending' && (
                           <div className="w-2 h-2 bg-orange-500 rounded-full mt-2 ml-3"></div>
                         )}
-                        {request.reviewedAt && new Date(request.reviewedAt) > new Date(Date.now() - 24 * 60 * 60 * 1000) && (
+                        {!isRevoked && request.reviewedAt && new Date(request.reviewedAt) > new Date(Date.now() - 24 * 60 * 60 * 1000) && (
                           <div className="w-2 h-2 bg-blue-500 rounded-full mt-2 ml-3"></div>
                         )}
                       </div>
                     </div>
-                  ))
+                    );
+                  })
                 )}
               </div>
               

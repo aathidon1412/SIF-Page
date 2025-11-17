@@ -77,6 +77,17 @@ const Admin: React.FC = () => {
     }
   }
 
+  // Auto-refresh bookings every 10 seconds for real-time updates
+  useEffect(() => {
+    if (!auth) return;
+    
+    const interval = setInterval(() => {
+      loadBookings();
+    }, 10000); // 10 seconds
+    
+    return () => clearInterval(interval);
+  }, [auth]);
+
   // Hydrate saved filters on mount
   useEffect(() => {
     try {
@@ -252,12 +263,17 @@ const Admin: React.FC = () => {
       toast.error('Request not found');
       return;
     }
-    if (target.status !== 'pending') {
-      toast.error('Action invalid: already processed');
-      return;
-    }
-    if (!adminNote.trim()) {
-      toast.error('Please add an admin note before proceeding');
+    
+    // Allow declining approved bookings (revocation)
+    const isRevocation = target.status === 'approved' && action === 'declined';
+    
+    // Only require admin note for status changes (optional for initial approval)
+    if (isRevocation && !adminNote.trim()) {
+      const confirmed = confirm('You are about to REVOKE a previously approved booking. This will notify the user immediately. Please add a reason in the admin note field before proceeding.');
+      if (!confirmed) {
+        return;
+      }
+      toast.error('Please add a revocation reason in the admin note before proceeding');
       return;
     }
     try {
@@ -552,6 +568,22 @@ const Admin: React.FC = () => {
               </div>
             </div>
           </div>
+          
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-amber-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Active Conflicts</p>
+                <p className="text-3xl font-bold text-amber-600">
+                  {bookingRequests.filter(r => r.hasConflict && r.status === 'pending').length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </div>
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
             <div className="flex items-center justify-between">
               <div>
@@ -760,6 +792,14 @@ const Admin: React.FC = () => {
                           <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
                             {request.itemType.toUpperCase()}
                           </span>
+                          {request.hasConflict && request.status === 'pending' && (
+                            <span className="px-3 py-1 bg-amber-100 text-amber-800 text-sm rounded-full font-semibold flex items-center gap-1.5">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                              CONFLICT ({request.conflictingBookings?.length || 0})
+                            </span>
+                          )}
                         </div>
                         <p className="text-gray-600 mb-4">Requested by: <strong>{request.userName}</strong> ({request.userEmail})</p>
                         
@@ -792,6 +832,68 @@ const Admin: React.FC = () => {
                           </div>
                         )}
 
+                        {request.hasConflict && request.conflictingBookings && request.conflictingBookings.length > 0 && (
+                          <div className="mt-6 p-4 bg-amber-50 border-2 border-amber-300 rounded-xl">
+                            <div className="flex items-start space-x-3">
+                              <div className="p-2 bg-amber-200 rounded-lg">
+                                <svg className="w-5 h-5 text-amber-800" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-amber-900 mb-2 flex items-center gap-2">
+                                  Booking Conflicts Detected
+                                  <span className="px-2 py-0.5 bg-amber-200 text-amber-900 text-xs rounded-full font-bold">
+                                    {request.conflictingBookings.length}
+                                  </span>
+                                </h4>
+                                <p className="text-amber-800 text-sm mb-3">
+                                  {request.status === 'pending' 
+                                    ? 'This booking overlaps with existing bookings. If you approve this request, conflicting pending bookings will be automatically declined.'
+                                    : 'This booking had conflicts when it was submitted.'}
+                                </p>
+                                <div className="space-y-2">
+                                  {request.conflictingBookings.map((conflict, idx) => (
+                                    <div key={idx} className="bg-white border border-amber-200 rounded-lg p-3 text-sm">
+                                      <div className="flex items-start justify-between mb-2">
+                                        <div className="flex-1">
+                                          <p className="font-semibold text-amber-900">
+                                            {conflict.userName || conflict.userEmail}
+                                          </p>
+                                          <p className="text-xs text-amber-700">{conflict.userEmail}</p>
+                                        </div>
+                                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                          conflict.status === 'approved' 
+                                            ? 'bg-green-100 text-green-800' 
+                                            : conflict.status === 'declined'
+                                            ? 'bg-red-100 text-red-800'
+                                            : 'bg-yellow-100 text-yellow-800'
+                                        }`}>
+                                          {conflict.status.toUpperCase()}
+                                        </span>
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-2 text-xs text-amber-700">
+                                        <div>
+                                          <span className="font-medium">Dates:</span> {formatDate(conflict.startDate)} - {formatDate(conflict.endDate)}
+                                        </div>
+                                        {conflict.startTime && (
+                                          <div>
+                                            <span className="font-medium">Time:</span> {conflict.startTime} - {conflict.endTime}
+                                          </div>
+                                        )}
+                                        <div className="col-span-2">
+                                          <span className="font-medium">Overlap Type:</span>{' '}
+                                          <span className="capitalize">{conflict.conflictType.replace('_', ' ')}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
                         {request.adminNote && (
                           <div className="mt-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
                             <div className="flex items-start space-x-3">
@@ -815,7 +917,7 @@ const Admin: React.FC = () => {
                       </div>
                     </div>
 
-                    {request.status === 'pending' && (
+                    {(request.status === 'pending' || request.status === 'approved') && (
                       <div className="border-t border-blue-100 pt-6 mt-6 bg-blue-50 -mx-6 px-6 pb-6 rounded-b-2xl">
                         <div className="mb-4">
                           <label className="flex items-center space-x-2 text-sm font-semibold text-blue-950 mb-3">
@@ -836,30 +938,70 @@ const Admin: React.FC = () => {
                           />
                         </div>
                         <div className="flex gap-4">
-                          <button
-                            onClick={() => {
-                              setSelectedRequest(request);
-                              handleBookingAction(request.id, 'approved');
-                            }}
-                            className="flex-1 bg-green-600 text-white py-3 px-6 rounded-xl hover:bg-green-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                          {request.status === 'pending' && (
+                            <button
+                              onClick={() => {
+                                setSelectedRequest(request);
+                                if (request.hasConflict && request.conflictingBookings && request.conflictingBookings.length > 0) {
+                                  const conflictCount = request.conflictingBookings.filter(c => c.status === 'pending').length;
+                                  if (conflictCount > 0 && !confirm(`⚠️ WARNING: Approving this booking will automatically DECLINE ${conflictCount} conflicting pending booking(s). Do you want to proceed?`)) {
+                                    return;
+                                  }
+                                }
+                                handleBookingAction(request.id, 'approved');
+                              }}
+                            className={`flex-1 py-3 px-6 rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 ${
+                              request.hasConflict 
+                                ? 'bg-amber-600 hover:bg-amber-700 text-white' 
+                                : 'bg-green-600 hover:bg-green-700 text-white'
+                            }`}
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>Approve Request</span>
-                          </button>
-                          <button
-                            onClick={() => {
-                              setSelectedRequest(request);
-                              handleBookingAction(request.id, 'declined');
-                            }}
-                            className="flex-1 bg-red-600 text-white py-3 px-6 rounded-xl hover:bg-red-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>Decline Request</span>
-                          </button>
+                            {request.hasConflict && (
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                            {!request.hasConflict && (
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            )}
+                              <span>{request.hasConflict ? 'Approve & Auto-Decline Conflicts' : 'Approve Request'}</span>
+                            </button>
+                          )}
+                          
+                          {request.status === 'approved' && (
+                            <button
+                              onClick={() => {
+                                setSelectedRequest(request);
+                                if (!confirm(`⚠️ CRITICAL: You are about to REVOKE an approved booking for ${request.userName}. This action will immediately notify the user and mark their booking as declined. Are you absolutely sure?`)) {
+                                  return;
+                                }
+                                handleBookingAction(request.id, 'declined');
+                              }}
+                              className="flex-1 bg-orange-600 hover:bg-orange-700 text-white py-3 px-6 rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                            >
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                              <span>Revoke Approved Booking</span>
+                            </button>
+                          )}
+                          
+                          {request.status === 'pending' && (
+                            <button
+                              onClick={() => {
+                                setSelectedRequest(request);
+                                handleBookingAction(request.id, 'declined');
+                              }}
+                              className="flex-1 bg-red-600 text-white py-3 px-6 rounded-xl hover:bg-red-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span>Decline Request</span>
+                            </button>
+                          )}
                         </div>
                       </div>
                     )}

@@ -143,6 +143,114 @@ export const validateTimeRange = (startTime, endTime) => {
 };
 
 /**
+ * Validate date-time combination (single unified validation)
+ */
+export const validateDateTimeCombination = (startDate, endDate, startTime, endTime, itemType) => {
+  // Basic validation
+  if (!startDate || !endDate) {
+    return { isValid: false, error: 'Start date and end date are required' };
+  }
+
+  // For equipment bookings (date only)
+  if (itemType === 'equipment') {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      return { isValid: false, error: 'Invalid date format' };
+    }
+    
+    // Single check: end must be after or equal to start
+    if (end < start) {
+      return { isValid: false, error: 'End date must be after or equal to start date' };
+    }
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (start < today) {
+      return { isValid: false, error: 'Start date cannot be in the past' };
+    }
+    
+    return { isValid: true };
+  }
+
+  // For lab bookings (date + time)
+  if (itemType === 'lab') {
+    if (!startTime || !endTime) {
+      return { isValid: false, error: 'Start time and end time are required for lab bookings' };
+    }
+
+    // Validate time format
+    const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
+    if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
+      return { isValid: false, error: 'Invalid time format. Use HH:mm format' };
+    }
+
+    // Create complete date-time objects
+    const startDateTime = new Date(`${startDate}T${startTime}:00`);
+    const endDateTime = new Date(`${endDate}T${endTime}:00`);
+
+    if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
+      return { isValid: false, error: 'Invalid date or time combination' };
+    }
+
+    // Single unified check: end date-time must be after start date-time
+    if (endDateTime <= startDateTime) {
+      return { 
+        isValid: false, 
+        error: 'End date and time must be after start date and time' 
+      };
+    }
+
+    // Check if booking is in the past
+    const now = new Date();
+    if (startDateTime < now) {
+      return { isValid: false, error: 'Booking cannot be in the past' };
+    }
+
+    // Validate business hours (9 AM - 6 PM)
+    const [startHour, startMinute] = startTime.split(':').map(Number);
+    const [endHour, endMinute] = endTime.split(':').map(Number);
+    const startTotalMinutes = startHour * 60 + startMinute;
+    const endTotalMinutes = endHour * 60 + endMinute;
+
+    if (startTotalMinutes < 540 || startTotalMinutes > 1080) {
+      return { isValid: false, error: 'Start time must be between 9:00 AM and 6:00 PM' };
+    }
+    if (endTotalMinutes < 540 || endTotalMinutes > 1080) {
+      return { isValid: false, error: 'End time must be between 9:00 AM and 6:00 PM' };
+    }
+
+    // Minimum 1 hour duration
+    const durationHours = (endDateTime - startDateTime) / (1000 * 60 * 60);
+    if (durationHours < 1) {
+      return { isValid: false, error: 'Minimum booking duration is 1 hour' };
+    }
+
+    // Maximum 9 hours for single day
+    if (startDate === endDate && durationHours > 9) {
+      return { isValid: false, error: 'Maximum booking duration per day is 9 hours' };
+    }
+
+    // Validate weekdays in range
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const currentDate = new Date(start);
+    while (currentDate <= end) {
+      if (!isWeekday(currentDate)) {
+        return {
+          isValid: false,
+          error: `Booking includes ${getDayName(currentDate)}. Only Monday-Friday allowed.`
+        };
+      }
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+  }
+
+  return { isValid: true };
+};
+
+/**
  * Complete booking validation for backend
  */
 export const validateBooking = (bookingData) => {
@@ -159,16 +267,17 @@ export const validateBooking = (bookingData) => {
     return dateValidation;
   }
 
-  // Validate times for lab bookings
-  if (itemType === 'lab') {
-    if (!startTime || !endTime) {
-      return { isValid: false, error: 'Start time and end time are required for lab bookings' };
-    }
-
-    const timeValidation = validateTimeRange(startTime, endTime);
-    if (!timeValidation.isValid) {
-      return timeValidation;
-    }
+  // Use ONLY the unified date-time combination validation
+  // This properly handles multi-day bookings where end time < start time
+  const dateTimeCombinationValidation = validateDateTimeCombination(
+    startDate, 
+    endDate, 
+    startTime, 
+    endTime, 
+    itemType
+  );
+  if (!dateTimeCombinationValidation.isValid) {
+    return dateTimeCombinationValidation;
   }
 
   return { isValid: true };
