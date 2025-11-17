@@ -36,7 +36,6 @@
 ☐ booking conflicts for same time slots no two user can't book the same lab or equipment at the same time slot
 ✔ items restrictions for admin side @done (11/17/2025, 9:34:44 PM)
 ✔ amount in rupees @done (11/17/2025, 9:34:45 PM)
-☐ booking limitations based on user type (student/faculty/staff)
 ☐ payment gateway integration use razorpay or paytm
 ☐ Navbar functionality to be changed based on the page scrolled
 ☐ add catergories and sub-catergories for the labs and equipments in the main booking page and in the admin page 
