@@ -88,3 +88,48 @@ export async function updateBookingStatus(token: string, id: string, status: 'ap
   if (!res.ok) throw new Error('Failed to update booking');
   return res.json();
 }
+
+export async function createBackup(token: string) {
+  const res = await fetch(`${API_BASE}/admin/backup`, {
+    method: 'POST',
+    headers: { Authorization: `Bearer ${token}` }
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to create backup');
+  }
+  return res.json();
+}
+
+export async function restoreBackup(token: string, backupData: any) {
+  const res = await fetch(`${API_BASE}/admin/restore`, {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}` 
+    },
+    body: JSON.stringify(backupData)
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to restore backup');
+  }
+  return res.json();
+}
+
+export async function verifyBackup(token: string, backupData: any) {
+  const res = await fetch(`${API_BASE}/admin/backup/verify`, {
+    method: 'POST',
+    headers: { 
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}` 
+    },
+    body: JSON.stringify(backupData)
+  });
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to verify backup');
+  }
+  return res.json();
+}
+
