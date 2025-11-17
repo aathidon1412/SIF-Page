@@ -67,7 +67,15 @@ export async function createBooking(payload: any) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(payload)
   });
-  if (!res.ok) throw new Error('Failed to create booking');
+  
+  if (!res.ok) {
+    // Parse error message from backend
+    const errorData = await res.json().catch(() => ({}));
+    const error: any = new Error(errorData.message || 'Failed to create booking');
+    error.response = { data: errorData };
+    throw error;
+  }
+  
   return res.json();
 }
 

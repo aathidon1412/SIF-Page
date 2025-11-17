@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import type { BookingFormData, BookingRequest } from '../types/booking';
 import { createBooking } from '../services/api';
 import { useAuth } from '../lib/auth';
+import TimePicker from './ui/TimePicker';
+import { isWeekdayString, getMinAllowedDate } from '../lib/bookingValidation';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -22,14 +24,15 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
   const [formData, setFormData] = useState<BookingFormData>({
     startDate: '',
     endDate: '',
-    startTime: itemType === 'lab' ? '' : undefined,
-    endTime: itemType === 'lab' ? '' : undefined,
+    startTime: itemType === 'lab' ? '09:00' : undefined,
+    endTime: itemType === 'lab' ? '10:00' : undefined,
     purpose: '',
     contactInfo: user?.email || '',
     additionalNotes: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationError, setValidationError] = useState<string>('');
 
   const calculateCost = (): number => {
     if (!formData.startDate || !formData.endDate) return 0;
@@ -54,6 +57,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
     e.preventDefault();
     if (!user) return;
 
+    // Clear previous validation errors
+    setValidationError('');
     setIsSubmitting(true);
     
     const bookingRequest: BookingRequest = {
@@ -87,14 +92,17 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
       setFormData({
         startDate: '',
         endDate: '',
-        startTime: itemType === 'lab' ? '' : undefined,
-        endTime: itemType === 'lab' ? '' : undefined,
+        startTime: itemType === 'lab' ? '09:00' : undefined,
+        endTime: itemType === 'lab' ? '10:00' : undefined,
         purpose: '',
         contactInfo: user?.email || '',
         additionalNotes: ''
       });
-    } catch (error) {
-      alert('Error submitting booking request. Please try again.');
+      setValidationError('');
+    } catch (error: any) {
+      // Display backend validation error
+      const errorMessage = error.response?.data?.message || error.message || 'Error submitting booking request. Please try again.';
+      setValidationError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -132,6 +140,38 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Validation Error Message */}
+            {validationError && (
+              <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-red-700 font-medium">{validationError}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Business Hours Notice */}
+            <div className="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-blue-700">
+                    <strong>Booking Hours:</strong> Monday - Friday, 9:00 AM - 6:00 PM only
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-blue-950 mb-1">
@@ -140,11 +180,20 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
                 <input
                   type="date"
                   value={formData.startDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                  min={new Date().toISOString().split('T')[0]}
+                  onChange={(e) => {
+                    const newDate = e.target.value;
+                    if (!newDate || isWeekdayString(newDate)) {
+                      setFormData(prev => ({ ...prev, startDate: newDate }));
+                      setValidationError('');
+                    } else {
+                      setValidationError('Bookings are only available Monday-Friday');
+                    }
+                  }}
+                  min={getMinAllowedDate()}
                   required
                   className="w-full border-2 border-blue-950 text-blue-950 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-950"
                 />
+                <p className="text-xs text-gray-600 mt-1">Weekdays only</p>
               </div>
 
               <div>
@@ -154,41 +203,48 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
                 <input
                   type="date"
                   value={formData.endDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                  min={formData.startDate || new Date().toISOString().split('T')[0]}
+                  onChange={(e) => {
+                    const newDate = e.target.value;
+                    if (!newDate || isWeekdayString(newDate)) {
+                      setFormData(prev => ({ ...prev, endDate: newDate }));
+                      setValidationError('');
+                    } else {
+                      setValidationError('Bookings are only available Monday-Friday');
+                    }
+                  }}
+                  min={formData.startDate || getMinAllowedDate()}
                   required
                   className="w-full border-2 border-blue-950 text-blue-950 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-950"
                 />
+                <p className="text-xs text-gray-600 mt-1">Weekdays only</p>
               </div>
             </div>
 
             {itemType === 'lab' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-blue-950 mb-1">
-                    Start Time *
-                  </label>
-                  <input
-                    type="time"
-                    value={formData.startTime}
-                    onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
-                    required
-                    className="w-full border-2 border-blue-950 text-blue-950 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-950"
-                  />
-                </div>
+                <TimePicker
+                  label="Start Time"
+                  value={formData.startTime || '09:00'}
+                  onChange={(value) => {
+                    setFormData(prev => ({ ...prev, startTime: value }));
+                    setValidationError('');
+                  }}
+                  required
+                  minTime="09:00"
+                  maxTime="18:00"
+                />
 
-                <div>
-                  <label className="block text-sm font-medium text-blue-950 mb-1">
-                    End Time *
-                  </label>
-                  <input
-                    type="time"
-                    value={formData.endTime}
-                    onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
-                    required
-                    className="w-full border-2 border-blue-950 text-blue-950 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-950"
-                  />
-                </div>
+                <TimePicker
+                  label="End Time"
+                  value={formData.endTime || '10:00'}
+                  onChange={(value) => {
+                    setFormData(prev => ({ ...prev, endTime: value }));
+                    setValidationError('');
+                  }}
+                  required
+                  minTime="09:00"
+                  maxTime="18:00"
+                />
               </div>
             )}
 
