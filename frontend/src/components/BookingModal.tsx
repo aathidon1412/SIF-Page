@@ -126,8 +126,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
             </h3>
             <p className="text-sm text-blue-950">
               {itemType === 'equipment' 
-                ? `$${item.pricePerDay?.toFixed(2)}/day` 
-                : `$${item.pricePerHour}/hour`}
+                ? `Rs: ${item.pricePerDay?.toFixed(2)}/day` 
+                : `Rs: ${item.pricePerHour}/hour`}
             </p>
           </div>
 
@@ -237,7 +237,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
               <div className="p-4 bg-yellow-50 rounded-lg">
                 <div className="flex justify-between items-center">
                   <span className="font-semibold text-blue-950">Estimated Total Cost:</span>
-                  <span className="text-2xl font-bold text-blue-950">${totalCost.toFixed(2)}</span>
+                  <span className="text-2xl font-bold text-blue-950">Rs: {totalCost.toFixed(2)}</span>
                 </div>
               </div>
             )}
