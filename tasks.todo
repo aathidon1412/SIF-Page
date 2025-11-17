@@ -37,7 +37,7 @@
 ✔ items restrictions for admin side @done (11/17/2025, 9:34:44 PM)
 ✔ amount in rupees @done (11/17/2025, 9:34:45 PM)
 ☐ payment gateway integration use razorpay or paytm
-☐ Navbar functionality to be changed based on the page scrolled
+✔ Navbar functionality to be changed based on the page scrolled @done (11/17/2025, 10:49:49 PM)
 ☐ add catergories and sub-catergories for the labs and equipments in the main booking page and in the admin page 
-☐ create a testing for the page and error handling for the website
+✔ create a testing for the page and error handling for the website @done (11/17/2025, 10:58:44 PM)
 ☐ backup and restore functionality for the admin page (data of labs, equipments and booking requests to be backed up and restored)
