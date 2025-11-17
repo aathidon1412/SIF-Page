@@ -1052,8 +1052,12 @@ const Admin: React.FC = () => {
                   const price = isEquipment ? `$${(item as any).pricePerDay}/day` : `$${(item as any).pricePerHour}/hour`;
                   const image = (item as any).image;
                   
+                  const available = item.available !== false; // default to true if undefined
                   return (
-                    <div key={item.id} className="bg-white rounded-2xl shadow-lg border overflow-hidden">
+                    <div
+                      key={item.id}
+                      className={`bg-white rounded-2xl shadow-lg border overflow-hidden relative ${!available ? 'opacity-60 grayscale' : ''}`}
+                    >
                       {/* Item Image */}
                       <div className="relative h-48 bg-gray-100">
                         {image ? (
@@ -1067,25 +1071,54 @@ const Admin: React.FC = () => {
                             <span className="text-gray-500">No Image</span>
                           </div>
                         )}
-                        <div className="absolute top-3 left-3">
+                        <div className="absolute top-3 left-3 flex gap-2">
                           <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
                             {isEquipment ? 'EQUIPMENT' : 'LAB'}
                           </span>
+                          {!available && (
+                            <span className="bg-red-200 text-red-800 text-xs px-2 py-1 rounded-full font-medium animate-pulse">
+                              Under Maintenance
+                            </span>
+                          )}
                         </div>
                       </div>
-                      
                       {/* Item Details */}
                       <div className="p-6">
-                        <h4 className="text-lg font-semibold text-gray-900 mb-2">{title}</h4>
+                        <h4 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                          {title}
+                          {!available && (
+                            <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded font-semibold">Unavailable</span>
+                          )}
+                        </h4>
                         <p className="text-sm text-gray-600 mb-3 line-clamp-2">{desc}</p>
-                        
                         <div className="flex items-center justify-between mb-4">
                           <div className="text-lg font-bold text-blue-950">{price}</div>
                           {!isEquipment && (item as any).capacity && (
                             <div className="text-sm text-gray-500">Capacity: {(item as any).capacity}</div>
                           )}
                         </div>
-                        
+                        {/* Availability Toggle */}
+                        <div className="flex items-center gap-3 mb-4">
+                          <span className={`text-xs font-medium ${available ? 'text-green-700' : 'text-red-700'}`}>
+                            {available ? 'Available' : 'Unavailable'}
+                          </span>
+                          <button
+                            onClick={async () => {
+                              try {
+                                const token = localStorage.getItem('admin_token') || '';
+                                const updated = await updateItem(token, item.id, { available: !available });
+                                setItems(prev => prev.map(i => i.id === item.id ? { ...i, available: updated.available } : i));
+                                toast.success(`Item marked as ${!available ? 'available' : 'unavailable'}`);
+                              } catch (e: any) {
+                                toast.error(e.message || 'Failed to update availability');
+                              }
+                            }}
+                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border transition-colors focus:outline-none ${available ? 'bg-green-100 text-green-800 border-green-300 hover:bg-green-200' : 'bg-red-100 text-red-800 border-red-300 hover:bg-red-200'}`}
+                            title={available ? 'Set as unavailable (maintenance)' : 'Set as available'}
+                          >
+                            {available ? 'Set Unavailable' : 'Set Available'}
+                          </button>
+                        </div>
                         {/* Action Buttons */}
                         <div className="flex gap-2">
                           <button

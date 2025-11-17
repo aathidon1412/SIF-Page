@@ -8,6 +8,7 @@ const itemSchema = new mongoose.Schema({
   pricePerHour: Number,
   capacity: String,
   image: String,
+  available: { type: Boolean, default: true },
   createdAt: { type: Date, default: Date.now }
 });
 

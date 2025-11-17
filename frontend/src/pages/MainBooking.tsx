@@ -20,13 +20,19 @@ const MainBooking: React.FC = () => {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successMessageText, setSuccessMessageText] = useState('');
 
-  // Filter results based on active tab and search query
+  // Filter results based on active tab, search query, and availability
   const filteredResults = useMemo(() => {
     const q = query.toLowerCase();
     if (activeTab === 'equipment') {
-      return equipments.filter((eq) => (eq.title || '').toLowerCase().includes(q));
+      return equipments.filter((eq) => {
+        const available = eq.available !== false;
+        return available && (eq.title || '').toLowerCase().includes(q);
+      });
     } else {
-      return labs.filter((lab) => (lab.title || lab.name || '').toLowerCase().includes(q));
+      return labs.filter((lab) => {
+        const available = lab.available !== false;
+        return available && (lab.title || lab.name || '').toLowerCase().includes(q);
+      });
     }
   }, [query, activeTab, equipments, labs]);
 
@@ -259,7 +265,7 @@ const MainBooking: React.FC = () => {
                               }
                             </span>
                             <span className="text-sm font-bold text-gray-800">
-                              ${request.totalCost.toFixed(2)}
+                              {request.totalCost.toFixed(2)}
                             </span>
                           </div>
                         </div>
@@ -410,86 +416,106 @@ const MainBooking: React.FC = () => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {activeTab === 'equipment' ? (
               // Equipment Cards
-              filteredResults.map((eq: any) => (
-                <article 
-                  key={eq.id} 
-                  className="bg-white rounded-2xl shadow-lg p-4 border hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer group"
-                  onClick={() => handleCardClick(eq)}
-                >
-                  <div className="relative rounded-lg overflow-hidden h-44 mb-4">
-                    <img src={eq.image} alt={eq.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
-                    <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">EQUIPMENT</span>
-                    <span className="absolute top-3 right-3 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"><FaCheckCircle size={10} /> Available</span>
-                    <div className="absolute inset-0 bg-blue-950 bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-center">
-                        <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        <p className="text-sm font-medium">Click to Book</p>
+              filteredResults.map((eq: any) => {
+                const available = eq.available !== false;
+                return (
+                  <article 
+                    key={eq.id} 
+                    className={`bg-white rounded-2xl shadow-lg p-4 border transition-all duration-300 group ${available ? 'hover:shadow-2xl hover:scale-105 cursor-pointer' : 'opacity-60 grayscale cursor-not-allowed'}`}
+                    onClick={() => available && handleCardClick(eq)}
+                  >
+                    <div className="relative rounded-lg overflow-hidden h-44 mb-4">
+                      <img src={eq.image} alt={eq.title} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                      <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">EQUIPMENT</span>
+                      {available ? (
+                        <span className="absolute top-3 right-3 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"><FaCheckCircle size={10} /> Available</span>
+                      ) : (
+                        <span className="absolute top-3 right-3 bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"><FaTimesCircle size={10} /> Unavailable</span>
+                      )}
+                      {available && (
+                        <div className="absolute inset-0 bg-blue-950 bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-center">
+                            <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <p className="text-sm font-medium">Click to Book</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="text-lg font-semibold text-blue-950 mb-1 group-hover:text-blue-800 transition-colors">{eq.title}</h3>
+                    <p className="text-sm text-gray-600 mb-3">{eq.description}</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-blue-950">Rs: {eq.pricePerDay.toFixed(2)}</div>
+                        <div className="text-xs text-gray-500">/ day</div>
                       </div>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (available) handleCardClick(eq);
+                        }}
+                        className={`px-4 py-2 rounded-lg transition-colors shadow-lg text-white font-medium ${available ? 'bg-blue-950 hover:bg-blue-900 hover:shadow-xl transform hover:-translate-y-1' : 'bg-gray-300 cursor-not-allowed'}`}
+                        disabled={!available}
+                      >
+                        Book Now
+                      </button>
                     </div>
-                  </div>
-                  <h3 className="text-lg font-semibold text-blue-950 mb-1 group-hover:text-blue-800 transition-colors">{eq.title}</h3>
-                  <p className="text-sm text-gray-600 mb-3">{eq.description}</p>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-2xl font-bold text-blue-950">${eq.pricePerDay.toFixed(2)}</div>
-                      <div className="text-xs text-gray-500">/ day</div>
-                    </div>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCardClick(eq);
-                      }}
-                      className="bg-blue-950 text-white px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                    >
-                      Book Now
-                    </button>
-                  </div>
-                </article>
-              ))
+                  </article>
+                );
+              })
             ) : (
               // Lab Cards
-              filteredResults.map((lab: any) => (
-                <article 
-                  key={lab.id} 
-                  className="bg-white rounded-2xl shadow-lg p-4 border hover:shadow-2xl hover:scale-105 transition-all duration-300 cursor-pointer group"
-                  onClick={() => handleCardClick(lab)}
-                >
-                  <div className="relative rounded-lg overflow-hidden h-44 mb-4">
-                    <img src={lab.image} alt={lab.title || lab.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
-                    <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">LAB</span>
-                    <span className="absolute top-3 right-3 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"><FaCheckCircle size={10} /> Available</span>
-                    <div className="absolute inset-0 bg-blue-950 bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
-                      <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-center">
-                        <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        <p className="text-sm font-medium">Click to Book</p>
+              filteredResults.map((lab: any) => {
+                const available = lab.available !== false;
+                return (
+                  <article 
+                    key={lab.id} 
+                    className={`bg-white rounded-2xl shadow-lg p-4 border transition-all duration-300 group ${available ? 'hover:shadow-2xl hover:scale-105 cursor-pointer' : 'opacity-60 grayscale cursor-not-allowed'}`}
+                    onClick={() => available && handleCardClick(lab)}
+                  >
+                    <div className="relative rounded-lg overflow-hidden h-44 mb-4">
+                      <img src={lab.image} alt={lab.title || lab.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300" />
+                      <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full font-medium">LAB</span>
+                      {available ? (
+                        <span className="absolute top-3 right-3 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"><FaCheckCircle size={10} /> Available</span>
+                      ) : (
+                        <span className="absolute top-3 right-3 bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1"><FaTimesCircle size={10} /> Unavailable</span>
+                      )}
+                      {available && (
+                        <div className="absolute inset-0 bg-blue-950 bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300 flex items-center justify-center">
+                          <div className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-white text-center">
+                            <svg className="w-12 h-12 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            <p className="text-sm font-medium">Click to Book</p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <h3 className="text-lg font-semibold text-blue-950 mb-1 group-hover:text-blue-800 transition-colors">{lab.title || lab.name}</h3>
+                    <p className="text-sm text-gray-600 mb-3">{lab.desc}</p>
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div className="text-2xl font-bold text-blue-950">Rs: {lab.pricePerHour.toFixed(0)}</div>
+                        <div className="text-xs text-gray-500">/ hour · Capacity {lab.capacity}</div>
                       </div>
+                      <button 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          if (available) handleCardClick(lab);
+                        }}
+                        className={`px-4 py-2 rounded-lg transition-colors shadow-lg text-white font-medium ${available ? 'bg-blue-950 hover:bg-blue-900 hover:shadow-xl transform hover:-translate-y-1' : 'bg-gray-300 cursor-not-allowed'}`}
+                        disabled={!available}
+                      >
+                        Book Lab
+                      </button>
                     </div>
-                  </div>
-                  <h3 className="text-lg font-semibold text-blue-950 mb-1 group-hover:text-blue-800 transition-colors">{lab.title || lab.name}</h3>
-                  <p className="text-sm text-gray-600 mb-3">{lab.desc}</p>
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div className="text-2xl font-bold text-blue-950">${lab.pricePerHour.toFixed(0)}</div>
-                      <div className="text-xs text-gray-500">/ hour · Capacity {lab.capacity}</div>
-                    </div>
-                    <button 
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCardClick(lab);
-                      }}
-                      className="bg-blue-950 text-white px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors shadow-lg hover:shadow-xl transform hover:-translate-y-1"
-                    >
-                      Book Lab
-                    </button>
-                  </div>
-                </article>
-              ))
+                  </article>
+                );
+              })
             )}
           </div>
 
