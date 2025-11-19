@@ -112,26 +112,30 @@ npm run type-check     # TypeScript type checking (if available)
 ### 3. Booking Page (`/booking`)
 
 #### Components to Test:
-- **Equipment Cards**: Display, interaction, data loading
-- **Lab Cards**: Display, interaction, data loading
+- **Equipment Cards**: Display, interaction, data loading from backend API
+- **Lab Cards**: Display, interaction, data loading from backend API
 - **Authentication**: Google sign-in integration
-- **Data Management**: ItemsContext integration
+- **Data Management**: Backend API integration via fetchItems()
 
 #### Test Cases:
 ```markdown
 ✅ Equipment Section
-- [ ] All equipment items load from items.json
+- [ ] All equipment items load from backend API (fetchItems())
 - [ ] Cards display correct information (title, description, price, image)
 - [ ] Equipment badges show correctly
 - [ ] "Book Now" buttons are functional
 - [ ] Responsive grid layout
+- [ ] Availability status shows correctly (Available/Unavailable)
+- [ ] Unavailable items are disabled and grayed out
 
 ✅ Labs Section
-- [ ] All lab items load from items.json
+- [ ] All lab items load from backend API (fetchItems())
 - [ ] Cards display correct information (name, description, capacity, price)
 - [ ] Lab badges show correctly
 - [ ] "Book Lab" buttons are functional
 - [ ] Proper color scheme (blue background)
+- [ ] Availability status shows correctly
+- [ ] Unavailable labs are disabled and grayed out
 
 ✅ Authentication Flow
 - [ ] Google sign-in popup appears
@@ -140,21 +144,26 @@ npm run type-check     # TypeScript type checking (if available)
 - [ ] Authentication state persists
 
 ✅ Data Integration
-- [ ] Items load from ItemsContext
-- [ ] Real-time updates when admin adds/removes items
-- [ ] No duplicate items displayed
-- [ ] Fallback for empty data states
+- [ ] Items load from backend API using fetchItems()
+- [ ] Data consistency with MainBooking page
+- [ ] Loading states display properly
+- [ ] Empty states handled gracefully
+- [ ] Error handling for API failures
+- [ ] Real-time data fetching on page load
 ```
 
 #### Error Scenarios:
 ```markdown
 🚨 Booking Page Error Handling
 - [ ] No internet connection
+- [ ] Backend API server down
 - [ ] Google sign-in service down
-- [ ] Empty equipment/lab arrays
-- [ ] Malformed JSON data
+- [ ] Empty equipment/lab arrays from API
+- [ ] Malformed API response data
 - [ ] Image loading failures
 - [ ] Authentication popup blocked
+- [ ] API request timeout
+- [ ] Network connectivity issues
 ```
 
 ---
