@@ -6,6 +6,7 @@ import adminRoutes from './src/routes/admin.js';
 import itemRoutes from './src/routes/items.js';
 import bookingRoutes from './src/routes/bookings.js';
 import { seedAdmin } from './src/utils/seedAdmin.js';
+import { seedItems } from './src/utils/seed.js';
 
 dotenv.config();
 
@@ -29,6 +30,7 @@ async function start() {
     await mongoose.connect(MONGODB_URI, { dbName: 'sif_fab_lab' });
     console.log('[MongoDB] Connected');
     await seedAdmin();
+    await seedItems();
 
     app.get('/api/health', (req, res) => res.json({ status: 'ok' }));
     app.use('/api/admin', adminRoutes);
