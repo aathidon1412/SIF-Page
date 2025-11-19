@@ -87,7 +87,7 @@ const Booking: React.FC = () => {
             <button
               type="button"
               onClick={handleCardClick}
-              className="bg-blue-950 text-[#fffdeb] px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors"
+              className="bg-yellow-50 text-blue-950 px-4 py-2 rounded-lg hover:bg-yellow-100 transition-colors"
             >
               View more
             </button>

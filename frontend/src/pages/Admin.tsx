@@ -2,7 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { BookingRequest } from '../types/booking';
 import { toast } from 'react-hot-toast';
-import { adminLogin, fetchBookings, updateBookingStatus, fetchItems, createItem, deleteItem, updateItem } from '../services/api';
+import { adminLogin, fetchBookings, updateBookingStatus, fetchItems, createItem, deleteItem, updateItem, createBackup, restoreBackup, verifyBackup } from '../services/api';
 import { exportToExcel } from '../lib/exportExcel';
 
 // Backend API handles admin credentials (seeded); env fallback removed.
@@ -76,6 +76,17 @@ const Admin: React.FC = () => {
       toast.error('Failed to load bookings');
     }
   }
+
+  // Auto-refresh bookings every 10 seconds for real-time updates
+  useEffect(() => {
+    if (!auth) return;
+    
+    const interval = setInterval(() => {
+      loadBookings();
+    }, 10000); // 10 seconds
+    
+    return () => clearInterval(interval);
+  }, [auth]);
 
   // Hydrate saved filters on mount
   useEffect(() => {
@@ -229,6 +240,107 @@ const Admin: React.FC = () => {
       toast.error('Failed to export Excel');
     }
   };
+
+  const handleCreateBackup = async () => {
+    if (!window.confirm('Create a backup of all system data (items and bookings)? This will download a JSON file to your computer.')) {
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const backupData = await createBackup(token);
+      
+      // Download backup as JSON file
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup-${backupData.timestamp}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast.success(`Backup created successfully! ${backupData.stats.totalItems} items, ${backupData.stats.totalBookings} bookings`);
+    } catch (error: any) {
+      console.error('Backup failed:', error);
+      toast.error(error.message || 'Failed to create backup');
+    }
+  };
+
+  const handleRestoreBackup = async () => {
+    // Create file input
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = async (e: any) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      try {
+        const text = await file.text();
+        const backupData = JSON.parse(text);
+        
+        // Verify backup first
+        const token = localStorage.getItem('admin_token') || '';
+        const verification = await verifyBackup(token, backupData);
+        
+        if (!verification.valid) {
+          toast.error(`Invalid backup file: ${verification.errors.join(', ')}`);
+          return;
+        }
+        
+        // Show warnings if any
+        if (verification.warnings && verification.warnings.length > 0) {
+          const warningMsg = verification.warnings.join('\n');
+          if (!window.confirm(`Backup has warnings:\n${warningMsg}\n\nContinue with restore?`)) {
+            return;
+          }
+        }
+        
+        // Confirm restore action
+        const confirmMsg = `⚠️ WARNING: This will REPLACE ALL existing data!\n\n` +
+          `Backup contains:\n` +
+          `- ${verification.stats.totalItems} items (${verification.stats.labs} labs, ${verification.stats.equipment} equipment)\n` +
+          `- ${verification.stats.totalBookings} bookings (${verification.stats.pendingBookings} pending, ${verification.stats.approvedBookings} approved, ${verification.stats.declinedBookings} declined)\n\n` +
+          `Current data will be PERMANENTLY DELETED.\n\n` +
+          `Are you absolutely sure you want to proceed?`;
+        
+        if (!window.confirm(confirmMsg)) {
+          return;
+        }
+        
+        // Double confirmation
+        if (!window.confirm('This is your FINAL confirmation. Restore backup and delete all current data?')) {
+          return;
+        }
+        
+        // Perform restore
+        const result = await restoreBackup(token, backupData);
+        
+        // Show warnings if any
+        if (result.warnings && result.warnings.length > 0) {
+          console.warn('Restore warnings:', result.warnings);
+        }
+        
+        toast.success(`Restore successful! ${result.restored.items} items, ${result.restored.bookings} bookings restored`);
+        
+        // Reload data
+        await loadBookings();
+        const itemData = await fetchItems();
+        const normalizedItems = itemData.map((d: any) => ({ ...d, id: d._id || d.id }));
+        setItems(normalizedItems);
+        
+      } catch (error: any) {
+        console.error('Restore failed:', error);
+        toast.error(error.message || 'Failed to restore backup');
+      }
+    };
+    
+    input.click();
+  };
+  
   // Load items when authenticated
   useEffect(() => {
     async function load() {
@@ -252,12 +364,17 @@ const Admin: React.FC = () => {
       toast.error('Request not found');
       return;
     }
-    if (target.status !== 'pending') {
-      toast.error('Action invalid: already processed');
-      return;
-    }
-    if (!adminNote.trim()) {
-      toast.error('Please add an admin note before proceeding');
+    
+    // Allow declining approved bookings (revocation)
+    const isRevocation = target.status === 'approved' && action === 'declined';
+    
+    // Only require admin note for status changes (optional for initial approval)
+    if (isRevocation && !adminNote.trim()) {
+      const confirmed = confirm('You are about to REVOKE a previously approved booking. This will notify the user immediately. Please add a reason in the admin note field before proceeding.');
+      if (!confirmed) {
+        return;
+      }
+      toast.error('Please add a revocation reason in the admin note before proceeding');
       return;
     }
     try {
@@ -552,6 +669,22 @@ const Admin: React.FC = () => {
               </div>
             </div>
           </div>
+          
+          <div className="bg-white rounded-2xl shadow-lg p-6 border border-amber-100">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-600">Active Conflicts</p>
+                <p className="text-3xl font-bold text-amber-600">
+                  {bookingRequests.filter(r => r.hasConflict && r.status === 'pending').length}
+                </p>
+              </div>
+              <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
+                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                </svg>
+              </div>
+            </div>
+          </div>
           <div className="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
             <div className="flex items-center justify-between">
               <div>
@@ -760,6 +893,14 @@ const Admin: React.FC = () => {
                           <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
                             {request.itemType.toUpperCase()}
                           </span>
+                          {request.hasConflict && request.status === 'pending' && (
+                            <span className="px-3 py-1 bg-amber-100 text-amber-800 text-sm rounded-full font-semibold flex items-center gap-1.5">
+                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                              CONFLICT ({request.conflictingBookings?.length || 0})
+                            </span>
+                          )}
                         </div>
                         <p className="text-gray-600 mb-4">Requested by: <strong>{request.userName}</strong> ({request.userEmail})</p>
                         
@@ -792,6 +933,68 @@ const Admin: React.FC = () => {
                           </div>
                         )}
 
+                        {request.hasConflict && request.conflictingBookings && request.conflictingBookings.length > 0 && (
+                          <div className="mt-6 p-4 bg-amber-50 border-2 border-amber-300 rounded-xl">
+                            <div className="flex items-start space-x-3">
+                              <div className="p-2 bg-amber-200 rounded-lg">
+                                <svg className="w-5 h-5 text-amber-800" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                </svg>
+                              </div>
+                              <div className="flex-1">
+                                <h4 className="font-semibold text-amber-900 mb-2 flex items-center gap-2">
+                                  Booking Conflicts Detected
+                                  <span className="px-2 py-0.5 bg-amber-200 text-amber-900 text-xs rounded-full font-bold">
+                                    {request.conflictingBookings.length}
+                                  </span>
+                                </h4>
+                                <p className="text-amber-800 text-sm mb-3">
+                                  {request.status === 'pending' 
+                                    ? 'This booking overlaps with existing bookings. If you approve this request, conflicting pending bookings will be automatically declined.'
+                                    : 'This booking had conflicts when it was submitted.'}
+                                </p>
+                                <div className="space-y-2">
+                                  {request.conflictingBookings.map((conflict, idx) => (
+                                    <div key={idx} className="bg-white border border-amber-200 rounded-lg p-3 text-sm">
+                                      <div className="flex items-start justify-between mb-2">
+                                        <div className="flex-1">
+                                          <p className="font-semibold text-amber-900">
+                                            {conflict.userName || conflict.userEmail}
+                                          </p>
+                                          <p className="text-xs text-amber-700">{conflict.userEmail}</p>
+                                        </div>
+                                        <span className={`px-2 py-1 rounded text-xs font-medium ${
+                                          conflict.status === 'approved' 
+                                            ? 'bg-green-100 text-green-800' 
+                                            : conflict.status === 'declined'
+                                            ? 'bg-red-100 text-red-800'
+                                            : 'bg-yellow-100 text-yellow-800'
+                                        }`}>
+                                          {conflict.status.toUpperCase()}
+                                        </span>
+                                      </div>
+                                      <div className="grid grid-cols-2 gap-2 text-xs text-amber-700">
+                                        <div>
+                                          <span className="font-medium">Dates:</span> {formatDate(conflict.startDate)} - {formatDate(conflict.endDate)}
+                                        </div>
+                                        {conflict.startTime && (
+                                          <div>
+                                            <span className="font-medium">Time:</span> {conflict.startTime} - {conflict.endTime}
+                                          </div>
+                                        )}
+                                        <div className="col-span-2">
+                                          <span className="font-medium">Overlap Type:</span>{' '}
+                                          <span className="capitalize">{conflict.conflictType.replace('_', ' ')}</span>
+                                        </div>
+                                      </div>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+
                         {request.adminNote && (
                           <div className="mt-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
                             <div className="flex items-start space-x-3">
@@ -815,7 +1018,7 @@ const Admin: React.FC = () => {
                       </div>
                     </div>
 
-                    {request.status === 'pending' && (
+                    {(request.status === 'pending' || request.status === 'approved') && (
                       <div className="border-t border-blue-100 pt-6 mt-6 bg-blue-50 -mx-6 px-6 pb-6 rounded-b-2xl">
                         <div className="mb-4">
                           <label className="flex items-center space-x-2 text-sm font-semibold text-blue-950 mb-3">
@@ -836,30 +1039,70 @@ const Admin: React.FC = () => {
                           />
                         </div>
                         <div className="flex gap-4">
-                          <button
-                            onClick={() => {
-                              setSelectedRequest(request);
-                              handleBookingAction(request.id, 'approved');
-                            }}
-                            className="flex-1 bg-green-600 text-white py-3 px-6 rounded-xl hover:bg-green-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                          {request.status === 'pending' && (
+                            <button
+                              onClick={() => {
+                                setSelectedRequest(request);
+                                if (request.hasConflict && request.conflictingBookings && request.conflictingBookings.length > 0) {
+                                  const conflictCount = request.conflictingBookings.filter(c => c.status === 'pending').length;
+                                  if (conflictCount > 0 && !confirm(`⚠️ WARNING: Approving this booking will automatically DECLINE ${conflictCount} conflicting pending booking(s). Do you want to proceed?`)) {
+                                    return;
+                                  }
+                                }
+                                handleBookingAction(request.id, 'approved');
+                              }}
+                            className={`flex-1 py-3 px-6 rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 ${
+                              request.hasConflict 
+                                ? 'bg-amber-600 hover:bg-amber-700 text-white' 
+                                : 'bg-green-600 hover:bg-green-700 text-white'
+                            }`}
                           >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>Approve Request</span>
-                          </button>
-                          <button
-                            onClick={() => {
-                              setSelectedRequest(request);
-                              handleBookingAction(request.id, 'declined');
-                            }}
-                            className="flex-1 bg-red-600 text-white py-3 px-6 rounded-xl hover:bg-red-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>Decline Request</span>
-                          </button>
+                            {request.hasConflict && (
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                            {!request.hasConflict && (
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                            )}
+                              <span>{request.hasConflict ? 'Approve & Auto-Decline Conflicts' : 'Approve Request'}</span>
+                            </button>
+                          )}
+                          
+                          {request.status === 'approved' && (
+                            <button
+                              onClick={() => {
+                                setSelectedRequest(request);
+                                if (!confirm(`⚠️ CRITICAL: You are about to REVOKE an approved booking for ${request.userName}. This action will immediately notify the user and mark their booking as declined. Are you absolutely sure?`)) {
+                                  return;
+                                }
+                                handleBookingAction(request.id, 'declined');
+                              }}
+                              className="flex-1 bg-orange-600 hover:bg-orange-700 text-white py-3 px-6 rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                            >
+                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                              </svg>
+                              <span>Revoke Approved Booking</span>
+                            </button>
+                          )}
+                          
+                          {request.status === 'pending' && (
+                            <button
+                              onClick={() => {
+                                setSelectedRequest(request);
+                                handleBookingAction(request.id, 'declined');
+                              }}
+                              className="flex-1 bg-red-600 text-white py-3 px-6 rounded-xl hover:bg-red-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                              </svg>
+                              <span>Decline Request</span>
+                            </button>
+                          )}
                         </div>
                       </div>
                     )}
@@ -873,15 +1116,54 @@ const Admin: React.FC = () => {
           <div>
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold text-blue-950">Manage Items</h2>
-              <button
-                onClick={handleExportData}
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                <span>Export Excel</span>
-              </button>
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={handleCreateBackup}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2 shadow-md"
+                  title="Create a complete backup of all items and bookings"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                  </svg>
+                  <span>Backup</span>
+                </button>
+                <button
+                  onClick={handleRestoreBackup}
+                  className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2 shadow-md"
+                  title="Restore items and bookings from a backup file"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <span>Restore</span>
+                </button>
+                <button
+                  onClick={handleExportData}
+                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <span>Export Excel</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Backup & Restore Info */}
+            <div className="bg-purple-50 border-l-4 border-purple-400 p-4 mb-4 rounded-lg">
+              <div className="flex">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-purple-700">
+                    <strong>Backup & Restore:</strong> Use <strong>"Backup"</strong> to download all system data (items, bookings) as JSON. 
+                    Use <strong>"Restore"</strong> to upload and restore from a backup file. ⚠️ Restore will replace all current data with full relational integrity checks.
+                  </p>
+                </div>
+              </div>
             </div>
 
             {/* Data Persistence Info */}

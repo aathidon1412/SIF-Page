@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import type { BookingFormData, BookingRequest } from '../types/booking';
 import { createBooking } from '../services/api';
 import { useAuth } from '../lib/auth';
+import TimePicker from './ui/TimePicker';
+import { isWeekdayString, getMinAllowedDate } from '../lib/bookingValidation';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -22,14 +24,111 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
   const [formData, setFormData] = useState<BookingFormData>({
     startDate: '',
     endDate: '',
-    startTime: itemType === 'lab' ? '' : undefined,
-    endTime: itemType === 'lab' ? '' : undefined,
+    startTime: itemType === 'lab' ? '09:00' : undefined,
+    endTime: itemType === 'lab' ? '10:00' : undefined,
     purpose: '',
     contactInfo: user?.email || '',
     additionalNotes: ''
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [validationError, setValidationError] = useState<string>('');
+
+  // Simple unified date-time validation
+  const validateDateTime = (): string | null => {
+    const { startDate, endDate, startTime, endTime } = formData;
+
+    if (!startDate) return 'Start date is required';
+    if (!endDate) return 'End date is required';
+
+    // For equipment bookings (date only)
+    if (itemType === 'equipment') {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return 'Invalid date format';
+      }
+      
+      // Single check: end must be after or equal to start
+      if (end < start) {
+        return 'End date must be after or equal to start date';
+      }
+      
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      if (start < today) {
+        return 'Start date cannot be in the past';
+      }
+      
+      return null;
+    }
+
+    // For lab bookings (date + time)
+    if (itemType === 'lab') {
+      if (!startTime) return 'Start time is required';
+      if (!endTime) return 'End time is required';
+      
+      // Validate time format
+      const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
+      if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
+        return 'Invalid time format';
+      }
+      
+      // Create complete date-time objects
+      const startDateTime = new Date(`${startDate}T${startTime}:00`);
+      const endDateTime = new Date(`${endDate}T${endTime}:00`);
+      
+      if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
+        return 'Invalid date or time combination';
+      }
+      
+      // Single unified check: end date-time must be after start date-time
+      if (endDateTime <= startDateTime) {
+        return 'End date and time must be after start date and time';
+      }
+      
+      // Check if booking is in the past
+      const now = new Date();
+      if (startDateTime < now) {
+        return 'Booking cannot be in the past';
+      }
+      
+      // Validate business hours (9 AM - 6 PM)
+      const [startHour, startMinute] = startTime.split(':').map(Number);
+      const [endHour, endMinute] = endTime.split(':').map(Number);
+      const startTotalMinutes = startHour * 60 + startMinute;
+      const endTotalMinutes = endHour * 60 + endMinute;
+      
+      if (startTotalMinutes < 540 || startTotalMinutes > 1080) {
+        return 'Start time must be between 9:00 AM and 6:00 PM';
+      }
+      if (endTotalMinutes < 540 || endTotalMinutes > 1080) {
+        return 'End time must be between 9:00 AM and 6:00 PM';
+      }
+      
+      // Minimum 1 hour duration
+      const durationHours = (endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60 * 60);
+      if (durationHours < 1) {
+        return 'Minimum booking duration is 1 hour';
+      }
+      
+      // Maximum 9 hours for single day
+      if (startDate === endDate && durationHours > 9) {
+        return 'Maximum booking duration per day is 9 hours';
+      }
+      
+      // Validate weekdays
+      if (!isWeekdayString(startDate)) {
+        return 'Start date must be a weekday (Monday-Friday)';
+      }
+      if (!isWeekdayString(endDate)) {
+        return 'End date must be a weekday (Monday-Friday)';
+      }
+    }
+
+    return null;
+  };
 
   const calculateCost = (): number => {
     if (!formData.startDate || !formData.endDate) return 0;
@@ -53,6 +152,16 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+
+    // Clear previous validation errors
+    setValidationError('');
+
+    // Validate date-time combination
+    const dateTimeError = validateDateTime();
+    if (dateTimeError) {
+      setValidationError(dateTimeError);
+      return;
+    }
 
     setIsSubmitting(true);
     
@@ -87,14 +196,17 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
       setFormData({
         startDate: '',
         endDate: '',
-        startTime: itemType === 'lab' ? '' : undefined,
-        endTime: itemType === 'lab' ? '' : undefined,
+        startTime: itemType === 'lab' ? '09:00' : undefined,
+        endTime: itemType === 'lab' ? '10:00' : undefined,
         purpose: '',
         contactInfo: user?.email || '',
         additionalNotes: ''
       });
-    } catch (error) {
-      alert('Error submitting booking request. Please try again.');
+      setValidationError('');
+    } catch (error: any) {
+      // Display backend validation error
+      const errorMessage = error.response?.data?.message || error.message || 'Error submitting booking request. Please try again.';
+      setValidationError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -132,6 +244,38 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Validation Error Message */}
+            {validationError && (
+              <div className="p-4 bg-red-50 border-l-4 border-red-500 rounded-lg">
+                <div className="flex items-start">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-red-700 font-medium">{validationError}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Business Hours Notice */}
+            <div className="p-4 bg-blue-50 border-l-4 border-blue-500 rounded-lg">
+              <div className="flex items-start">
+                <div className="flex-shrink-0">
+                  <svg className="h-5 w-5 text-blue-500" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <div className="ml-3">
+                  <p className="text-sm text-blue-700">
+                    <strong>Booking Hours:</strong> Monday - Friday, 9:00 AM - 6:00 PM only
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-blue-950 mb-1">
@@ -140,11 +284,37 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
                 <input
                   type="date"
                   value={formData.startDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, startDate: e.target.value }))}
-                  min={new Date().toISOString().split('T')[0]}
+                  onChange={(e) => {
+                    const newDate = e.target.value;
+                    if (!newDate || isWeekdayString(newDate)) {
+                      setFormData(prev => ({ ...prev, startDate: newDate }));
+                      
+                      // Real-time validation for date-time combination
+                      if (itemType === 'lab' && newDate && formData.endDate && formData.startTime && formData.endTime) {
+                        const startDateTime = new Date(`${newDate}T${formData.startTime}`);
+                        const endDateTime = new Date(`${formData.endDate}T${formData.endTime}`);
+                        
+                        if (endDateTime <= startDateTime) {
+                          if (newDate === formData.endDate) {
+                            setValidationError('End time must be after start time on the same date');
+                          } else {
+                            setValidationError('End date-time must be after start date-time');
+                          }
+                        } else {
+                          setValidationError('');
+                        }
+                      } else {
+                        setValidationError('');
+                      }
+                    } else {
+                      setValidationError('Bookings are only available Monday-Friday');
+                    }
+                  }}
+                  min={getMinAllowedDate()}
                   required
                   className="w-full border-2 border-blue-950 text-blue-950 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-950"
                 />
+                <p className="text-xs text-gray-600 mt-1">Weekdays only</p>
               </div>
 
               <div>
@@ -154,41 +324,121 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
                 <input
                   type="date"
                   value={formData.endDate}
-                  onChange={(e) => setFormData(prev => ({ ...prev, endDate: e.target.value }))}
-                  min={formData.startDate || new Date().toISOString().split('T')[0]}
+                  onChange={(e) => {
+                    const newDate = e.target.value;
+                    if (!newDate || isWeekdayString(newDate)) {
+                      setFormData(prev => ({ ...prev, endDate: newDate }));
+                      
+                      // Real-time validation for date-time combination
+                      if (itemType === 'lab' && formData.startDate && newDate && formData.startTime && formData.endTime) {
+                        const startDateTime = new Date(`${formData.startDate}T${formData.startTime}`);
+                        const endDateTime = new Date(`${newDate}T${formData.endTime}`);
+                        
+                        if (endDateTime <= startDateTime) {
+                          if (formData.startDate === newDate) {
+                            setValidationError('End time must be after start time on the same date');
+                          } else {
+                            setValidationError('End date-time must be after start date-time');
+                          }
+                        } else {
+                          const durationMs = endDateTime.getTime() - startDateTime.getTime();
+                          const durationHours = durationMs / (1000 * 60 * 60);
+                          if (durationHours < 1) {
+                            setValidationError('Minimum booking duration is 1 hour');
+                          } else {
+                            setValidationError('');
+                          }
+                        }
+                      } else if (itemType === 'equipment' && formData.startDate && newDate) {
+                        const start = new Date(formData.startDate);
+                        const end = new Date(newDate);
+                        if (end < start) {
+                          setValidationError('End date cannot be before start date');
+                        } else {
+                          setValidationError('');
+                        }
+                      } else {
+                        setValidationError('');
+                      }
+                    } else {
+                      setValidationError('Bookings are only available Monday-Friday');
+                    }
+                  }}
+                  min={formData.startDate || getMinAllowedDate()}
                   required
                   className="w-full border-2 border-blue-950 text-blue-950 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-950"
                 />
+                <p className="text-xs text-gray-600 mt-1">Weekdays only</p>
               </div>
             </div>
 
             {itemType === 'lab' && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-blue-950 mb-1">
-                    Start Time *
-                  </label>
-                  <input
-                    type="time"
-                    value={formData.startTime}
-                    onChange={(e) => setFormData(prev => ({ ...prev, startTime: e.target.value }))}
-                    required
-                    className="w-full border-2 border-blue-950 text-blue-950 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-950"
-                  />
-                </div>
+                <TimePicker
+                  label="Start Time"
+                  value={formData.startTime || '09:00'}
+                  onChange={(value) => {
+                    const updated = { ...formData, startTime: value };
+                    setFormData(updated);
+                    
+                    // Real-time validation: check if end time is still valid
+                    if (formData.startDate && formData.endDate && formData.endTime) {
+                      const startDateTime = new Date(`${formData.startDate}T${value}`);
+                      const endDateTime = new Date(`${formData.endDate}T${formData.endTime}`);
+                      
+                      if (endDateTime <= startDateTime) {
+                        if (formData.startDate === formData.endDate) {
+                          setValidationError('End time must be after start time on the same date');
+                        } else {
+                          setValidationError('End date-time must be after start date-time');
+                        }
+                      } else {
+                        setValidationError('');
+                      }
+                    } else {
+                      setValidationError('');
+                    }
+                  }}
+                  required
+                  minTime="09:00"
+                  maxTime="18:00"
+                />
 
-                <div>
-                  <label className="block text-sm font-medium text-blue-950 mb-1">
-                    End Time *
-                  </label>
-                  <input
-                    type="time"
-                    value={formData.endTime}
-                    onChange={(e) => setFormData(prev => ({ ...prev, endTime: e.target.value }))}
-                    required
-                    className="w-full border-2 border-blue-950 text-blue-950 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-950"
-                  />
-                </div>
+                <TimePicker
+                  label="End Time"
+                  value={formData.endTime || '10:00'}
+                  onChange={(value) => {
+                    const updated = { ...formData, endTime: value };
+                    setFormData(updated);
+                    
+                    // Real-time validation: check if end time is after start time
+                    if (formData.startDate && formData.endDate && formData.startTime) {
+                      const startDateTime = new Date(`${formData.startDate}T${formData.startTime}`);
+                      const endDateTime = new Date(`${formData.endDate}T${value}`);
+                      
+                      if (endDateTime <= startDateTime) {
+                        if (formData.startDate === formData.endDate) {
+                          setValidationError('End time must be after start time on the same date');
+                        } else {
+                          setValidationError('End date-time must be after start date-time');
+                        }
+                      } else {
+                        const durationMs = endDateTime.getTime() - startDateTime.getTime();
+                        const durationHours = durationMs / (1000 * 60 * 60);
+                        if (durationHours < 1) {
+                          setValidationError('Minimum booking duration is 1 hour');
+                        } else {
+                          setValidationError('');
+                        }
+                      }
+                    } else {
+                      setValidationError('');
+                    }
+                  }}
+                  required
+                  minTime="09:00"
+                  maxTime="18:00"
+                />
               </div>
             )}
 
