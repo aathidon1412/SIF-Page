@@ -27,7 +27,7 @@ const Booking: React.FC = () => {
     loadItems();
   }, []);
 
-  const handleCardClick = async () => {
+  const handleCardClick = async (item?: any, tab?: 'labs' | 'equipment') => {
     try {
       if (!auth.user) {
         await auth.signInWithGoogle();
@@ -35,7 +35,12 @@ const Booking: React.FC = () => {
     } catch (e) {
       // ignore sign-in errors for now
     }
-    navigate('/main-booking');
+    // If an item is provided, instruct MainBooking to preselect and open modal
+    if (item) {
+      navigate('/main-booking', { state: { preselectedItem: item, openBookingModal: true, tab: tab || (item.type === 'lab' ? 'labs' : 'equipment') } });
+    } else {
+      navigate('/main-booking');
+    }
   };
 
   return (
@@ -67,11 +72,11 @@ const Booking: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                equipments.map((eq) => {
+                    equipments.map((eq) => {
                   // Check availability (same logic as MainBooking)
                   const available = eq.available !== false;
                   return (
-                    <article key={eq.id} role="button" tabIndex={0} onClick={handleCardClick} onKeyDown={(e) => { if (e.key === 'Enter') handleCardClick(); }} className={`bg-white rounded-2xl shadow p-4 border cursor-pointer transition-all duration-300 ${available ? 'hover:shadow-lg' : 'opacity-60 grayscale cursor-not-allowed'}`}>
+                      <article key={eq.id} role="button" tabIndex={0} onClick={() => available && handleCardClick(eq, 'equipment')} onKeyDown={(e) => { if (e.key === 'Enter') handleCardClick(eq, 'equipment'); }} className={`bg-[#fffdeb] rounded-2xl shadow p-4 border cursor-pointer transition-all duration-300 ${available ? 'hover:shadow-lg' : 'opacity-60 grayscale cursor-not-allowed'}`}>
                       <div className="relative rounded-lg overflow-hidden h-44 mb-4">
                         <img src={eq.image} alt={eq.title} className="w-full h-full object-cover" />
                         <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full">EQUIPMENT</span>
@@ -80,25 +85,18 @@ const Booking: React.FC = () => {
                           {available ? 'Available' : 'Unavailable'}
                         </span>
                       </div>
-                      <h3 className="text-lg font-semibold text-slate-900 mb-1">{eq.title}</h3>
+                      <h3 className="text-lg font-semibold text-blue-950 mb-1">{eq.title}</h3>
                       <p className="text-sm text-gray-600 mb-3">{eq.description}</p>
                       <div className="flex items-center justify-between">
                         <div>
-                          <div className="text-2xl font-bold text-slate-900">Rs: {eq.pricePerDay ? eq.pricePerDay.toFixed(2) : '0.00'}</div>
+                          <div className="text-2xl font-bold text-blue-950">Rs: {eq.pricePerDay ? eq.pricePerDay.toFixed(2) : '0.00'}</div>
                           <div className="text-xs text-gray-500">/ day</div>
                         </div>
                         <button 
-                          onClick={async (e) => {
+                          onClick={(e) => {
                             e.stopPropagation();
                             if (!available) return;
-                            try {
-                              if (!auth.user) {
-                                await auth.signInWithGoogle();
-                              }
-                            } catch (e) {
-                              // ignore
-                            }
-                            navigate('/main-booking');
+                            handleCardClick(eq, 'equipment');
                           }} 
                           disabled={!available}
                           className={`px-4 py-2 rounded-lg transition-colors ${
@@ -143,12 +141,12 @@ const Booking: React.FC = () => {
                     </div>
                   </div>
                 ) : (
-                  labs.map((lab) => {
+                      labs.map((lab) => {
                     // Check availability (same logic as MainBooking)
                     const available = lab.available !== false;
                     const labName = lab.name || lab.title;
                     return (
-                      <article key={lab.id} role="button" tabIndex={0} onClick={() => available && handleCardClick()} onKeyDown={(e) => { if (e.key === 'Enter' && available) handleCardClick(); }} className={`bg-[#fffdeb] text-blue-950 rounded-2xl p-4 shadow-md border transition-all duration-300 ${available ? 'cursor-pointer hover:shadow-lg' : 'opacity-60 grayscale cursor-not-allowed'}`}>
+                        <article key={lab.id} role="button" tabIndex={0} onClick={() => available && handleCardClick(lab, 'labs')} onKeyDown={(e) => { if (e.key === 'Enter' && available) handleCardClick(lab, 'labs'); }} className={`bg-[#fffdeb] text-blue-950 rounded-2xl p-4 shadow-md border transition-all duration-300 ${available ? 'cursor-pointer hover:shadow-lg' : 'opacity-60 grayscale cursor-not-allowed'}`}>
                         <div className="relative rounded-lg overflow-hidden h-44 mb-4">
                           <img src={lab.image} alt={labName} className="w-full h-full object-cover" />
                           <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full">LAB</span>
@@ -167,7 +165,7 @@ const Booking: React.FC = () => {
                           <button 
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (available) handleCardClick();
+                              if (available) handleCardClick(lab, 'labs');
                             }}
                             disabled={!available}
                             className={`px-4 py-2 rounded-lg transition-colors ${

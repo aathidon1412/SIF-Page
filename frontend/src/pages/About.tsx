@@ -7,11 +7,11 @@ import { FaLinkedin, FaXTwitter, FaInstagram } from 'react-icons/fa6';
 
 const About: React.FC = () => {
   return (
-    <div className="bg-yellow-50 pt-14 dark:bg-yellow-50">
+    <div className="bg-yellow-50 pt-1 dark:bg-yellow-50">
       <div className="w-full ">
         {/* Header Section */}
         <ScrollReveal>
-          <div className="mb-16 mt-8 mx-4 sm:mx-6 lg:mx-8 border-2 border-blue-950 rounded-2xl p-8 lg:p-12">
+          <div className="mb-16 mt-8 mx-4 sm:mx-6 lg:mx-8 rounded-2xl p-8 lg:p-12">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               <div className="text-left">
                 <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-black inline-block border-b-4 border-blue-950">
@@ -40,11 +40,11 @@ const About: React.FC = () => {
         <div className="w-full mb-0 bg-blue-950">
           <ScrollReveal>
             <div className="mx-4 sm:mx-6 lg:mx-8 py-8">
-              <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center p-8 lg:p-12 border-2 rounded-2xl" style={{ borderColor: '#fffdeb' }}>
-                <div className="flex justify-center">
-                  <img src="https://picsum.photos/800/600?random=2" alt="Mission - Lab collaboration" className="rounded-2xl shadow-lg w-full object-cover"/>
-                </div>
-                <div className="text-white">
+              <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center p-8 lg:p-12 rounded-2xl">
+                <div className="flex justify-center order-last md:order-first">
+                    <img src="https://picsum.photos/800/600?random=2" alt="Mission - Lab collaboration" className="rounded-2xl shadow-lg w-full object-cover"/>
+                  </div>
+                  <div className="text-white order-first md:order-last">
                   <section aria-labelledby="mission-heading">
                     <h2 id="mission-heading" className="text-3xl md:text-4xl font-bold mb-6 text-yellow-300 inline-block border-b-4 border-yellow-300">Our Mission</h2>
                     <p className="text-lg leading-relaxed text-blue-100 mb-6">
@@ -85,7 +85,7 @@ const About: React.FC = () => {
         <div className="w-full mb-0" style={{ backgroundColor: '#fffdeb' }}>
           <ScrollReveal delay={200}>
             <div className="mx-4 sm:mx-6 lg:mx-8 py-8">
-              <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center p-8 lg:p-12 border-2 rounded-2xl border-blue-950">
+              <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center p-8 lg:p-12 rounded-2xl">
                 <div className="text-blue-950">
                   <section aria-labelledby="vision-heading">
                     <h2 id="vision-heading" className="text-3xl md:text-4xl font-bold mb-6 text-blue-950 inline-block border-b-4 border-blue-950">Our Vision</h2>
@@ -128,7 +128,7 @@ const About: React.FC = () => {
         <div className="w-full  bg-blue-950">
           <ScrollReveal>
             <div className="mx-4 sm:mx-6 lg:mx-8 py-8">
-              <div className="border-4 rounded-2xl p-6 lg:p-8" style={{ borderColor: '#fffdeb' }}>
+              <div className="rounded-2xl p-6 lg:p-8">
                 {/* Section Header */}
                 <div className="text-center mb-6">
                   <h2 className="text-4xl md:text-5xl font-bold text-yellow-300 inline-block border-b-4 border-yellow-300 pb-2">
@@ -144,13 +144,12 @@ const About: React.FC = () => {
                   {/* Founder Section */}
                   <div className="flex flex-col items-center justify-start p-3 lg:p-4">
                     <div className="w-40 h-40 lg:w-48 lg:h-48 mb-4">
-                      <img 
-                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
-                        alt="Dr. Rahman Al-Farisi - Founder" 
-                        className="w-full h-full rounded-full object-cover border-4 shadow-2xl"
-                        style={{ borderColor: '#fffdeb' }}
-                      />
-                    </div>
+                        <img 
+                          src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                          alt="Dr. Rahman Al-Farisi - Founder" 
+                          className="w-full h-full rounded-full object-cover shadow-2xl"
+                        />
+                      </div>
                     <div className="text-center text-white max-w-sm">
                       <h3 className="text-2xl lg:text-3xl font-bold text-yellow-300 mb-2">Dr. Rahman Al-Farisi</h3>
                       <p className="text-lg text-yellow-200 mb-4 font-medium">Founder & Director</p>
@@ -189,10 +188,7 @@ const About: React.FC = () => {
                   </div>
 
                   {/* Vertical Divider */}
-                  <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 transform -translate-x-1/2" style={{ backgroundColor: '#fffdeb' }}></div>
-                  
-                  {/* Horizontal Divider for Mobile */}
-                  <div className="md:hidden w-full h-1 my-8" style={{ backgroundColor: '#fffdeb' }}></div>
+                  {/* Dividers removed */}
 
                   {/* Co-Founder Section */}
                   <div className="flex flex-col items-center justify-start p-3 lg:p-4">
@@ -200,8 +196,7 @@ const About: React.FC = () => {
                       <img 
                         src="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=3461&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
                         alt="Dr. Maya Patel - Co-Founder" 
-                        className="w-full h-full rounded-full object-cover border-4 shadow-2xl"
-                        style={{ borderColor: '#fffdeb' }}
+                        className="w-full h-full rounded-full object-cover shadow-2xl"
                       />
                     </div>
                     <div className="text-center text-white max-w-sm">

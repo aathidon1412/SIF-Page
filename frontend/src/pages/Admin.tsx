@@ -2,6 +2,7 @@ import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { BookingRequest } from '../types/booking';
 import { toast } from 'react-hot-toast';
+import { FaEye, FaCheck, FaTimes, FaUndo } from 'react-icons/fa';
 import { adminLogin, fetchBookings, updateBookingStatus, fetchItems, createItem, deleteItem, updateItem, createBackup, restoreBackup, verifyBackup } from '../services/api';
 import { exportToExcel } from '../lib/exportExcel';
 
@@ -399,6 +400,16 @@ const Admin: React.FC = () => {
     return new Date(dateString).toLocaleString();
   };
 
+  const formatDateTime = (dateString: string, timeString?: string) => {
+    try {
+      const timePart = timeString || '00:00';
+      const dt = new Date(`${dateString}T${timePart}`);
+      return dt.toLocaleString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+    } catch {
+      return dateString;
+    }
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'approved': return 'text-green-600 bg-green-100';
@@ -492,6 +503,17 @@ const Admin: React.FC = () => {
       return matchesSearch && matchesType && matchesName && matchesDate(r);
     });
   }, [bookingRequests, searchTerm, filterType, filterName, filterStartDate, filterEndDate]);
+
+  // Pagination for requests (8 per page)
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const itemsPerPage = 8;
+  const totalPages = Math.max(1, Math.ceil(filteredRequests.length / itemsPerPage));
+  const pagedRequests = filteredRequests.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // Reset to first page when filters/search change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredRequests.length, searchTerm, filterType, filterName, filterStartDate, filterEndDate]);
 
   if (!auth) {
     return (
@@ -880,234 +902,188 @@ const Admin: React.FC = () => {
                 <p className="text-gray-600 text-lg">No booking requests match your search.</p>
               </div>
             ) : (
-              <div className="grid gap-6">
-                {filteredRequests.map((request) => (
-                  <div key={request.id} className="bg-white rounded-2xl shadow-lg p-6 border">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-xl font-semibold text-blue-950">{request.itemTitle}</h3>
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(request.status)}`}>
-                            {request.status.toUpperCase()}
-                          </span>
-                          <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
-                            {request.itemType.toUpperCase()}
-                          </span>
-                          {request.hasConflict && request.status === 'pending' && (
-                            <span className="px-3 py-1 bg-amber-100 text-amber-800 text-sm rounded-full font-semibold flex items-center gap-1.5">
-                              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                              </svg>
-                              CONFLICT ({request.conflictingBookings?.length || 0})
-                            </span>
-                          )}
+              <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
+                <table className="min-w-full divide-y divide-gray-200">
+                  <thead className="bg-blue-50">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-blue-900">Name</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-blue-900">Equipment / Lab</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-blue-900">Time Slot</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-blue-900">Purpose</th>
+                      <th className="px-4 py-3 text-left text-sm font-medium text-blue-900">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-100">
+                    {pagedRequests.map((request) => (
+                      <tr key={request.id}>
+                        <td className="px-4 py-3 text-sm text-gray-700">
+                          <div className="font-medium text-blue-950">{request.userName}</div>
+                          <div className="text-xs text-gray-500">{request.userEmail}</div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-700">
+                          <div className="font-medium text-blue-950">{request.itemTitle}</div>
+                          <div className="text-xs text-gray-500">{request.itemType.toUpperCase()}</div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-700">
+                          <div className="text-sm font-medium text-blue-950">{formatDateTime(request.startDate, request.startTime)} - {formatDateTime(request.endDate, request.endTime)}</div>
+                        </td>
+                        <td className="px-4 py-3 text-sm text-gray-700 max-w-xs truncate">{request.purpose || '—'}</td>
+                        <td className="px-4 py-3 text-sm text-gray-700">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => setSelectedRequest(request)}
+                              className="p-2 bg-blue-100 text-blue-900 rounded-lg text-sm flex items-center justify-center"
+                              title="View details"
+                              aria-label="View details"
+                            >
+                              <FaEye />
+                            </button>
+                            {request.status === 'pending' && (
+                              <>
+                                <button
+                                  onClick={() => {
+                                    if (request.hasConflict && request.conflictingBookings && request.conflictingBookings.length > 0) {
+                                      const conflictCount = request.conflictingBookings.filter((c:any) => c.status === 'pending').length;
+                                      if (conflictCount > 0 && !confirm(`⚠️ WARNING: Approving this booking will automatically DECLINE ${conflictCount} conflicting pending booking(s). Do you want to proceed?`)) return;
+                                    }
+                                    setSelectedRequest(request);
+                                    handleBookingAction(request.id, 'approved');
+                                  }}
+                                  className="p-2 bg-green-600 text-white rounded-lg text-sm flex items-center justify-center"
+                                >
+                                  <FaCheck />
+                                </button>
+                                <button
+                                  onClick={() => { setSelectedRequest(request); handleBookingAction(request.id, 'declined'); }}
+                                  className="p-2 bg-red-600 text-white rounded-lg text-sm flex items-center justify-center"
+                                  title="Reject"
+                                  aria-label="Reject request"
+                                >
+                                  <FaTimes />
+                                </button>
+                              </>
+                            )}
+                            {request.status === 'approved' && (
+                              <button
+                                  onClick={() => {
+                                    const reason = window.prompt('Enter revocation reason (required):');
+                                    if (!reason || !reason.trim()) { toast.error('Revocation reason required'); return; }
+                                    setAdminNote(reason);
+                                    setSelectedRequest(request);
+                                    handleBookingAction(request.id, 'declined');
+                                  }}
+                                  className="p-2 bg-orange-600 text-white rounded-lg text-sm flex items-center justify-center"
+                                  title="Revoke"
+                                  aria-label="Revoke booking"
+                                >
+                                  <FaUndo />
+                                </button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+
+                {/* Pagination controls */}
+                <div className="flex items-center justify-between px-4 py-3 bg-white border-t">
+                  <div className="text-sm text-gray-600">Page {currentPage} of {totalPages}</div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage === 1}
+                      className={`px-3 py-1 rounded-lg ${currentPage === 1 ? 'bg-gray-100 text-gray-400' : 'bg-blue-100 text-blue-900'}`}
+                    >Prev</button>
+                    <button
+                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage === totalPages}
+                      className={`px-3 py-1 rounded-lg ${currentPage === totalPages ? 'bg-gray-100 text-gray-400' : 'bg-blue-100 text-blue-900'}`}
+                    >Next</button>
+                  </div>
+                </div>
+
+                {/* Detail Modal */}
+                {selectedRequest && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center">
+                    <div className="absolute inset-0 bg-black bg-opacity-40" onClick={() => { setSelectedRequest(null); setAdminNote(''); }} />
+                    <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-4 z-50 p-6 overflow-auto max-h-[80vh]">
+                      <div className="flex items-start justify-between mb-4">
+                        <div>
+                          <h3 className="text-2xl font-bold text-blue-950">{selectedRequest.itemTitle}</h3>
+                          <div className="text-sm text-gray-600">Requested by {selectedRequest.userName} ({selectedRequest.userEmail})</div>
                         </div>
-                        <p className="text-gray-600 mb-4">Requested by: <strong>{request.userName}</strong> ({request.userEmail})</p>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <strong>Dates:</strong> {formatDate(request.startDate)} - {formatDate(request.endDate)}
-                          </div>
-                          {request.startTime && (
-                            <div>
-                              <strong>Time:</strong> {request.startTime} - {request.endTime}
-                            </div>
-                          )}
-                          <div>
-                            <strong>Total Cost:</strong> <span className="text-2xl font-bold text-green-600">${request.totalCost.toFixed(2)}</span>
-                          </div>
-                          <div>
-                            <strong>Submitted:</strong> {formatDate(request.submittedAt)}
+                        <div className="flex items-center gap-2">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedRequest.status)}`}>{selectedRequest.status.toUpperCase()}</span>
+                          <button onClick={() => { setSelectedRequest(null); setAdminNote(''); }} className="text-gray-500">Close</button>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
+                        <div><strong>Time Slot:</strong> {formatDateTime(selectedRequest.startDate, selectedRequest.startTime)} - {formatDateTime(selectedRequest.endDate, selectedRequest.endTime)}</div>
+                        <div><strong>Submitted:</strong> {formatDate(selectedRequest.submittedAt)}</div>
+                        <div><strong>Total Cost:</strong> <span className="font-bold text-green-600">${selectedRequest.totalCost.toFixed(2)}</span></div>
+                        <div><strong>Type:</strong> {selectedRequest.itemType.toUpperCase()}</div>
+                      </div>
+
+                      <div className="mb-4">
+                        <strong>Purpose:</strong>
+                        <p className="text-gray-700 mt-2">{selectedRequest.purpose}</p>
+                      </div>
+
+                      {selectedRequest.additionalNotes && (
+                        <div className="mb-4">
+                          <strong>Additional Notes:</strong>
+                          <p className="text-gray-700 mt-2">{selectedRequest.additionalNotes}</p>
+                        </div>
+                      )}
+
+                      {selectedRequest.hasConflict && selectedRequest.conflictingBookings && selectedRequest.conflictingBookings.length > 0 && (
+                        <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                          <h4 className="font-semibold text-amber-900 mb-2">Conflicts ({selectedRequest.conflictingBookings.length})</h4>
+                          <div className="space-y-2">
+                            {selectedRequest.conflictingBookings.map((c:any, idx:number) => (
+                              <div key={idx} className="p-2 bg-white border rounded">
+                                <div className="text-sm font-medium">{c.userName || c.userEmail}</div>
+                                <div className="text-xs text-gray-600">{formatDate(c.startDate)} - {formatDate(c.endDate)} {c.startTime ? `· ${c.startTime} - ${c.endTime}` : ''}</div>
+                                <div className="text-xs mt-1"><span className="font-semibold">Status:</span> {c.status}</div>
+                              </div>
+                            ))}
                           </div>
                         </div>
+                      )}
 
-                        <div className="mt-4">
-                          <strong>Purpose:</strong>
-                          <p className="text-gray-600 mt-1">{request.purpose}</p>
-                        </div>
+                      <div className="mt-4">
+                        <label className="block text-sm font-semibold text-blue-950 mb-2">Admin Note (optional)</label>
+                        <textarea value={adminNote} onChange={(e) => setAdminNote(e.target.value)} rows={3} className="w-full border-2 border-blue-200 rounded-lg px-4 py-3" />
+                      </div>
 
-                        {request.additionalNotes && (
-                          <div className="mt-4">
-                            <strong>Additional Notes:</strong>
-                            <p className="text-gray-600 mt-1">{request.additionalNotes}</p>
-                          </div>
+                      <div className="mt-6 flex gap-3">
+                        {selectedRequest.status === 'pending' && (
+                          <>
+                            <button onClick={() => {
+                              if (selectedRequest.hasConflict && selectedRequest.conflictingBookings) {
+                                const conflictCount = selectedRequest.conflictingBookings.filter((c:any) => c.status === 'pending').length;
+                                if (conflictCount > 0 && !confirm(`⚠️ WARNING: Approving this booking will automatically DECLINE ${conflictCount} conflicting pending booking(s). Do you want to proceed?`)) return;
+                              }
+                              handleBookingAction(selectedRequest.id, 'approved');
+                            }} className="px-4 py-2 bg-green-600 text-white rounded-lg">Approve</button>
+                            <button onClick={() => { handleBookingAction(selectedRequest.id, 'declined'); }} className="px-4 py-2 bg-red-600 text-white rounded-lg">Reject</button>
+                          </>
                         )}
-
-                        {request.hasConflict && request.conflictingBookings && request.conflictingBookings.length > 0 && (
-                          <div className="mt-6 p-4 bg-amber-50 border-2 border-amber-300 rounded-xl">
-                            <div className="flex items-start space-x-3">
-                              <div className="p-2 bg-amber-200 rounded-lg">
-                                <svg className="w-5 h-5 text-amber-800" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                                </svg>
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="font-semibold text-amber-900 mb-2 flex items-center gap-2">
-                                  Booking Conflicts Detected
-                                  <span className="px-2 py-0.5 bg-amber-200 text-amber-900 text-xs rounded-full font-bold">
-                                    {request.conflictingBookings.length}
-                                  </span>
-                                </h4>
-                                <p className="text-amber-800 text-sm mb-3">
-                                  {request.status === 'pending' 
-                                    ? 'This booking overlaps with existing bookings. If you approve this request, conflicting pending bookings will be automatically declined.'
-                                    : 'This booking had conflicts when it was submitted.'}
-                                </p>
-                                <div className="space-y-2">
-                                  {request.conflictingBookings.map((conflict, idx) => (
-                                    <div key={idx} className="bg-white border border-amber-200 rounded-lg p-3 text-sm">
-                                      <div className="flex items-start justify-between mb-2">
-                                        <div className="flex-1">
-                                          <p className="font-semibold text-amber-900">
-                                            {conflict.userName || conflict.userEmail}
-                                          </p>
-                                          <p className="text-xs text-amber-700">{conflict.userEmail}</p>
-                                        </div>
-                                        <span className={`px-2 py-1 rounded text-xs font-medium ${
-                                          conflict.status === 'approved' 
-                                            ? 'bg-green-100 text-green-800' 
-                                            : conflict.status === 'declined'
-                                            ? 'bg-red-100 text-red-800'
-                                            : 'bg-yellow-100 text-yellow-800'
-                                        }`}>
-                                          {conflict.status.toUpperCase()}
-                                        </span>
-                                      </div>
-                                      <div className="grid grid-cols-2 gap-2 text-xs text-amber-700">
-                                        <div>
-                                          <span className="font-medium">Dates:</span> {formatDate(conflict.startDate)} - {formatDate(conflict.endDate)}
-                                        </div>
-                                        {conflict.startTime && (
-                                          <div>
-                                            <span className="font-medium">Time:</span> {conflict.startTime} - {conflict.endTime}
-                                          </div>
-                                        )}
-                                        <div className="col-span-2">
-                                          <span className="font-medium">Overlap Type:</span>{' '}
-                                          <span className="capitalize">{conflict.conflictType.replace('_', ' ')}</span>
-                                        </div>
-                                      </div>
-                                    </div>
-                                  ))}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
+                        {selectedRequest.status === 'approved' && (
+                          <button onClick={() => {
+                            const reason = window.prompt('Enter revocation reason (required):');
+                            if (!reason || !reason.trim()) { toast.error('Revocation reason required'); return; }
+                            setAdminNote(reason);
+                            handleBookingAction(selectedRequest.id, 'declined');
+                          }} className="px-4 py-2 bg-orange-600 text-white rounded-lg">Revoke</button>
                         )}
-
-                        {request.adminNote && (
-                          <div className="mt-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
-                            <div className="flex items-start space-x-3">
-                              <div className="p-2 bg-blue-200 rounded-lg">
-                                <svg className="w-4 h-4 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="font-semibold text-blue-950 mb-2">Admin Note</h4>
-                                <p className="text-blue-800 leading-relaxed">{request.adminNote}</p>
-                                {request.reviewedAt && (
-                                  <p className="text-xs text-blue-600 mt-3 font-medium">
-                                    Reviewed: {formatDate(request.reviewedAt)}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                        <button onClick={() => { setSelectedRequest(null); setAdminNote(''); }} className="px-4 py-2 bg-gray-200 rounded-lg">Close</button>
                       </div>
                     </div>
-
-                    {(request.status === 'pending' || request.status === 'approved') && (
-                      <div className="border-t border-blue-100 pt-6 mt-6 bg-blue-50 -mx-6 px-6 pb-6 rounded-b-2xl">
-                        <div className="mb-4">
-                          <label className="flex items-center space-x-2 text-sm font-semibold text-blue-950 mb-3">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            <span>Admin Note (optional)</span>
-                          </label>
-                          <textarea
-                            value={selectedRequest?.id === request.id ? adminNote : ''}
-                            onChange={(e) => {
-                              setAdminNote(e.target.value);
-                              setSelectedRequest(request);
-                            }}
-                            placeholder="Add a personalized note for the client (e.g., special instructions, conditions, or feedback)..."
-                            rows={3}
-                            className="w-full border-2 border-blue-200 text-blue-950 placeholder-blue-400 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors resize-none"
-                          />
-                        </div>
-                        <div className="flex gap-4">
-                          {request.status === 'pending' && (
-                            <button
-                              onClick={() => {
-                                setSelectedRequest(request);
-                                if (request.hasConflict && request.conflictingBookings && request.conflictingBookings.length > 0) {
-                                  const conflictCount = request.conflictingBookings.filter(c => c.status === 'pending').length;
-                                  if (conflictCount > 0 && !confirm(`⚠️ WARNING: Approving this booking will automatically DECLINE ${conflictCount} conflicting pending booking(s). Do you want to proceed?`)) {
-                                    return;
-                                  }
-                                }
-                                handleBookingAction(request.id, 'approved');
-                              }}
-                            className={`flex-1 py-3 px-6 rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center space-x-2 ${
-                              request.hasConflict 
-                                ? 'bg-amber-600 hover:bg-amber-700 text-white' 
-                                : 'bg-green-600 hover:bg-green-700 text-white'
-                            }`}
-                          >
-                            {request.hasConflict && (
-                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                              </svg>
-                            )}
-                            {!request.hasConflict && (
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                            )}
-                              <span>{request.hasConflict ? 'Approve & Auto-Decline Conflicts' : 'Approve Request'}</span>
-                            </button>
-                          )}
-                          
-                          {request.status === 'approved' && (
-                            <button
-                              onClick={() => {
-                                setSelectedRequest(request);
-                                if (!confirm(`⚠️ CRITICAL: You are about to REVOKE an approved booking for ${request.userName}. This action will immediately notify the user and mark their booking as declined. Are you absolutely sure?`)) {
-                                  return;
-                                }
-                                handleBookingAction(request.id, 'declined');
-                              }}
-                              className="flex-1 bg-orange-600 hover:bg-orange-700 text-white py-3 px-6 rounded-xl transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
-                            >
-                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                              </svg>
-                              <span>Revoke Approved Booking</span>
-                            </button>
-                          )}
-                          
-                          {request.status === 'pending' && (
-                            <button
-                              onClick={() => {
-                                setSelectedRequest(request);
-                                handleBookingAction(request.id, 'declined');
-                              }}
-                              className="flex-1 bg-red-600 text-white py-3 px-6 rounded-xl hover:bg-red-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
-                            >
-                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                              </svg>
-                              <span>Decline Request</span>
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    )}
                   </div>
-                ))}
+                )}
               </div>
             )}
           </div>

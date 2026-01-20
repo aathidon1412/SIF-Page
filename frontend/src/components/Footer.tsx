@@ -11,7 +11,7 @@ const Footer: React.FC = () => {
           <p className="text-2xl md:text-3xl font-bold text-slate-900">
             SIF-<span className="text-blue-900 no-underline">FABLAB</span>
           </p>
-          <p className="text-sm text-slate-700">© 2024 SIF-FABLAB. All rights reserved.</p>
+          <p className="text-sm text-slate-700">© {new Date().getFullYear()} SIF-FABLAB. All rights reserved.</p>
 
           {/* Social icons */}
           <div className="flex items-center gap-4 pt-2">

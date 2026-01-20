@@ -1,7 +1,7 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { useAuth } from '../lib/auth';
 import { fetchItems, fetchBookings } from '../services/api';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { FaBell, FaCog, FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa';
 import BookingModal from '../components/BookingModal';
 
@@ -11,6 +11,7 @@ const MainBooking: React.FC = () => {
   const equipments = items.filter(i => i.type === 'equipment');
   const labs = items.filter(i => i.type === 'lab');
   const navigate = useNavigate();
+  const location = useLocation();
   const [query, setQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'labs' | 'equipment'>('labs');
   const [showNotifications, setShowNotifications] = useState(false);
@@ -73,6 +74,22 @@ const MainBooking: React.FC = () => {
     const interval = setInterval(load, 5000); // Poll every 5 seconds for real-time updates
     return () => { cancelled = true; clearInterval(interval); };
   }, [user]);
+
+  // If navigated here with state (preselected item), apply it
+  useEffect(() => {
+    try {
+      const state: any = (location && (location as any).state) || null;
+      if (state) {
+        if (state.tab) setActiveTab(state.tab);
+        if (state.preselectedItem) {
+          setSelectedItem(state.preselectedItem);
+          if (state.openBookingModal) setShowBookingModal(true);
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }, [location]);
 
   // Get notification count (pending + recently reviewed + revoked)
   const getNotificationCount = () => {

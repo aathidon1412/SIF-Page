@@ -14,6 +14,7 @@ import { ThemeProvider, useTheme } from './hooks/useTheme';
 import { ItemsProvider } from './lib/itemsContext';
 import { Toaster } from 'react-hot-toast';
 import Loader from './components/ui/loader';
+import BackToTop from './components/ui/BackToTop';
 
 
 // Scroll to top on page change
@@ -71,6 +72,7 @@ const AppContent: React.FC = () => {
         </Routes>
       </main>
       {!hideFooter && <Footer />}
+      {pathname !== '/main-booking' && <BackToTop />}
       
       {/* Loader overlay */}
       {isLoading && (

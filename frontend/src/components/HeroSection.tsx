@@ -1,9 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { NavLink } from 'react-router-dom';
 import CountUp from 'react-countup';
-import logo1 from '../assets/logo_1.png';
-import logo2 from '../assets/logo_2.png';
-import logo3 from '../assets/logo_3.png';
 
 const stats = [
   { label: 'Available Labs', value: '12' },
@@ -12,55 +9,18 @@ const stats = [
   { label: 'Active Projects', value: '18' }
 ];
 
-const logos = [logo1, logo2, logo3];
 
 const HeroSection: React.FC = () => {
-  const [currentLogoIndex, setCurrentLogoIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentLogoIndex((prev) => (prev + 1) % logos.length);
-    }, 2500); // Rotate every 2.5 seconds
-
-    return () => clearInterval(interval);
-  }, []);
+  // No rotating logo here anymore (moved to Navbar)
   return (
-    <section className="min-h-screen w-full font-sans flex items-center py-8 lg:py-0 relative" style={{ backgroundColor: '#fffdeb' }} >
-      {/* 3D Rotating Logo Cube - Top Left Corner */}
-      <div className="absolute top-1 left-4 sm:top-1 sm:left-6 lg:top-4 lg:left-8 z-10">
-        <div className="relative w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24" style={{ perspective: '1000px' }}>
-          <div 
-            className="absolute w-full h-full transition-transform duration-700 ease-in-out"
-            style={{ 
-              transformStyle: 'preserve-3d',
-              transform: `rotateY(${currentLogoIndex * 120}deg)`
-            }}
-          >
-            {logos.map((logo, index) => (
-              <div
-                key={index}
-                className="absolute w-full h-full flex items-center justify-center "
-                style={{
-                  backfaceVisibility: 'hidden',
-                  transform: `rotateY(${index * 120}deg) translateZ(60px)`
-                }}
-              >
-                <img 
-                  src={logo} 
-                  alt={`Logo ${index + 1}`}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+    <section className="min-h w-full font-sans flex items-center py-8 relative" style={{ backgroundColor: '#fffdeb' }} >
+      {/* Rotating logo moved to navbar */}
 
       <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-10">
         <div className="flex flex-col-reverse lg:flex-row gap-6 lg:gap-8 items-stretch">
           {/* Left - Content */}
           <div className="lg:w-6/12 flex flex-col justify-center">
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight animate-fade-in-up mt-12 sm:mt-16 lg:mt-0" style={{ animationDelay: '0ms' }}>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 leading-tight animate-fade-in-up mt-0" style={{ animationDelay: '0ms' }}>
               Book lab time for <span className="text-blue-900 px-1 rounded">equipment</span> and <span className="text-blue-900 px-1 rounded">workspace</span> instantly.
             </h1>
 
@@ -100,7 +60,7 @@ const HeroSection: React.FC = () => {
               {stats.map((s) => (
                 <div key={s.label} className="bg-blue-900 rounded-lg p-3 sm:p-4 lg:p-6 flex flex-col items-center justify-center shadow-md hover:shadow-lg transition-shadow duration-300">
                   <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
-                    <CountUp start={0} end={Number(s.value)} duration={8.5} separator="," />
+                    <CountUp start={0} end={Number(s.value)} duration={2} separator="," />
                   </div>
                   <div className="text-xs sm:text-sm text-blue-300 mt-1 text-center">{s.label}</div>
                 </div>
