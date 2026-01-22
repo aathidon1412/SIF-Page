@@ -38,24 +38,22 @@ const AppContent: React.FC = () => {
 
     // Handle page navigation loading
     useEffect(() => {
-        // Don't show loader for main-booking page
-        if (pathname === '/main-booking') {
-            setIsLoading(false);
-            return;
-        }
-        
-        setIsLoading(true);
-        const timer = setTimeout(() => {
-            setIsLoading(false);
-        }, 2000); // Show loader for 2 seconds
+      // Don't show loader for main-booking or any /admin routes
+      if (pathname === '/main-booking' || pathname.startsWith('/admin')) {
+        setIsLoading(false);
+        return;
+      }
 
-        return () => clearTimeout(timer);
+      setIsLoading(true);
+      const timer = setTimeout(() => {
+        setIsLoading(false);
+      }, 2000); // Show loader for 2 seconds
+
+      return () => clearTimeout(timer);
     }, [pathname]);
 
-  const hideFooterOn = ['/main-booking', '/admin'];
-  const hideNavbarOn = ['/main-booking', '/admin'];
-  const hideFooter = hideFooterOn.includes(pathname);
-  const hideNavbar = hideNavbarOn.includes(pathname);
+  const hideFooter = pathname === '/main-booking' || pathname.startsWith('/admin');
+  const hideNavbar = pathname === '/main-booking' || pathname.startsWith('/admin');
 
   return (
     <div className="flex flex-col min-h-screen">

@@ -1,36 +1,26 @@
 import React from 'react';
 import { toast } from 'react-hot-toast';
-import type { BookingRequest } from '../types/booking';
 
 type Props = any;
 
 const AdminEquipments: React.FC<Props> = (props) => {
   const {
     navigate,
-    handleCreateBackup,
-    handleRestoreBackup,
-    handleExportData,
     equipments,
-    labs,
     searchQuery,
     setSearchQuery,
-    newItemType,
-    setNewItemType,
     newItemTitle,
     setNewItemTitle,
     newItemDesc,
     setNewItemDesc,
     newItemPrice,
     setNewItemPrice,
-    newItemCapacity,
-    setNewItemCapacity,
     newItemImage,
     setNewItemImage,
     addItem,
     handleEditItem,
     handleDeleteItem,
     updateItem,
-    items,
     setItems,
   } = props;
 
@@ -43,7 +33,7 @@ const AdminEquipments: React.FC<Props> = (props) => {
         Back to Dashboard
       </button>
 
-      <div className="flex items-center justify-between mb-6">
+      {/* <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-bold text-blue-950">Manage Items</h2>
         <div className="flex items-center space-x-3">
           <button onClick={handleCreateBackup} className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl font-medium transition-colors flex items-center space-x-2 shadow-lg" title="Create a complete backup of all items and bookings">
@@ -59,9 +49,9 @@ const AdminEquipments: React.FC<Props> = (props) => {
             <span>Export Excel</span>
           </button>
         </div>
-      </div>
+      </div> */}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
         <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-xl shadow-sm">
           <div className="flex">
             <div className="flex-shrink-0">
@@ -82,18 +72,11 @@ const AdminEquipments: React.FC<Props> = (props) => {
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
 
       <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 mb-8">
         <h3 className="text-xl font-bold text-blue-950 mb-4 flex items-center gap-2"><svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>Add New Item</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Item Type</label>
-            <select value={newItemType} onChange={(e) => setNewItemType(e.target.value)} className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all text-gray-900 bg-white">
-              <option value="equipment">Equipment</option>
-              <option value="lab">Lab</option>
-            </select>
-          </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Title</label>
             <input type="text" value={newItemTitle} onChange={(e) => setNewItemTitle(e.target.value)} placeholder="Enter item title" className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all text-gray-900 placeholder-gray-400" />
@@ -103,19 +86,15 @@ const AdminEquipments: React.FC<Props> = (props) => {
             <textarea value={newItemDesc} onChange={(e) => setNewItemDesc(e.target.value)} placeholder="Enter item description" rows={2} className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all text-gray-900 placeholder-gray-400" />
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Price ({newItemType === 'equipment' ? 'per day' : 'per hour'})</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Price (per day)</label>
             <input type="number" value={newItemPrice} onChange={(e) => setNewItemPrice(Number(e.target.value))} placeholder="Enter price" min="0" step="0.01" className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all text-gray-900 placeholder-gray-400" />
           </div>
-          {newItemType === 'lab' && (<div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Capacity</label>
-            <input type="text" value={newItemCapacity} onChange={(e) => setNewItemCapacity(e.target.value)} placeholder="e.g., 4-8" className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all text-gray-900 placeholder-gray-400" />
-          </div>)}
           <div className="md:col-span-2">
             <label className="block text-sm font-semibold text-gray-700 mb-2">Image URL (optional)</label>
             <input type="url" value={newItemImage} onChange={(e) => setNewItemImage(e.target.value)} placeholder="https://example.com/image.jpg" className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all text-gray-900 placeholder-gray-400" />
           </div>
           <div className="md:col-span-2">
-            <button onClick={addItem} className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors font-semibold shadow-lg flex items-center gap-2"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>Add {newItemType}</button>
+            <button onClick={() => addItem?.('equipment')} className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors font-semibold shadow-lg flex items-center gap-2"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>Add Equipment</button>
           </div>
         </div>
       </div>

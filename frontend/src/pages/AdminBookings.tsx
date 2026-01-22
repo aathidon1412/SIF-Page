@@ -1,5 +1,5 @@
-import React from 'react';
-import { FaEye, FaCheck, FaTimes, FaUndo } from 'react-icons/fa';
+import React, { useState } from 'react';
+// icons removed (not used in table view)
 import type { BookingRequest } from '../types/booking';
 
 type Props = any;
@@ -26,13 +26,11 @@ const AdminBookings: React.FC<Props> = (props) => {
     applyPreset,
     setSelectedRequest,
     handleBookingAction,
-    getStatusColor,
-    formatDateTime,
-    formatDate,
-    adminNote,
     setAdminNote,
     toast,
   } = props;
+
+  const [localSelected, setLocalSelected] = useState<BookingRequest | null>(null);
 
   return (
     <div>
@@ -174,48 +172,59 @@ const AdminBookings: React.FC<Props> = (props) => {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
-            {pagedRequests.map((request: BookingRequest) => (
-              <div key={request.id} className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                <div className={`px-6 py-4 border-b ${request.status === 'approved' ? 'bg-green-50 border-green-100' : request.status === 'declined' ? 'bg-red-50 border-red-100' : 'bg-yellow-50 border-yellow-100'}`}>
-                  <div className="flex items-center justify-between">
-                    <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${getStatusColor(request.status)}`}>{request.status}</span>
-                    <span className="text-xs font-medium text-gray-500">{request.itemType.toUpperCase()}</span>
-                  </div>
-                </div>
-                <div className="p-6">
-                  <h3 className="text-lg font-bold text-blue-950 mb-2 truncate" title={request.itemTitle}>{request.itemTitle}</h3>
-                  <div className="space-y-3 mb-4">
-                    <div className="flex items-start gap-2">
-                      <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900 truncate">{request.userName}</p>
-                        <p className="text-xs text-gray-500 truncate">{request.userEmail}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2">
-                      <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-                      <div className="flex-1 text-xs text-gray-700">
-                        <div className="font-medium">{formatDateTime(request.startDate, request.startTime)}</div>
-                        <div className="text-gray-500">to {formatDateTime(request.endDate, request.endTime)}</div>
-                      </div>
-                    </div>
-                    {request.purpose && (<div className="flex items-start gap-2"><svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg><p className="text-xs text-gray-600 line-clamp-2 flex-1">{request.purpose}</p></div>)}
-                    <div className="flex items-center justify-between pt-2 border-t border-gray-100"><span className="text-xs text-gray-500">Total Cost</span><span className="text-lg font-bold text-green-600">${request.totalCost.toFixed(2)}</span></div>
-                    {request.hasConflict && request.conflictingBookings && request.conflictingBookings.length > 0 && (<div className="flex items-center gap-2 p-2 bg-amber-50 border border-amber-200 rounded-lg"><svg className="w-4 h-4 text-amber-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg><span className="text-xs font-medium text-amber-900">{request.conflictingBookings.length} conflict{request.conflictingBookings.length !== 1 ? 's' : ''}</span></div>)}
-                  </div>
-                  <div className="flex gap-2 mt-4">
-                    <button onClick={() => setSelectedRequest(request)} className="flex-1 px-3 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-medium hover:bg-blue-200 transition-colors flex items-center justify-center gap-1" title="View details"><FaEye className="w-3.5 h-3.5" /><span>View</span></button>
-                    {request.status === 'pending' && (<>
-                      <button onClick={() => { if (request.hasConflict && request.conflictingBookings) { const conflictCount = request.conflictingBookings.filter((c:any) => c.status === 'pending').length; if (conflictCount > 0 && !confirm(`⚠️ WARNING: Approving this booking will automatically DECLINE ${conflictCount} conflicting pending booking(s). Do you want to proceed?`)) return; } setSelectedRequest(request); handleBookingAction(request.id, 'approved'); }} className="px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center justify-center gap-1" title="Approve"><FaCheck className="w-3.5 h-3.5" /></button>
-                      <button onClick={() => { setSelectedRequest(request); handleBookingAction(request.id, 'declined'); }} className="px-3 py-2 bg-red-600 text-white rounded-lg text-sm font-medium hover:bg-red-700 transition-colors flex items-center justify-center gap-1" title="Reject"><FaTimes className="w-3.5 h-3.5" /></button>
-                    </>)}
-                    {request.status === 'approved' && (<button onClick={() => { const reason = window.prompt('Enter revocation reason (required):'); if (!reason || !reason.trim()) { toast.error('Revocation reason required'); return; } setAdminNote(reason); setSelectedRequest(request); handleBookingAction(request.id, 'declined'); }} className="px-3 py-2 bg-orange-600 text-white rounded-lg text-sm font-medium hover:bg-orange-700 transition-colors flex items-center justify-center gap-1" title="Revoke"><FaUndo className="w-3.5 h-3.5" /><span className="hidden sm:inline">Revoke</span></button>)}
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
+            <div className="w-full overflow-x-auto">
+              <table className="w-full text-left table-auto">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-600 min-w-[200px]">Name</th>
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-600 min-w-[220px]">Equipment/Lab</th>
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-600 min-w-[260px]">Time Slot</th>
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-600 min-w-[160px]">Purpose</th>
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-600 min-w-[220px]">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pagedRequests.map((request: BookingRequest) => {
+                    const start = new Date(`${request.startDate}T${request.startTime || '00:00'}`);
+                    const end = new Date(`${request.endDate}T${request.endTime || '00:00'}`);
+                    const formatSlot = (d: Date) => d.toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+                    return (
+                      <tr key={request.id} className="border-t border-gray-100 hover:bg-gray-50">
+                        <td className="px-6 py-5 align-top min-w-[200px]">
+                          <div className="text-sm font-medium text-gray-900 break-words whitespace-normal">{request.userName}</div>
+                          <div className="text-xs text-gray-500 break-words whitespace-normal">{request.userEmail}</div>
+                        </td>
+                        <td className="px-6 py-5 align-top min-w-[220px]">
+                          <div className="text-sm font-medium text-blue-950 break-words whitespace-normal" title={request.itemTitle}>{request.itemTitle}</div>
+                          <div className="text-xs text-gray-500">{request.itemType}</div>
+                        </td>
+                        <td className="px-6 py-5 align-top min-w-[260px] text-sm text-gray-700 whitespace-normal">
+                          {formatSlot(start)} — {formatSlot(end)}
+                        </td>
+                        <td className="px-6 py-5 align-top min-w-[160px] text-sm text-gray-700 break-words whitespace-normal">{request.purpose || '—'}</td>
+                        <td className="px-6 py-5 align-top min-w-[220px] text-sm">
+                          <div className="flex items-center gap-2">
+                            <button onClick={() => { setSelectedRequest(request); setLocalSelected(request); }} className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md text-sm">View More</button>
+                            {request.status === 'pending' && (
+                              <>
+                                <button onClick={() => { if (request.hasConflict && request.conflictingBookings) { const conflictCount = request.conflictingBookings.filter((c:any) => c.status === 'pending').length; if (conflictCount > 0 && !confirm(`⚠️ WARNING: Approving this booking will automatically DECLINE ${conflictCount} conflicting pending booking(s). Do you want to proceed?`)) return; } setSelectedRequest(request); handleBookingAction(request.id, 'approved'); }} className="px-3 py-1.5 bg-green-600 text-white rounded-md text-sm">Approve</button>
+                                <button onClick={() => { setSelectedRequest(request); handleBookingAction(request.id, 'declined'); }} className="px-3 py-1.5 bg-red-600 text-white rounded-md text-sm">Reject</button>
+                              </>
+                            )}
+                            {request.status === 'approved' && (
+                              <button onClick={() => { const reason = window.prompt('Enter revocation reason (required):'); if (!reason || !reason.trim()) { toast.error('Revocation reason required'); return; } setAdminNote(reason); setSelectedRequest(request); handleBookingAction(request.id, 'declined'); }} className="px-3 py-1.5 bg-orange-600 text-white rounded-md text-sm">Revoke</button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
+
           <div className="bg-white rounded-2xl shadow-lg px-6 py-4 border border-gray-100">
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">Page <span className="font-bold text-blue-950">{currentPage}</span> of <span className="font-bold text-blue-950">{totalPages}</span></div>
@@ -226,6 +235,69 @@ const AdminBookings: React.FC<Props> = (props) => {
             </div>
           </div>
         </>
+      )}
+
+      {/* Detail modal */}
+      {localSelected && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black bg-opacity-40" onClick={() => setLocalSelected(null)} />
+          <div className="relative bg-white rounded-2xl shadow-xl w-11/12 md:w-3/5 max-h-[90vh] overflow-y-auto z-10">
+            <div className="p-6 border-b flex items-start justify-between">
+              <div>
+                <h3 className="text-lg font-bold text-blue-950">{localSelected.itemTitle}</h3>
+                <p className="text-xs text-gray-500">{localSelected.itemType}</p>
+              </div>
+              <button onClick={() => setLocalSelected(null)} className="text-gray-400 hover:text-gray-600">Close</button>
+            </div>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <p className="text-xs text-gray-500">Requested By</p>
+                  <p className="font-medium">{localSelected.userName} — <span className="text-xs text-gray-500">{localSelected.userEmail}</span></p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Status</p>
+                  <p className="font-medium capitalize">{localSelected.status}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Time Slot</p>
+                  <p className="font-medium">
+                    {new Date(`${localSelected.startDate}T${localSelected.startTime || '00:00'}`).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}
+                    {' '}—{' '}
+                    {new Date(`${localSelected.endDate}T${localSelected.endTime || '00:00'}`).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true })}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-xs text-gray-500">Total Cost</p>
+                  <p className="font-medium text-green-600">${localSelected.totalCost.toFixed(2)}</p>
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <p className="text-xs text-gray-500">Purpose</p>
+                <p className="text-sm text-gray-700">{localSelected.purpose || '—'}</p>
+              </div>
+
+              {localSelected.hasConflict && localSelected.conflictingBookings && localSelected.conflictingBookings.length > 0 && (
+                <div className="mt-4 p-3 bg-amber-50 border border-amber-200 rounded">
+                  <p className="text-xs font-semibold text-amber-900">Conflicts ({localSelected.conflictingBookings.length})</p>
+                </div>
+              )}
+            </div>
+            <div className="p-6 border-t flex items-center gap-2 justify-end">
+              <button onClick={() => setLocalSelected(null)} className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200">Close</button>
+              {localSelected.status === 'pending' && (
+                <>
+                  <button onClick={() => { if (localSelected.hasConflict && localSelected.conflictingBookings) { const conflictCount = localSelected.conflictingBookings.filter((c:any) => c.status === 'pending').length; if (conflictCount > 0 && !confirm(`⚠️ WARNING: Approving this booking will automatically DECLINE ${conflictCount} conflicting pending booking(s). Do you want to proceed?`)) return; } setSelectedRequest(localSelected); handleBookingAction(localSelected.id, 'approved'); setLocalSelected(null); }} className="px-4 py-2 rounded-lg bg-green-600 text-white">Approve</button>
+                  <button onClick={() => { setSelectedRequest(localSelected); handleBookingAction(localSelected.id, 'declined'); setLocalSelected(null); }} className="px-4 py-2 rounded-lg bg-red-600 text-white">Reject</button>
+                </>
+              )}
+              {localSelected.status === 'approved' && (
+                <button onClick={() => { const reason = window.prompt('Enter revocation reason (required):'); if (!reason || !reason.trim()) { toast.error('Revocation reason required'); return; } setAdminNote(reason); setSelectedRequest(localSelected); handleBookingAction(localSelected.id, 'declined'); setLocalSelected(null); }} className="px-4 py-2 rounded-lg bg-orange-600 text-white">Revoke</button>
+              )}
+            </div>
+          </div>
+        </div>
       )}
 
     </div>

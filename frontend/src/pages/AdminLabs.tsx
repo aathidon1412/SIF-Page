@@ -4,7 +4,27 @@ import { toast } from 'react-hot-toast';
 type Props = any;
 
 const AdminLabs: React.FC<Props> = (props) => {
-  const { navigate, labs, searchQuery, setSearchQuery, handleEditItem, handleDeleteItem, updateItem, setItems } = props;
+  const {
+    navigate,
+    labs,
+    searchQuery,
+    setSearchQuery,
+    handleEditItem,
+    handleDeleteItem,
+    updateItem,
+    setItems,
+    newItemTitle,
+    setNewItemTitle,
+    newItemDesc,
+    setNewItemDesc,
+    newItemPrice,
+    setNewItemPrice,
+    newItemCapacity,
+    setNewItemCapacity,
+    newItemImage,
+    setNewItemImage,
+    addItem,
+  } = props;
 
   return (
     <div>
@@ -16,13 +36,42 @@ const AdminLabs: React.FC<Props> = (props) => {
       </button>
 
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100">
-        <div className="bg-gradient-to-r from-green-600 to-green-700 text-white px-6 py-4 rounded-t-2xl">
+        {/* Add New Lab section */}
+        <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 mb-6">
+          <h3 className="text-xl font-bold text-blue-950 mb-4 flex items-center gap-2">Add New Lab</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Lab Name</label>
+              <input type="text" value={newItemTitle} onChange={(e) => setNewItemTitle(e.target.value)} placeholder="Enter lab name" className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-green-600 transition-all text-gray-900" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Price (per hour)</label>
+              <input type="number" value={newItemPrice} onChange={(e) => setNewItemPrice(Number(e.target.value))} placeholder="Enter price" min="0" step="0.01" className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all text-gray-900" />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
+              <textarea value={newItemDesc} onChange={(e) => setNewItemDesc(e.target.value)} placeholder="Enter lab description" rows={2} className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-green-600 transition-all text-gray-900" />
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Capacity</label>
+              <input type="text" value={newItemCapacity} onChange={(e) => setNewItemCapacity(e.target.value)} placeholder="e.g., 4-8" className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-green-600 transition-all text-gray-900" />
+            </div>
+            <div className="md:col-span-2">
+              <label className="block text-sm font-semibold text-gray-700 mb-2">Image URL (optional)</label>
+              <input type="url" value={newItemImage} onChange={(e) => setNewItemImage(e.target.value)} placeholder="https://example.com/image.jpg" className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-green-600 focus:border-green-600 transition-all text-gray-900" />
+            </div>
+            <div className="md:col-span-2">
+              <button onClick={() => addItem?.('lab')} className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition-colors font-semibold">Add Lab</button>
+            </div>
+          </div>
+        </div>
+        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-t-2xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg></div>
               <div>
                 <h3 className="text-2xl font-bold">Labs</h3>
-                <p className="text-green-100 text-sm">{labs.length} labs available</p>
+                <p className="text-blue-100 text-sm">{labs.length} labs available</p>
               </div>
             </div>
           </div>
@@ -52,9 +101,9 @@ const AdminLabs: React.FC<Props> = (props) => {
                   <div className="p-4">
                     <h4 className="text-lg font-bold text-gray-900 mb-1 truncate" title={(item as any).name}>{(item as any).name}</h4>
                     <p className="text-sm text-gray-600 mb-3 line-clamp-2 h-10">{(item as any).desc}</p>
-                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-200"><span className="text-xl font-bold text-green-600">${(item as any).pricePerHour}/hr</span><span className="text-xs text-gray-500">Capacity: {(item as any).capacity}</span></div>
-                    <div className="flex items-center gap-2 mb-3"><button onClick={async () => { try { const token = localStorage.getItem('admin_token') || ''; const updated = await updateItem(token, item.id, { available: !available }); setItems((prev:any) => prev.map((i:any) => i.id === item.id ? { ...i, available: updated.available } : i)); toast.success(`Item marked as ${!available ? 'available' : 'unavailable'}`); } catch (e:any) { toast.error(e.message || 'Failed to update availability'); } }} className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${available ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}>{available ? '✓ Available' : '✗ Unavailable'}</button></div>
-                    <div className="flex gap-2"><button onClick={() => handleEditItem(item)} className="flex-1 bg-green-100 text-green-700 px-3 py-2 rounded-lg hover:bg-green-200 transition-colors text-sm font-medium">Edit</button><button onClick={() => handleDeleteItem(item.id)} className="bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium">Delete</button></div>
+                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-200"><span className="text-xl font-bold text-blue-600">${(item as any).pricePerHour}/hr</span><span className="text-xs text-gray-500">Capacity: {(item as any).capacity}</span></div>
+                    <div className="flex items-center gap-2 mb-3"><button onClick={async () => { try { const token = localStorage.getItem('admin_token') || ''; const updated = await updateItem(token, item.id, { available: !available }); setItems((prev:any) => prev.map((i:any) => i.id === item.id ? { ...i, available: updated.available } : i)); toast.success(`Item marked as ${!available ? 'available' : 'unavailable'}`); } catch (e:any) { toast.error(e.message || 'Failed to update availability'); } }} className={`flex-1 inline-flex items-center justify-center px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${available ? 'bg-blue-100 text-blue-700 hover:bg-blue-200' : 'bg-red-100 text-red-700 hover:bg-red-200'}`}>{available ? '✓ Available' : '✗ Unavailable'}</button></div>
+                    <div className="flex gap-2"><button onClick={() => handleEditItem(item)} className="flex-1 bg-blue-100 text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-200 transition-colors text-sm font-medium">Edit</button><button onClick={() => handleDeleteItem(item.id)} className="bg-red-100 text-red-700 px-3 py-2 rounded-lg hover:bg-red-200 transition-colors text-sm font-medium">Delete</button></div>
                   </div>
                 </div>
               );
