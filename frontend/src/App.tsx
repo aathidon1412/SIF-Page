@@ -68,6 +68,9 @@ const AppContent: React.FC = () => {
           <Route path="/booking" element={<Booking />} />
           <Route path="/main-booking" element={<MainBooking />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/admin/bookings" element={<Admin />} />
+          <Route path="/admin/equipments" element={<Admin />} />
+          <Route path="/admin/labs" element={<Admin />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>
       </main>

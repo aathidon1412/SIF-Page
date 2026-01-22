@@ -1,21 +1,25 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import type { BookingRequest } from '../types/booking';
 import { toast } from 'react-hot-toast';
-import { FaEye, FaCheck, FaTimes, FaUndo } from 'react-icons/fa';
 import { adminLogin, fetchBookings, updateBookingStatus, fetchItems, createItem, deleteItem, updateItem, createBackup, restoreBackup, verifyBackup } from '../services/api';
+import AdminBookings from './AdminBookings';
+import AdminEquipments from './AdminEquipments';
+import AdminLabs from './AdminLabs';
 import { exportToExcel } from '../lib/exportExcel';
 
 // Backend API handles admin credentials (seeded); env fallback removed.
 
 const Admin: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
+  
   // Items managed via backend API instead of local context
   const [items, setItems] = useState<any[]>([]);
   const [auth, setAuth] = useState(false);
   const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
-  const [activeTab, setActiveTab] = useState<'items' | 'bookings'>('bookings');
   const [newItemTitle, setNewItemTitle] = useState('');
   const [newItemType, setNewItemType] = useState<'lab' | 'equipment'>('equipment');
   const [newItemDesc, setNewItemDesc] = useState('');
@@ -24,22 +28,11 @@ const Admin: React.FC = () => {
   const [newItemImage, setNewItemImage] = useState('');
   const [editingItem, setEditingItem] = useState<any>(null);
   const [showEditModal, setShowEditModal] = useState(false);
-  const [itemFilter, setItemFilter] = useState<'equipment' | 'labs'>('equipment');
   const [searchQuery, setSearchQuery] = useState('');
   
   // Separate items by type
   const equipments = items.filter(i => i.type === 'equipment');
   const labs = items.filter(i => i.type === 'lab');
-  const allItems = items;
-  
-  // Filter items based on search query and toggle selection
-  const baseFilteredItems = itemFilter === 'equipment' ? equipments : labs;
-  const filteredItems = baseFilteredItems.filter(item => {
-    const title = 'title' in item ? item.title : (item as any).name;
-    const desc = 'description' in item ? item.description : (item as any).desc;
-    const searchText = `${title} ${desc}`.toLowerCase();
-    return searchText.includes(searchQuery.toLowerCase());
-  });
   const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
   const [selectedRequest, setSelectedRequest] = useState<BookingRequest | null>(null);
   const [adminNote, setAdminNote] = useState('');
@@ -580,23 +573,20 @@ const Admin: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-yellow-50">
-      {/* Enhanced Header */}
+      {/* Compact Header */}
       <div className="bg-blue-950 text-white shadow-xl">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
                 <svg className="w-6 h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-                <p className="text-blue-100 text-sm">SIF-FAB LAB Management Portal</p>
-              </div>
+              <h1 className="text-2xl font-bold">Admin Dashboard</h1>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-3">
               <button
                 onClick={() => navigate('/main-booking')}
                 className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 border border-white border-opacity-30"
@@ -606,12 +596,8 @@ const Admin: React.FC = () => {
                 </svg>
                 <span>Back to Booking</span>
               </button>
-              <div className="text-right">
-                <div className="text-sm text-blue-100">Welcome, Administrator</div>
-                <div className="text-xs text-blue-200">{new Date().toLocaleDateString()}</div>
-              </div>
               <button 
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl transition-colors font-medium shadow-lg flex items-center space-x-2" 
+                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl transition-colors font-medium shadow-lg flex items-center space-x-2" 
                 onClick={() => { 
                   setAuth(false); 
                   toast.success('Logged out');
@@ -634,792 +620,342 @@ const Admin: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Dashboard Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-5 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Total Requests</p>
-                <p className="text-3xl font-bold text-blue-950">{bookingRequests.length}</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+        {/* Welcome Section */}
+        <div className="bg-gradient-to-r from-blue-950 to-blue-900 rounded-2xl shadow-xl p-8 mb-8 text-white">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-3xl font-bold mb-2">Welcome, Administrator</h2>
+              <p className="text-blue-100 text-lg">SIF-FAB LAB Management Portal</p>
+              <p className="text-blue-200 text-sm mt-1">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            </div>
+            <div className="hidden md:block">
+              <div className="w-24 h-24 bg-yellow-400 bg-opacity-20 rounded-full flex items-center justify-center">
+                <svg className="w-12 h-12 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
                 </svg>
               </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-yellow-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-3xl font-bold text-yellow-600">{bookingRequests.filter(r => r.status === 'pending').length}</p>
-              </div>
-              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-green-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Approved</p>
-                <p className="text-3xl font-bold text-green-600">{bookingRequests.filter(r => r.status === 'approved').length}</p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-red-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Declined</p>
-                <p className="text-3xl font-bold text-red-600">{bookingRequests.filter(r => r.status === 'declined').length}</p>
-              </div>
-              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-amber-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Active Conflicts</p>
-                <p className="text-3xl font-bold text-amber-600">
-                  {bookingRequests.filter(r => r.hasConflict && r.status === 'pending').length}
-                </p>
-              </div>
-              <div className="w-12 h-12 bg-amber-100 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-amber-600" fill="currentColor" viewBox="0 0 20 20">
-                  <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                </svg>
-              </div>
-            </div>
-          </div>
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Admin Sessions</p>
-                <p className="text-3xl font-bold text-blue-950">{adminLogs.filter(l => l.type === 'login').length}</p>
-              </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-            <div className="mt-4 text-xs text-gray-600 space-y-1">
-              <div><strong>Last Login:</strong> {adminLogs.filter(l => l.type === 'login').length === 0 ? '—' : new Date([...adminLogs.filter(l => l.type === 'login')].slice(-1)[0].timestamp).toLocaleString()}</div>
-              <div><strong>Last Logout:</strong> {adminLogs.filter(l => l.type === 'logout').length === 0 ? '—' : new Date([...adminLogs.filter(l => l.type === 'logout')].slice(-1)[0].timestamp).toLocaleString()}</div>
             </div>
           </div>
         </div>
-        {/* Enhanced Tab Navigation */}
-        <div className="bg-white rounded-2xl shadow-lg p-2 mb-8 border border-blue-100">
-          <div className="flex">
-            <button
-              onClick={() => setActiveTab('bookings')}
-              className={`flex-1 flex items-center justify-center space-x-3 px-6 py-4 rounded-xl font-medium transition-all duration-200 ${
-                activeTab === 'bookings'
-                  ? 'bg-blue-950 text-white shadow-lg'
-                  : 'text-blue-950 hover:bg-blue-50'
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              <span>Booking Requests</span>
-              {bookingRequests.filter(r => r.status === 'pending').length > 0 && (
-                <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                  activeTab === 'bookings' ? 'bg-yellow-400 text-blue-950' : 'bg-blue-950 text-white'
-                }`}>
-                  {bookingRequests.filter(r => r.status === 'pending').length}
-                </span>
-              )}
-            </button>
-            
-            <button
-              onClick={() => setActiveTab('items')}
-              className={`flex-1 flex items-center justify-center space-x-3 px-6 py-4 rounded-xl font-medium transition-all duration-200 ${
-                activeTab === 'items'
-                  ? 'bg-blue-950 text-white shadow-lg'
-                  : 'text-blue-950 hover:bg-blue-50'
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-              <span>Manage Items</span>
-              <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                activeTab === 'items' ? 'bg-yellow-400 text-blue-950' : 'bg-blue-100 text-blue-950'
-              }`}>
-                {allItems.length}
-              </span>
-            </button>
-          </div>
-        </div>
 
-        {activeTab === 'bookings' ? (
-          /* Booking Requests Tab */
-          <div>
-            <h2 className="text-2xl font-semibold text-blue-950 mb-6">Booking Requests</h2>
-            {/* Search + Filters */}
-            <div className="bg-white rounded-xl p-4 mb-6 border border-blue-100 shadow-sm">
-              <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
-                <div className="md:col-span-5 relative">
-                  <label className="block text-xs font-semibold text-blue-950 mb-1">Search</label>
-                  <input
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    placeholder="User, email, item, type, status"
-                    className="w-full border-2 border-blue-200 text-blue-950 rounded-lg px-4 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors"
-                  />
-                  {searchTerm && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchTerm('')}
-                      className="absolute right-2 bottom-2 text-xs bg-blue-100 hover:bg-blue-200 text-blue-900 px-2 py-1 rounded"
-                    >
-                      Clear
-                    </button>
-                  )}
-                  <svg className="w-5 h-5 absolute right-12 bottom-2.5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-4.35-4.35M9.5 17A7.5 7.5 0 109.5 2a7.5 7.5 0 000 15z" />
-                  </svg>
-                </div>
-
-                <div className="md:col-span-3">
-                  <label className="block text-xs font-semibold text-blue-950 mb-1">Type</label>
-                  <select
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value as 'all' | 'lab' | 'equipment')}
-                    className="w-full border-2 border-blue-200 text-blue-950 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors bg-white"
-                  >
-                    <option value="all">All</option>
-                    <option value="lab">Labs</option>
-                    <option value="equipment">Equipment</option>
-                  </select>
-                </div>
-
-                <div className="md:col-span-4">
-                  <label className="block text-xs font-semibold text-blue-950 mb-1">Name</label>
-                  <div className="relative">
-                    <input
-                      value={filterName}
-                      onChange={(e) => setFilterName(e.target.value)}
-                      placeholder="Lab/Equipment name"
-                      className="w-full border-2 border-blue-200 text-blue-950 rounded-lg px-4 py-2 pr-16 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors"
-                    />
-                    {filterName && (
-                      <button
-                        type="button"
-                        onClick={() => setFilterName('')}
-                        className="absolute right-2 bottom-2 text-xs bg-blue-100 hover:bg-blue-200 text-blue-900 px-2 py-1 rounded"
-                      >
-                        Clear
-                      </button>
-                    )}
-                  </div>
-                </div>
-
-                <div className="md:col-span-3">
-                  <label className="block text-xs font-semibold text-blue-950 mb-1">Start Date</label>
-                  <input
-                    type="date"
-                    value={filterStartDate}
-                    onChange={(e) => setFilterStartDate(e.target.value)}
-                    className="w-full border-2 border-blue-200 text-blue-950 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors"
-                  />
-                </div>
-                <div className="md:col-span-3">
-                  <label className="block text-xs font-semibold text-blue-950 mb-1">End Date</label>
-                  <input
-                    type="date"
-                    value={filterEndDate}
-                    onChange={(e) => setFilterEndDate(e.target.value)}
-                    className="w-full border-2 border-blue-200 text-blue-950 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors"
-                  />
-                </div>
-
-                <div className="md:col-span-3 flex gap-2">
-                  <button
-                    type="button"
-                    onClick={() => { setFilterType('all'); setFilterName(''); setFilterStartDate(''); setFilterEndDate(''); }}
-                    className="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-950 px-3 py-2 rounded-lg font-medium transition-colors"
-                  >
-                    Clear Filters
-                  </button>
-                </div>
-
-                {/* Quick Presets */}
-                <div className="md:col-span-12 flex flex-wrap gap-2 mt-2">
-                  <span className="text-xs font-semibold text-blue-950 self-center">Quick Filters:</span>
-                  <button
-                    type="button"
-                    onClick={() => applyPreset('pendingThisWeek')}
-                    className="px-3 py-1.5 text-sm rounded-lg bg-yellow-100 hover:bg-yellow-200 text-blue-950 border border-yellow-200"
-                  >
-                    Pending This Week
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyPreset('labsToday')}
-                    className="px-3 py-1.5 text-sm rounded-lg bg-blue-100 hover:bg-blue-200 text-blue-950 border border-blue-200"
-                  >
-                    Labs Today
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => applyPreset('equipmentToday')}
-                    className="px-3 py-1.5 text-sm rounded-lg bg-green-100 hover:bg-green-200 text-blue-950 border border-green-200"
-                  >
-                    Equipment Today
-                  </button>
-                </div>
-
-                <div className="md:col-span-12 text-sm text-blue-950 font-medium">
-                  Showing {filteredRequests.length} of {bookingRequests.length} requests
-                </div>
-              </div>
-            </div>
-            {bookingRequests.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg">
-                <p className="text-gray-600 text-lg">No booking requests found.</p>
-              </div>
-            ) : filteredRequests.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg">
-                <p className="text-gray-600 text-lg">No booking requests match your search.</p>
-              </div>
-            ) : (
-              <div className="bg-white rounded-lg shadow-sm overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-blue-50">
-                    <tr>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-blue-900">Name</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-blue-900">Equipment / Lab</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-blue-900">Time Slot</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-blue-900">Purpose</th>
-                      <th className="px-4 py-3 text-left text-sm font-medium text-blue-900">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-100">
-                    {pagedRequests.map((request) => (
-                      <tr key={request.id}>
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          <div className="font-medium text-blue-950">{request.userName}</div>
-                          <div className="text-xs text-gray-500">{request.userEmail}</div>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          <div className="font-medium text-blue-950">{request.itemTitle}</div>
-                          <div className="text-xs text-gray-500">{request.itemType.toUpperCase()}</div>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          <div className="text-sm font-medium text-blue-950">{formatDateTime(request.startDate, request.startTime)} - {formatDateTime(request.endDate, request.endTime)}</div>
-                        </td>
-                        <td className="px-4 py-3 text-sm text-gray-700 max-w-xs truncate">{request.purpose || '—'}</td>
-                        <td className="px-4 py-3 text-sm text-gray-700">
-                          <div className="flex items-center gap-2">
-                            <button
-                              onClick={() => setSelectedRequest(request)}
-                              className="p-2 bg-blue-100 text-blue-900 rounded-lg text-sm flex items-center justify-center"
-                              title="View details"
-                              aria-label="View details"
-                            >
-                              <FaEye />
-                            </button>
-                            {request.status === 'pending' && (
-                              <>
-                                <button
-                                  onClick={() => {
-                                    if (request.hasConflict && request.conflictingBookings && request.conflictingBookings.length > 0) {
-                                      const conflictCount = request.conflictingBookings.filter((c:any) => c.status === 'pending').length;
-                                      if (conflictCount > 0 && !confirm(`⚠️ WARNING: Approving this booking will automatically DECLINE ${conflictCount} conflicting pending booking(s). Do you want to proceed?`)) return;
-                                    }
-                                    setSelectedRequest(request);
-                                    handleBookingAction(request.id, 'approved');
-                                  }}
-                                  className="p-2 bg-green-600 text-white rounded-lg text-sm flex items-center justify-center"
-                                >
-                                  <FaCheck />
-                                </button>
-                                <button
-                                  onClick={() => { setSelectedRequest(request); handleBookingAction(request.id, 'declined'); }}
-                                  className="p-2 bg-red-600 text-white rounded-lg text-sm flex items-center justify-center"
-                                  title="Reject"
-                                  aria-label="Reject request"
-                                >
-                                  <FaTimes />
-                                </button>
-                              </>
-                            )}
-                            {request.status === 'approved' && (
-                              <button
-                                  onClick={() => {
-                                    const reason = window.prompt('Enter revocation reason (required):');
-                                    if (!reason || !reason.trim()) { toast.error('Revocation reason required'); return; }
-                                    setAdminNote(reason);
-                                    setSelectedRequest(request);
-                                    handleBookingAction(request.id, 'declined');
-                                  }}
-                                  className="p-2 bg-orange-600 text-white rounded-lg text-sm flex items-center justify-center"
-                                  title="Revoke"
-                                  aria-label="Revoke booking"
-                                >
-                                  <FaUndo />
-                                </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-
-                {/* Pagination controls */}
-                <div className="flex items-center justify-between px-4 py-3 bg-white border-t">
-                  <div className="text-sm text-gray-600">Page {currentPage} of {totalPages}</div>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                      disabled={currentPage === 1}
-                      className={`px-3 py-1 rounded-lg ${currentPage === 1 ? 'bg-gray-100 text-gray-400' : 'bg-blue-100 text-blue-900'}`}
-                    >Prev</button>
-                    <button
-                      onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                      disabled={currentPage === totalPages}
-                      className={`px-3 py-1 rounded-lg ${currentPage === totalPages ? 'bg-gray-100 text-gray-400' : 'bg-blue-100 text-blue-900'}`}
-                    >Next</button>
-                  </div>
-                </div>
-
-                {/* Detail Modal */}
-                {selectedRequest && (
-                  <div className="fixed inset-0 z-50 flex items-center justify-center">
-                    <div className="absolute inset-0 bg-black bg-opacity-40" onClick={() => { setSelectedRequest(null); setAdminNote(''); }} />
-                    <div className="bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-4 z-50 p-6 overflow-auto max-h-[80vh]">
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <h3 className="text-2xl font-bold text-blue-950">{selectedRequest.itemTitle}</h3>
-                          <div className="text-sm text-gray-600">Requested by {selectedRequest.userName} ({selectedRequest.userEmail})</div>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedRequest.status)}`}>{selectedRequest.status.toUpperCase()}</span>
-                          <button onClick={() => { setSelectedRequest(null); setAdminNote(''); }} className="text-gray-500">Close</button>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm mb-4">
-                        <div><strong>Time Slot:</strong> {formatDateTime(selectedRequest.startDate, selectedRequest.startTime)} - {formatDateTime(selectedRequest.endDate, selectedRequest.endTime)}</div>
-                        <div><strong>Submitted:</strong> {formatDate(selectedRequest.submittedAt)}</div>
-                        <div><strong>Total Cost:</strong> <span className="font-bold text-green-600">${selectedRequest.totalCost.toFixed(2)}</span></div>
-                        <div><strong>Type:</strong> {selectedRequest.itemType.toUpperCase()}</div>
-                      </div>
-
-                      <div className="mb-4">
-                        <strong>Purpose:</strong>
-                        <p className="text-gray-700 mt-2">{selectedRequest.purpose}</p>
-                      </div>
-
-                      {selectedRequest.additionalNotes && (
-                        <div className="mb-4">
-                          <strong>Additional Notes:</strong>
-                          <p className="text-gray-700 mt-2">{selectedRequest.additionalNotes}</p>
-                        </div>
-                      )}
-
-                      {selectedRequest.hasConflict && selectedRequest.conflictingBookings && selectedRequest.conflictingBookings.length > 0 && (
-                        <div className="mb-4 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                          <h4 className="font-semibold text-amber-900 mb-2">Conflicts ({selectedRequest.conflictingBookings.length})</h4>
-                          <div className="space-y-2">
-                            {selectedRequest.conflictingBookings.map((c:any, idx:number) => (
-                              <div key={idx} className="p-2 bg-white border rounded">
-                                <div className="text-sm font-medium">{c.userName || c.userEmail}</div>
-                                <div className="text-xs text-gray-600">{formatDate(c.startDate)} - {formatDate(c.endDate)} {c.startTime ? `· ${c.startTime} - ${c.endTime}` : ''}</div>
-                                <div className="text-xs mt-1"><span className="font-semibold">Status:</span> {c.status}</div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-                      )}
-
-                      <div className="mt-4">
-                        <label className="block text-sm font-semibold text-blue-950 mb-2">Admin Note (optional)</label>
-                        <textarea value={adminNote} onChange={(e) => setAdminNote(e.target.value)} rows={3} className="w-full border-2 border-blue-200 rounded-lg px-4 py-3" />
-                      </div>
-
-                      <div className="mt-6 flex gap-3">
-                        {selectedRequest.status === 'pending' && (
-                          <>
-                            <button onClick={() => {
-                              if (selectedRequest.hasConflict && selectedRequest.conflictingBookings) {
-                                const conflictCount = selectedRequest.conflictingBookings.filter((c:any) => c.status === 'pending').length;
-                                if (conflictCount > 0 && !confirm(`⚠️ WARNING: Approving this booking will automatically DECLINE ${conflictCount} conflicting pending booking(s). Do you want to proceed?`)) return;
-                              }
-                              handleBookingAction(selectedRequest.id, 'approved');
-                            }} className="px-4 py-2 bg-green-600 text-white rounded-lg">Approve</button>
-                            <button onClick={() => { handleBookingAction(selectedRequest.id, 'declined'); }} className="px-4 py-2 bg-red-600 text-white rounded-lg">Reject</button>
-                          </>
-                        )}
-                        {selectedRequest.status === 'approved' && (
-                          <button onClick={() => {
-                            const reason = window.prompt('Enter revocation reason (required):');
-                            if (!reason || !reason.trim()) { toast.error('Revocation reason required'); return; }
-                            setAdminNote(reason);
-                            handleBookingAction(selectedRequest.id, 'declined');
-                          }} className="px-4 py-2 bg-orange-600 text-white rounded-lg">Revoke</button>
-                        )}
-                        <button onClick={() => { setSelectedRequest(null); setAdminNote(''); }} className="px-4 py-2 bg-gray-200 rounded-lg">Close</button>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
-        ) : (
-          /* Items Management Tab */
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-blue-950">Manage Items</h2>
-              <div className="flex items-center space-x-3">
-                <button
-                  onClick={handleCreateBackup}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2 shadow-md"
-                  title="Create a complete backup of all items and bookings"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                  </svg>
-                  <span>Backup</span>
-                </button>
-                <button
-                  onClick={handleRestoreBackup}
-                  className="bg-orange-600 hover:bg-orange-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2 shadow-md"
-                  title="Restore items and bookings from a backup file"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                  </svg>
-                  <span>Restore</span>
-                </button>
-                <button
-                  onClick={handleExportData}
-                  className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center space-x-2"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  <span>Export Excel</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Backup & Restore Info */}
-            <div className="bg-purple-50 border-l-4 border-purple-400 p-4 mb-4 rounded-lg">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-purple-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-purple-700">
-                    <strong>Backup & Restore:</strong> Use <strong>"Backup"</strong> to download all system data (items, bookings) as JSON. 
-                    Use <strong>"Restore"</strong> to upload and restore from a backup file. ⚠️ Restore will replace all current data with full relational integrity checks.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Data Persistence Info */}
-            <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6 rounded-lg">
-              <div className="flex">
-                <div className="flex-shrink-0">
-                  <svg className="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                  </svg>
-                </div>
-                <div className="ml-3">
-                  <p className="text-sm text-blue-700">
-                    <strong>Data Persistence:</strong> Changes are saved to browser storage and persist between sessions. 
-                    To make changes permanent across deployments, use the <strong>"Export Data"</strong> button to download the updated JSON file, 
-                    then replace <code className="bg-blue-100 px-1 rounded">/src/data/items.json</code> with the downloaded file.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Add Item Form */}
-            <div className="bg-white rounded-2xl shadow-lg p-6 border mb-8">
-              <h3 className="text-lg font-semibold text-blue-950 mb-4">Add New Item</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Item Type</label>
-                  <select
-                    value={newItemType}
-                    onChange={(e) => setNewItemType(e.target.value as 'lab' | 'equipment')}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors text-gray-900 placeholder-gray-500"
-                  >
-                    <option value="equipment">Equipment</option>
-                    <option value="lab">Lab</option>
-                  </select>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
-                  <input
-                    type="text"
-                    value={newItemTitle}
-                    onChange={(e) => setNewItemTitle(e.target.value)}
-                    placeholder="Enter item title"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors text-gray-900 placeholder-gray-500"
-                  />
-                </div>
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
-                  <textarea
-                    value={newItemDesc}
-                    onChange={(e) => setNewItemDesc(e.target.value)}
-                    placeholder="Enter item description"
-                    rows={2}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors text-gray-900 placeholder-gray-500"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Price ({newItemType === 'equipment' ? 'per day' : 'per hour'})
-                  </label>
-                  <input
-                    type="number"
-                    value={newItemPrice}
-                    onChange={(e) => setNewItemPrice(Number(e.target.value))}
-                    placeholder="Enter price"
-                    min="0"
-                    step="0.01"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors text-gray-900 placeholder-gray-500"
-                  />
-                </div>
-                {newItemType === 'lab' && (
+        {/* Render content based on route */}
+        {currentPath === '/admin' ? (
+          /* Main Dashboard - Card Navigation */
+          <>
+            {/* Dashboard Stats */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-600">
+                <div className="flex items-center justify-between">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Capacity</label>
-                    <input
-                      type="text"
-                      value={newItemCapacity}
-                      onChange={(e) => setNewItemCapacity(e.target.value)}
-                      placeholder="e.g., 4-8"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors text-gray-900 placeholder-gray-500"
-                    />
+                    <p className="text-sm font-medium text-gray-600">Total Requests</p>
+                    <p className="text-3xl font-bold text-blue-950 mt-1">{bookingRequests.length}</p>
                   </div>
-                )}
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Image URL (optional)</label>
-                  <input
-                    type="url"
-                    value={newItemImage}
-                    onChange={(e) => setNewItemImage(e.target.value)}
-                    placeholder="https://example.com/image.jpg"
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors text-gray-900 placeholder-gray-500"
-                  />
+                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  </div>
                 </div>
-                <div className="md:col-span-2">
-                  <button
-                    onClick={addItem}
-                    className="bg-blue-950 text-white px-6 py-2 rounded-lg hover:bg-blue-900 transition-colors font-medium"
-                  >
-                    Add {newItemType}
-                  </button>
+              </div>
+              
+              <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-yellow-500">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Pending</p>
+                    <p className="text-3xl font-bold text-yellow-600 mt-1">{bookingRequests.filter(r => r.status === 'pending').length}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-green-500">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Approved</p>
+                    <p className="text-3xl font-bold text-green-600 mt-1">{bookingRequests.filter(r => r.status === 'approved').length}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-red-500">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">Declined</p>
+                    <p className="text-3xl font-bold text-red-600 mt-1">{bookingRequests.filter(r => r.status === 'declined').length}</p>
+                  </div>
+                  <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-xl font-semibold text-blue-950">All Items</h3>
-                <div className="text-sm text-gray-600">
-                  {allItems.length} total items ({equipments.length} equipment, {labs.length} labs)
-                </div>
-              </div>
-              
-              {/* Search Bar */}
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search items by title or description..."
-                  className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors text-gray-900 placeholder-gray-500"
-                />
-                {searchQuery && (
-                  <button
-                    onClick={() => setSearchQuery('')}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                  >
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                  </button>
-                )}
-              </div>
-              
-              {/* Filter Toggle */}
-              <div className="flex justify-center">
-                <div className="bg-gray-100 p-1 rounded-lg inline-flex">
-                  <button
-                    onClick={() => setItemFilter('equipment')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                      itemFilter === 'equipment'
-                        ? 'bg-blue-950 text-white shadow-lg'
-                        : 'text-gray-600 hover:text-blue-950 hover:bg-white'
-                    }`}
-                  >
-                    Equipment ({equipments.length})
-                  </button>
-                  <button
-                    onClick={() => setItemFilter('labs')}
-                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                      itemFilter === 'labs'
-                        ? 'bg-blue-950 text-white shadow-lg'
-                        : 'text-gray-600 hover:text-blue-950 hover:bg-white'
-                    }`}
-                  >
-                    Labs ({labs.length})
-                  </button>
-                </div>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredItems.map((item) => {
-                  const isEquipment = 'title' in item;
-                  const title = isEquipment ? item.title : (item as any).name;
-                  const desc = isEquipment ? item.description : (item as any).desc;
-                  const price = isEquipment ? `$${(item as any).pricePerDay}/day` : `$${(item as any).pricePerHour}/hour`;
-                  const image = (item as any).image;
-                  
-                  const available = item.available !== false; // default to true if undefined
-                  return (
-                    <div
-                      key={item.id}
-                      className={`bg-white rounded-2xl shadow-lg border overflow-hidden relative ${!available ? 'opacity-60 grayscale' : ''}`}
-                    >
-                      {/* Item Image */}
-                      <div className="relative h-48 bg-gray-100">
-                        {image ? (
-                          <img 
-                            src={image} 
-                            alt={title} 
-                            className="w-full h-full object-cover"
-                          />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                            <span className="text-gray-500">No Image</span>
-                          </div>
-                        )}
-                        <div className="absolute top-3 left-3 flex gap-2">
-                          <span className="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full font-medium">
-                            {isEquipment ? 'EQUIPMENT' : 'LAB'}
-                          </span>
-                          {!available && (
-                            <span className="bg-red-200 text-red-800 text-xs px-2 py-1 rounded-full font-medium animate-pulse">
-                              Under Maintenance
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                      {/* Item Details */}
-                      <div className="p-6">
-                        <h4 className="text-lg font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                          {title}
-                          {!available && (
-                            <span className="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded font-semibold">Unavailable</span>
-                          )}
-                        </h4>
-                        <p className="text-sm text-gray-600 mb-3 line-clamp-2">{desc}</p>
-                        <div className="flex items-center justify-between mb-4">
-                          <div className="text-lg font-bold text-blue-950">{price}</div>
-                          {!isEquipment && (item as any).capacity && (
-                            <div className="text-sm text-gray-500">Capacity: {(item as any).capacity}</div>
-                          )}
-                        </div>
-                        {/* Availability Toggle */}
-                        <div className="flex items-center gap-3 mb-4">
-                          <span className={`text-xs font-medium ${available ? 'text-green-700' : 'text-red-700'}`}>
-                            {available ? 'Available' : 'Unavailable'}
-                          </span>
-                          <button
-                            onClick={async () => {
-                              try {
-                                const token = localStorage.getItem('admin_token') || '';
-                                const updated = await updateItem(token, item.id, { available: !available });
-                                setItems(prev => prev.map(i => i.id === item.id ? { ...i, available: updated.available } : i));
-                                toast.success(`Item marked as ${!available ? 'available' : 'unavailable'}`);
-                              } catch (e: any) {
-                                toast.error(e.message || 'Failed to update availability');
-                              }
-                            }}
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold border transition-colors focus:outline-none ${available ? 'bg-green-100 text-green-800 border-green-300 hover:bg-green-200' : 'bg-red-100 text-red-800 border-red-300 hover:bg-red-200'}`}
-                            title={available ? 'Set as unavailable (maintenance)' : 'Set as available'}
-                          >
-                            {available ? 'Set Unavailable' : 'Set Available'}
-                          </button>
-                        </div>
-                        {/* Action Buttons */}
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleEditItem(item)}
-                            className="flex-1 bg-blue-50 text-blue-700 px-3 py-2 rounded-lg hover:bg-blue-100 transition-colors text-sm font-medium"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteItem((item as any).id)}
-                            className="bg-red-50 text-red-700 px-3 py-2 rounded-lg hover:bg-red-100 transition-colors text-sm font-medium"
-                          >
-                            Delete
-                          </button>
-                        </div>
+            {/* Navigation Cards */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-blue-950 mb-6">Management Sections</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Booking Requests Card */}
+                <div
+                  onClick={() => navigate('/admin/bookings')}
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-200 hover:border-blue-600 transform hover:-translate-y-1 text-left group cursor-pointer"
+                >
+                  <div className="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-14 h-14 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
                       </div>
                     </div>
-                  );
-                })}
+                    <h3 className="text-xl font-bold mb-2">Booking Requests</h3>
+                    <p className="text-blue-100 text-xs">Review and manage bookings</p>
+                  </div>
+                  <div className="p-6 space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Total</span>
+                      <span className="font-bold text-blue-950">{bookingRequests.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Pending</span>
+                      <span className="font-bold text-yellow-600">{bookingRequests.filter(r => r.status === 'pending').length}</span>
+                    </div>
+                    <div className="w-full bg-blue-100 hover:bg-blue-200 text-blue-700 px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+                      <span>Manage Bookings</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Equipment Management Card */}
+                <div
+                  onClick={() => navigate('/admin/equipments')}
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-200 hover:border-purple-600 transform hover:-translate-y-1 text-left group cursor-pointer"
+                >
+                  <div className="bg-gradient-to-r from-purple-600 to-purple-700 p-6 text-white">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-14 h-14 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">Equipment</h3>
+                    <p className="text-purple-100 text-xs">Manage equipment inventory</p>
+                  </div>
+                  <div className="p-6 space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Total Items</span>
+                      <span className="font-bold text-purple-700">{equipments.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Available</span>
+                      <span className="font-bold text-green-600">{equipments.filter(i => i.available !== false).length}</span>
+                    </div>
+                    <div className="w-full bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+                      <span>Manage Equipment</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lab Management Card */}
+                <div
+                  onClick={() => navigate('/admin/labs')}
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-200 hover:border-green-600 transform hover:-translate-y-1 text-left group cursor-pointer"
+                >
+                  <div className="bg-gradient-to-r from-green-600 to-green-700 p-6 text-white">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-14 h-14 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">Lab Spaces</h3>
+                    <p className="text-green-100 text-xs">Manage lab facilities</p>
+                  </div>
+                  <div className="p-6 space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Total Labs</span>
+                      <span className="font-bold text-green-700">{labs.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Available</span>
+                      <span className="font-bold text-green-600">{labs.filter(i => i.available !== false).length}</span>
+                    </div>
+                    <div className="w-full bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+                      <span>Manage Labs</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Data Management Card */}
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-gray-200">
+                  <div className="bg-gradient-to-r from-gray-600 to-gray-700 p-6 text-white">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-14 h-14 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold mb-2">Data Management</h3>
+                    <p className="text-gray-100 text-sm">Backup, restore, and export data</p>
+                  </div>
+                  <div className="p-6 space-y-3">
+                    <button
+                      onClick={handleCreateBackup}
+                      className="w-full bg-purple-100 hover:bg-purple-200 text-purple-700 px-4 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                      </svg>
+                      Backup Data
+                    </button>
+                    <button
+                      onClick={handleRestoreBackup}
+                      className="w-full bg-orange-100 hover:bg-orange-200 text-orange-700 px-4 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                      </svg>
+                      Restore Data
+                    </button>
+                    <button
+                      onClick={handleExportData}
+                      className="w-full bg-green-100 hover:bg-green-200 text-green-700 px-4 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      Export Excel
+                    </button>
+                  </div>
+                </div>
               </div>
-              
-              {filteredItems.length === 0 && (
-                <div className="text-center py-12 col-span-full">
-                  <div className="text-gray-400 mb-4">
-                    <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </div>
+
+            {/* Info Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="bg-purple-50 border-l-4 border-purple-500 p-4 rounded-xl shadow-sm">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-purple-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
                     </svg>
                   </div>
-                  <p className="text-gray-500 text-lg">
-                    {searchQuery ? 
-                      `No ${itemFilter === 'equipment' ? 'equipment' : 'labs'} found matching "${searchQuery}"` :
-                      itemFilter === 'equipment' ? 'No equipment found' : 'No labs found'}
-                  </p>
-                  <p className="text-gray-400 text-sm mt-2">
-                    {searchQuery ? 
-                      'Try adjusting your search terms or clear the search to see all items' :
-                      'Add new items using the form above or switch to the other category'}
-                  </p>
+                  <div className="ml-3">
+                    <p className="text-sm text-purple-700">
+                      <strong>Quick Tip:</strong> Click on the cards above to navigate to different management sections.
+                    </p>
+                  </div>
                 </div>
-              )}
+              </div>
+
+              <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-xl shadow-sm">
+                <div className="flex">
+                  <div className="flex-shrink-0">
+                    <svg className="h-5 w-5 text-blue-500" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <p className="text-sm text-blue-700">
+                      <strong>Data Persistence:</strong> All changes are automatically saved to the system.
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-          </div>
-        )}
+          </>
+        ) : currentPath === '/admin/bookings' ? (
+          <AdminBookings
+            navigate={navigate}
+            bookingRequests={bookingRequests}
+            filteredRequests={filteredRequests}
+            pagedRequests={pagedRequests}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            totalPages={totalPages}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            filterType={filterType}
+            setFilterType={setFilterType}
+            filterName={filterName}
+            setFilterName={setFilterName}
+            filterStartDate={filterStartDate}
+            setFilterStartDate={setFilterStartDate}
+            filterEndDate={filterEndDate}
+            setFilterEndDate={setFilterEndDate}
+            applyPreset={applyPreset}
+            setSelectedRequest={setSelectedRequest}
+            handleBookingAction={handleBookingAction}
+            getStatusColor={getStatusColor}
+            formatDateTime={formatDateTime}
+            formatDate={formatDate}
+            adminNote={adminNote}
+            setAdminNote={setAdminNote}
+            toast={toast}
+          />
+        ) : currentPath === '/admin/equipments' ? (
+          <AdminEquipments
+            navigate={navigate}
+            handleCreateBackup={handleCreateBackup}
+            handleRestoreBackup={handleRestoreBackup}
+            handleExportData={handleExportData}
+            equipments={equipments}
+            labs={labs}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            newItemType={newItemType}
+            setNewItemType={setNewItemType}
+            newItemTitle={newItemTitle}
+            setNewItemTitle={setNewItemTitle}
+            newItemDesc={newItemDesc}
+            setNewItemDesc={setNewItemDesc}
+            newItemPrice={newItemPrice}
+            setNewItemPrice={setNewItemPrice}
+            newItemCapacity={newItemCapacity}
+            setNewItemCapacity={setNewItemCapacity}
+            newItemImage={newItemImage}
+            setNewItemImage={setNewItemImage}
+            addItem={addItem}
+            handleEditItem={handleEditItem}
+            handleDeleteItem={handleDeleteItem}
+            updateItem={updateItem}
+            items={items}
+            setItems={setItems}
+          />
+        ) : currentPath === '/admin/labs' ? (
+          <AdminLabs
+            navigate={navigate}
+            labs={labs}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            handleEditItem={handleEditItem}
+            handleDeleteItem={handleDeleteItem}
+            updateItem={updateItem}
+            setItems={setItems}
+          />
+        ) : null}
       </div>
       
       {/* Edit Modal */}
