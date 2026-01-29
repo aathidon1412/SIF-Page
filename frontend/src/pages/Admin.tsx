@@ -647,14 +647,14 @@ const Admin: React.FC = () => {
           <>
             {/* Dashboard Stats */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-600">
+              <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-950">
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-sm font-medium text-gray-600">Total Requests</p>
                     <p className="text-3xl font-bold text-blue-950 mt-1">{bookingRequests.length}</p>
                   </div>
                   <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-6 h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                   </div>
@@ -823,34 +823,40 @@ const Admin: React.FC = () => {
                     <h3 className="text-2xl font-bold mb-2">Data Management</h3>
                     <p className="text-gray-100 text-sm">Backup, restore, and export data</p>
                   </div>
-                  <div className="p-6 space-y-3">
-                    <button
-                      onClick={handleCreateBackup}
-                      className="w-full bg-blue-200 hover:bg-blue-300 text-blue-950 px-4 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
-                      </svg>
-                      Backup Data
-                    </button>
-                    <button
-                      onClick={handleRestoreBackup}
-                      className="w-full bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-4 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
-                      </svg>
-                      Restore Data
-                    </button>
-                    <button
-                      onClick={handleExportData}
-                      className="w-full bg-green-100 hover:bg-green-200 text-green-700 px-4 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
-                    >
-                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                      </svg>
-                      Export Excel
-                    </button>
+                  <div className="p-6">
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <button
+                        onClick={handleCreateBackup}
+                        className="w-full bg-blue-200 hover:bg-blue-300 text-blue-950 px-4 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                        </svg>
+                        Backup
+                      </button>
+
+                      <button
+                        onClick={handleRestoreBackup}
+                        className="w-full bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-4 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        Restore
+                      </button>
+                    </div>
+
+                    <div>
+                      <button
+                        onClick={handleExportData}
+                        className="w-full bg-green-100 hover:bg-green-200 text-green-700 px-4 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>

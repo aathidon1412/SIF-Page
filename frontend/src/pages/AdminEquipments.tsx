@@ -75,32 +75,32 @@ const AdminEquipments: React.FC<Props> = (props) => {
       </div> */}
 
       <div className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 mb-8">
-        <h3 className="text-xl font-bold text-blue-950 mb-4 flex items-center gap-2"><svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>Add New Item</h3>
+        <h3 className="text-xl font-bold text-blue-950 mb-4 flex items-center gap-2"><svg className="w-5 h-5 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>Add New Item</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Title</label>
-            <input type="text" value={newItemTitle} onChange={(e) => setNewItemTitle(e.target.value)} placeholder="Enter item title" className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all text-gray-900 placeholder-gray-400" />
+            <input type="text" value={newItemTitle} onChange={(e) => setNewItemTitle(e.target.value)} placeholder="Enter item title" className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-all text-gray-900 placeholder-gray-400" />
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-semibold text-gray-700 mb-2">Description</label>
-            <textarea value={newItemDesc} onChange={(e) => setNewItemDesc(e.target.value)} placeholder="Enter item description" rows={2} className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all text-gray-900 placeholder-gray-400" />
+            <textarea value={newItemDesc} onChange={(e) => setNewItemDesc(e.target.value)} placeholder="Enter item description" rows={2} className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-all text-gray-900 placeholder-gray-400" />
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Price (per day)</label>
-            <input type="number" value={newItemPrice} onChange={(e) => setNewItemPrice(Number(e.target.value))} placeholder="Enter price" min="0" step="0.01" className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all text-gray-900 placeholder-gray-400" />
+            <input type="number" value={newItemPrice} onChange={(e) => setNewItemPrice(Number(e.target.value))} placeholder="Enter price" min="0" step="0.01" className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-all text-gray-900 placeholder-gray-400" />
           </div>
           <div className="md:col-span-2">
             <label className="block text-sm font-semibold text-gray-700 mb-2">Image URL (optional)</label>
-            <input type="url" value={newItemImage} onChange={(e) => setNewItemImage(e.target.value)} placeholder="https://example.com/image.jpg" className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all text-gray-900 placeholder-gray-400" />
+            <input type="url" value={newItemImage} onChange={(e) => setNewItemImage(e.target.value)} placeholder="https://example.com/image.jpg" className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-all text-gray-900 placeholder-gray-400" />
           </div>
           <div className="md:col-span-2">
-            <button onClick={() => addItem?.('equipment')} className="bg-blue-600 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors font-semibold shadow-lg flex items-center gap-2"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>Add Equipment</button>
+            <button onClick={() => addItem?.('equipment')} className="bg-blue-950 text-white px-6 py-3 rounded-xl hover:bg-blue-700 transition-colors font-semibold shadow-lg flex items-center gap-2"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>Add Equipment</button>
           </div>
         </div>
       </div>
 
       <div className="bg-white rounded-2xl shadow-lg border border-gray-100 mb-8">
-        <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-4 rounded-t-2xl">
+        <div className="bg-blue-950 text-white px-6 py-4 rounded-t-2xl">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg></div>
@@ -115,7 +115,7 @@ const AdminEquipments: React.FC<Props> = (props) => {
         <div className="p-6">
           <div className="relative mb-6">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"><svg className="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="m21 21-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg></div>
-            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search equipments by title or description..." className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all text-gray-900 placeholder-gray-400" />
+            <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search equipments by title or description..." className="w-full pl-10 pr-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-all text-gray-900 placeholder-gray-400" />
             {searchQuery && (<button onClick={() => setSearchQuery('')} className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"><svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg></button>)}
           </div>
 
@@ -136,7 +136,7 @@ const AdminEquipments: React.FC<Props> = (props) => {
                   <div className="p-4">
                     <h4 className="text-lg font-bold text-gray-900 mb-1 truncate" title={item.title}>{item.title}</h4>
                     <p className="text-sm text-gray-600 mb-3 line-clamp-2 h-10">{item.description}</p>
-                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-200"><span className="text-xl font-bold text-blue-600">${item.pricePerDay}/day</span></div>
+                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-gray-200"><span className="text-xl font-bold text-blue-950">${item.pricePerDay}/day</span></div>
                     <div className="flex items-center gap-2 mb-3"><button onClick={async () => {
                       try {
                         const token = localStorage.getItem('admin_token') || '';

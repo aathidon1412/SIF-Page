@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import { AiOutlineEye } from 'react-icons/ai';
+import { MdOutlineBlock } from 'react-icons/md';
 // icons removed (not used in table view)
 import type { BookingRequest } from '../types/booking';
 
@@ -45,14 +47,14 @@ const AdminBookings: React.FC<Props> = (props) => {
       </button>
 
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-600">
+        <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-950">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total Requests</p>
               <p className="text-3xl font-bold text-blue-950 mt-1">{bookingRequests.length}</p>
             </div>
             <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-6 h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
@@ -113,14 +115,14 @@ const AdminBookings: React.FC<Props> = (props) => {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-end">
           <div className="md:col-span-5 relative">
             <label className="block text-xs font-semibold text-blue-950 mb-2">Search</label>
-            <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="User, email, item, type, status" className="w-full border-2 border-gray-200 text-blue-950 rounded-xl px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all" />
+            <input value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="User, email, item, type, status" className="w-full border-2 border-gray-200 text-blue-950 rounded-xl px-4 py-2.5 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-all" />
             {searchTerm && (
               <button type="button" onClick={() => setSearchTerm('')} className="absolute right-2 top-9 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded">Clear</button>
             )}
           </div>
           <div className="md:col-span-3">
             <label className="block text-xs font-semibold text-blue-950 mb-2">Type</label>
-            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="w-full border-2 border-gray-200 text-blue-950 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all bg-white">
+            <select value={filterType} onChange={(e) => setFilterType(e.target.value)} className="w-full border-2 border-gray-200 text-blue-950 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-all bg-white">
               <option value="all">All Types</option>
               <option value="lab">Labs</option>
               <option value="equipment">Equipment</option>
@@ -129,17 +131,17 @@ const AdminBookings: React.FC<Props> = (props) => {
           <div className="md:col-span-4">
             <label className="block text-xs font-semibold text-blue-950 mb-2">Name</label>
             <div className="relative">
-              <input value={filterName} onChange={(e) => setFilterName(e.target.value)} placeholder="Lab/Equipment name" className="w-full border-2 border-gray-200 text-blue-950 rounded-xl px-4 py-2.5 pr-16 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all" />
+              <input value={filterName} onChange={(e) => setFilterName(e.target.value)} placeholder="Lab/Equipment name" className="w-full border-2 border-gray-200 text-blue-950 rounded-xl px-4 py-2.5 pr-16 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-all" />
               {filterName && (<button type="button" onClick={() => setFilterName('')} className="absolute right-2 top-2.5 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 px-2 py-1 rounded">Clear</button>)}
             </div>
           </div>
           <div className="md:col-span-3">
             <label className="block text-xs font-semibold text-blue-950 mb-2">Start Date</label>
-            <input type="date" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)} className="w-full border-2 border-gray-200 text-blue-950 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all" />
+            <input type="date" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)} className="w-full border-2 border-gray-200 text-blue-950 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-all" />
           </div>
           <div className="md:col-span-3">
             <label className="block text-xs font-semibold text-blue-950 mb-2">End Date</label>
-            <input type="date" value={filterEndDate} onChange={(e) => setFilterEndDate(e.target.value)} className="w-full border-2 border-gray-200 text-blue-950 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-blue-600 transition-all" />
+            <input type="date" value={filterEndDate} onChange={(e) => setFilterEndDate(e.target.value)} className="w-full border-2 border-gray-200 text-blue-950 rounded-xl px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-all" />
           </div>
           <div className="md:col-span-3 flex gap-2">
             <button type="button" onClick={() => { setFilterType('all'); setFilterName(''); setFilterStartDate(''); setFilterEndDate(''); setSearchTerm(''); }} className="flex-1 bg-gray-100 hover:bg-gray-200 text-blue-950 px-3 py-2.5 rounded-xl font-medium transition-colors">Clear All</button>
@@ -205,7 +207,9 @@ const AdminBookings: React.FC<Props> = (props) => {
                         <td className="px-6 py-5 align-top min-w-[160px] text-sm text-gray-700 break-words whitespace-normal">{request.purpose || '—'}</td>
                         <td className="px-6 py-5 align-top min-w-[220px] text-sm">
                           <div className="flex items-center gap-2">
-                            <button onClick={() => { setSelectedRequest(request); setLocalSelected(request); }} className="px-3 py-1.5 bg-blue-100 text-blue-700 rounded-md text-sm">View More</button>
+                            <button onClick={() => { setSelectedRequest(request); setLocalSelected(request); }} title="View details" aria-label="View details" className="p-2 bg-blue-100 text-blue-700 rounded-md text-sm">
+                              <AiOutlineEye className="w-4 h-4" />
+                            </button>
                             {request.status === 'pending' && (
                               <>
                                 <button onClick={() => { if (request.hasConflict && request.conflictingBookings) { const conflictCount = request.conflictingBookings.filter((c:any) => c.status === 'pending').length; if (conflictCount > 0 && !confirm(`⚠️ WARNING: Approving this booking will automatically DECLINE ${conflictCount} conflicting pending booking(s). Do you want to proceed?`)) return; } setSelectedRequest(request); handleBookingAction(request.id, 'approved'); }} className="px-3 py-1.5 bg-green-600 text-white rounded-md text-sm">Approve</button>
@@ -213,7 +217,9 @@ const AdminBookings: React.FC<Props> = (props) => {
                               </>
                             )}
                             {request.status === 'approved' && (
-                              <button onClick={() => { const reason = window.prompt('Enter revocation reason (required):'); if (!reason || !reason.trim()) { toast.error('Revocation reason required'); return; } setAdminNote(reason); setSelectedRequest(request); handleBookingAction(request.id, 'declined'); }} className="px-3 py-1.5 bg-orange-600 text-white rounded-md text-sm">Revoke</button>
+                              <button title="Revoke booking" aria-label="Revoke booking" onClick={() => { const reason = window.prompt('Enter revocation reason (required):'); if (!reason || !reason.trim()) { toast.error('Revocation reason required'); return; } setAdminNote(reason); setSelectedRequest(request); handleBookingAction(request.id, 'declined'); }} className="p-2 bg-orange-600 text-white rounded-md">
+                                <MdOutlineBlock className="w-4 h-4" />
+                              </button>
                             )}
                           </div>
                         </td>
@@ -229,8 +235,8 @@ const AdminBookings: React.FC<Props> = (props) => {
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">Page <span className="font-bold text-blue-950">{currentPage}</span> of <span className="font-bold text-blue-950">{totalPages}</span></div>
               <div className="flex items-center gap-2">
-                <button onClick={() => setCurrentPage((p:number) => Math.max(1, p - 1))} disabled={currentPage === 1} className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>Previous</button>
-                <button onClick={() => setCurrentPage((p:number) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-600 text-white hover:bg-blue-700'}`}>Next</button>
+                <button onClick={() => setCurrentPage((p:number) => Math.max(1, p - 1))} disabled={currentPage === 1} className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-950 text-white hover:bg-blue-700'}`}>Previous</button>
+                <button onClick={() => setCurrentPage((p:number) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-950 text-white hover:bg-blue-700'}`}>Next</button>
               </div>
             </div>
           </div>

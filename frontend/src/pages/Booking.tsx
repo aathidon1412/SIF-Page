@@ -44,7 +44,7 @@ const Booking: React.FC = () => {
   };
 
   return (
-    <div className="bg-yellow-50 pt-14 dark:bg-yellow-50 min-h-screen">
+    <div className="bg-yellow-50 pt-5 dark:bg-yellow-50 min-h-screen">
       <div className="w-full">
         {/* Hero block removed per request */}
         
@@ -76,11 +76,11 @@ const Booking: React.FC = () => {
                   // Check availability (same logic as MainBooking)
                   const available = eq.available !== false;
                   return (
-                      <article key={eq.id} role="button" tabIndex={0} onClick={() => available && handleCardClick(eq, 'equipment')} onKeyDown={(e) => { if (e.key === 'Enter') handleCardClick(eq, 'equipment'); }} className={`bg-[#fffdeb] rounded-2xl shadow p-4 border cursor-pointer transition-all duration-300 ${available ? 'hover:shadow-lg' : 'opacity-60 grayscale cursor-not-allowed'}`}>
+                      <article key={eq.id} role="button" tabIndex={0} onClick={() => available && handleCardClick(eq, 'equipment')} onKeyDown={(e) => { if (e.key === 'Enter') handleCardClick(eq, 'equipment'); }} className={`bg-[#fffdeb] rounded-2xl shadow p-4 border border-blue-950 cursor-pointer transition-all duration-300 ${available ? 'hover:shadow-lg' : 'opacity-60 grayscale cursor-not-allowed'}`}>
                       <div className="relative rounded-lg overflow-hidden h-44 mb-4">
-                        <img src={eq.image} alt={eq.title} className="w-full h-full object-cover" />
+                        <img src={eq.image} alt={eq.title} className="w-full h-full object-cover border-2 border-blue-950 rounded-lg" />
                         <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full">EQUIPMENT</span>
-                        <span className="absolute top-3 right-3 bg-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
+                        <span className="absolute top-3 right-3 bg-white px-2 py-1 rounded-full text-xs text-green-800 flex items-center gap-1">
                           <FaCheckCircle className={available ? "text-green-600" : "text-gray-400"} size={10} />
                           {available ? 'Available' : 'Unavailable'}
                         </span>
@@ -146,9 +146,9 @@ const Booking: React.FC = () => {
                     const available = lab.available !== false;
                     const labName = lab.name || lab.title;
                     return (
-                        <article key={lab.id} role="button" tabIndex={0} onClick={() => available && handleCardClick(lab, 'labs')} onKeyDown={(e) => { if (e.key === 'Enter' && available) handleCardClick(lab, 'labs'); }} className={`bg-[#fffdeb] text-blue-950 rounded-2xl p-4 shadow-md border transition-all duration-300 ${available ? 'cursor-pointer hover:shadow-lg' : 'opacity-60 grayscale cursor-not-allowed'}`}>
+                        <article key={lab.id} role="button" tabIndex={0} onClick={() => available && handleCardClick(lab, 'labs')} onKeyDown={(e) => { if (e.key === 'Enter' && available) handleCardClick(lab, 'labs'); }} className={`bg-[#fffdeb] text-blue-950 rounded-2xl p-4 shadow-md border border-blue-950 transition-all duration-300 ${available ? 'cursor-pointer hover:shadow-lg' : 'opacity-60 grayscale cursor-not-allowed'}`}>
                         <div className="relative rounded-lg overflow-hidden h-44 mb-4">
-                          <img src={lab.image} alt={labName} className="w-full h-full object-cover" />
+                          <img src={lab.image} alt={labName} className="w-full h-full object-cover border-2 border-blue-950 rounded-lg" />
                           <span className="absolute top-3 left-3 bg-blue-100 text-blue-800 text-xs px-3 py-1 rounded-full">LAB</span>
                           <span className="absolute top-3 right-3 bg-white px-2 py-1 rounded-full text-xs flex items-center gap-1">
                             <FaCheckCircle className={available ? "text-green-600" : "text-gray-400"} size={10} />

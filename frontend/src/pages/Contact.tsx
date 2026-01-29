@@ -11,22 +11,22 @@ const Contact: React.FC = () => {
   };
 
   return (
-  <div className="bg-blue-950 py-14 text-[#fffdeb] dark:bg-blue-950">
+  <div className="bg-blue-950 text-[#fffdeb] dark:bg-blue-950 pt-6 pb-12">
       <div className="w-full">
         <ScrollReveal>
-          <div className="mb-16 mt-8 mx-4 sm:mx-6 lg:mx-8 rounded-2xl p-8 lg:p-12 bg-transparent">
+          <div className="mx-4 sm:mx-6 lg:mx-8 rounded-2xl p-4 lg:p-6 bg-transparent">
             <div className="text-center">
               <h1 className="text-4xl md:text-5xl font-extrabold text-[#fffdeb] inline-block">
                 Get In <span className="text-yellow-300">Touch</span>
               </h1>
-              <p className="mt-6 text-lg max-w-3xl mx-auto text-[#fffdeb]">
+              <p className="mt-3 text-lg max-w-3xl mx-auto text-[#fffdeb]">
                 We're here to help and answer any questions you might have. We look forward to hearing from you.
               </p>
             </div>
           </div>
         </ScrollReveal>
 
-        <div className="mx-4 sm:mx-6 lg:mx-8 grid lg:grid-cols-2 gap-12 items-stretch">
+        <div className="mx-4 sm:mx-6 lg:mx-8 grid lg:grid-cols-2 gap-8 items-stretch">
           {/* Contact Information */}
           <ScrollReveal>
             <div className="space-y-8 h-full flex flex-col md:pr-8 md:border-r md:border-yellow-100">
@@ -121,7 +121,7 @@ const Contact: React.FC = () => {
 
           {/* Contact Form */}
           <ScrollReveal delay={200}>
-            <div className="p-10 md:p-12 rounded-2xl shadow-xl bg-transparent h-full flex flex-col md:pl-8">
+            <div className="p-6 md:p-8 rounded-2xl shadow-xl bg-transparent h-full flex flex-col md:pl-8">
               <h2 className="text-3xl md:text-4xl font-extrabold mb-4 text-[#fffdeb] tracking-tight leading-tight underline decoration-[#fffdeb] underline-offset-4">Send us a <span className="text-yellow-300">Message</span></h2>
               <p className="text-sm text-[#fffdeb] mb-6 max-w-xl">Have a question, project idea or need assistance? Send us a message and our team will get back to you shortly.</p>
 
