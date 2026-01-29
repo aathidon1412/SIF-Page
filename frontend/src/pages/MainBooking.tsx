@@ -498,7 +498,7 @@ const MainBooking: React.FC = () => {
                       )}
                     </div>
                     <h3 className="text-lg font-semibold text-blue-950 mb-1 group-hover:text-blue-800 transition-colors">{eq.title}</h3>
-                    <p className="text-sm text-gray-600 mb-3">{eq.description}</p>
+                    <p className="text-sm text-gray-600 mb-3">{eq.description || eq.desc || 'No description'}</p>
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="text-2xl font-bold text-blue-950">Rs: {eq.pricePerDay.toFixed(2)}</div>

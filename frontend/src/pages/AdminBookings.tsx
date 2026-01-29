@@ -36,64 +36,66 @@ const AdminBookings: React.FC<Props> = (props) => {
 
   return (
     <div>
-      <button
-        onClick={() => navigate('/admin')}
-        className="mb-6 flex items-center gap-2 text-blue-950 hover:text-blue-700 font-medium transition-colors"
-      >
-        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-        </svg>
-        Back to Dashboard
-      </button>
+      <div className="flex justify-end mb-6">
+        <button
+          onClick={() => navigate('/admin')}
+          className="flex items-center gap-2 text-blue-950 hover:bg-blue-950 hover:text-white font-medium transition-colors border-2 border-blue-950 px-4 py-2 rounded-xl"
+        >
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+          </svg>
+          Back to Dashboard
+        </button>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-950">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8">
+        <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-l-4 border-blue-950">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Total Requests</p>
-              <p className="text-3xl font-bold text-blue-950 mt-1">{bookingRequests.length}</p>
+              <p className="text-xs md:text-sm font-medium text-gray-600">Total Requests</p>
+              <p className="text-2xl md:text-3xl font-bold text-blue-950 mt-1">{bookingRequests.length}</p>
             </div>
-            <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+              <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-yellow-500">
+        <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-l-4 border-yellow-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-3xl font-bold text-yellow-600 mt-1">{bookingRequests.filter((r: BookingRequest) => r.status === 'pending').length}</p>
+              <p className="text-xs md:text-sm font-medium text-gray-600">Pending</p>
+              <p className="text-2xl md:text-3xl font-bold text-yellow-600 mt-1">{bookingRequests.filter((r: BookingRequest) => r.status === 'pending').length}</p>
             </div>
-            <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+              <svg className="w-5 h-5 md:w-6 md:h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-green-500">
+        <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-l-4 border-green-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Approved</p>
-              <p className="text-3xl font-bold text-green-600 mt-1">{bookingRequests.filter((r: BookingRequest) => r.status === 'approved').length}</p>
+              <p className="text-xs md:text-sm font-medium text-gray-600">Approved</p>
+              <p className="text-2xl md:text-3xl font-bold text-green-600 mt-1">{bookingRequests.filter((r: BookingRequest) => r.status === 'approved').length}</p>
             </div>
-            <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-xl flex items-center justify-center">
+              <svg className="w-5 h-5 md:w-6 md:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
           </div>
         </div>
-        <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-red-500">
+        <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-l-4 border-red-500">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Declined</p>
-              <p className="text-3xl font-bold text-red-600 mt-1">{bookingRequests.filter((r: BookingRequest) => r.status === 'declined').length}</p>
+              <p className="text-xs md:text-sm font-medium text-gray-600">Declined</p>
+              <p className="text-2xl md:text-3xl font-bold text-red-600 mt-1">{bookingRequests.filter((r: BookingRequest) => r.status === 'declined').length}</p>
             </div>
-            <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-10 h-10 md:w-12 md:h-12 bg-red-100 rounded-xl flex items-center justify-center">
+              <svg className="w-5 h-5 md:w-6 md:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -235,8 +237,8 @@ const AdminBookings: React.FC<Props> = (props) => {
             <div className="flex items-center justify-between">
               <div className="text-sm text-gray-600">Page <span className="font-bold text-blue-950">{currentPage}</span> of <span className="font-bold text-blue-950">{totalPages}</span></div>
               <div className="flex items-center gap-2">
-                <button onClick={() => setCurrentPage((p:number) => Math.max(1, p - 1))} disabled={currentPage === 1} className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-950 text-white hover:bg-blue-700'}`}>Previous</button>
-                <button onClick={() => setCurrentPage((p:number) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-950 text-white hover:bg-blue-700'}`}>Next</button>
+                <button onClick={() => setCurrentPage((p:number) => Math.max(1, p - 1))} disabled={currentPage === 1} className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-900 text-white hover:bg-blue-950'}`}>Previous</button>
+                <button onClick={() => setCurrentPage((p:number) => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages} className={`px-4 py-2 rounded-lg font-medium transition-colors ${currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-blue-900 text-white hover:bg-blue-950'}`}>Next</button>
               </div>
             </div>
           </div>

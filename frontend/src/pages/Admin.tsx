@@ -160,7 +160,9 @@ const Admin: React.FC = () => {
     try {
       const token = localStorage.getItem('admin_token') || '';
       const created = await createItem(token, itemData);
-      setItems(prev => [created, ...prev]);
+      // Normalize _id to id for consistency
+      const normalizedItem = { ...created, id: created._id || created.id };
+      setItems(prev => [normalizedItem, ...prev]);
       toast.success(`${itemTypeToUse} added successfully`);
     } catch (e:any) {
       toast.error(e.message || 'Failed to add item');
@@ -206,7 +208,9 @@ const Admin: React.FC = () => {
     try {
       const token = localStorage.getItem('admin_token') || '';
       const updated = await updateItem(token, editingItem.id, updates);
-      setItems(prev => prev.map(i => i._id === editingItem.id || i.id === editingItem.id ? updated : i));
+      // Normalize _id to id for consistency
+      const normalizedItem = { ...updated, id: updated._id || updated.id };
+      setItems(prev => prev.map(i => i._id === editingItem.id || i.id === editingItem.id ? normalizedItem : i));
       setShowEditModal(false);
       setEditingItem(null);
       toast.success('Item updated successfully');
@@ -576,29 +580,30 @@ const Admin: React.FC = () => {
     <div className="min-h-screen bg-yellow-50">
       {/* Compact Header */}
       <div className="bg-blue-950 text-white shadow-xl">
-        <div className="max-w-1xl mx-auto px-6 py-4">
+        <div className="max-w-1xl mx-auto px-3 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center space-x-2 md:space-x-3">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
-              <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+              <h1 className="text-lg md:text-2xl font-bold">Admin Dashboard</h1>
             </div>
             
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 md:space-x-3">
               <button
                 onClick={() => navigate('/main-booking')}
-                className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 border border-white border-opacity-30"
+                className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-2 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-sm md:font-medium transition-all duration-200 flex items-center space-x-1 md:space-x-2 border border-white border-opacity-30"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                <span>Back to Booking</span>
+                <span className="hidden sm:inline">Back to Booking</span>
+                <span className="sm:hidden">Back</span>
               </button>
               <button 
-                className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl transition-colors font-medium shadow-lg flex items-center space-x-2" 
+                className="bg-red-600 hover:bg-red-700 text-white px-2 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl transition-colors text-sm md:font-medium shadow-lg flex items-center space-x-1 md:space-x-2" 
                 onClick={() => { 
                   setAuth(false); 
                   toast.success('Logged out');
@@ -613,17 +618,18 @@ const Admin: React.FC = () => {
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                <span>Logout</span>
+                <span className="hidden sm:inline">Logout</span>
+                <span className="sm:hidden">Logout</span>
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-1xl mx-auto px-6 py-8 mt-6">
+      <div className="max-w-1xl mx-auto px-4 md:px-8 lg:px-12 py-6 md:py-8 mt-4 md:mt-6">
         {/* Welcome Section - only show on /admin root */}
         {currentPath === '/admin' && (
-          <div className="bg-gradient-to-r from-blue-950 to-blue-900 rounded-2xl shadow-xl p-8 mb-8 text-white">
+          <div className="bg-blue-950 rounded-2xl shadow-xl p-8 mb-8 text-white">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-3xl font-bold mb-2">Welcome, Administrator</h2>
@@ -646,57 +652,57 @@ const Admin: React.FC = () => {
           /* Main Dashboard - Card Navigation */
           <>
             {/* Dashboard Stats */}
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-              <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-blue-950">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8">
+              <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-l-4 border-blue-950">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Total Requests</p>
-                    <p className="text-3xl font-bold text-blue-950 mt-1">{bookingRequests.length}</p>
+                    <p className="text-xs md:text-sm font-medium text-gray-600">Total Requests</p>
+                    <p className="text-2xl md:text-3xl font-bold text-blue-950 mt-1">{bookingRequests.length}</p>
                   </div>
-                  <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                    <svg className="w-6 h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                     </svg>
                   </div>
                 </div>
               </div>
               
-              <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-yellow-500">
+              <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-l-4 border-yellow-500">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Pending</p>
-                    <p className="text-3xl font-bold text-yellow-600 mt-1">{bookingRequests.filter(r => r.status === 'pending').length}</p>
+                    <p className="text-xs md:text-sm font-medium text-gray-600">Pending</p>
+                    <p className="text-2xl md:text-3xl font-bold text-yellow-600 mt-1">{bookingRequests.filter(r => r.status === 'pending').length}</p>
                   </div>
-                  <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
-                    <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 md:w-6 md:h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                 </div>
               </div>
               
-              <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-green-500">
+              <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-l-4 border-green-500">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Approved</p>
-                    <p className="text-3xl font-bold text-green-600 mt-1">{bookingRequests.filter(r => r.status === 'approved').length}</p>
+                    <p className="text-xs md:text-sm font-medium text-gray-600">Approved</p>
+                    <p className="text-2xl md:text-3xl font-bold text-green-600 mt-1">{bookingRequests.filter(r => r.status === 'approved').length}</p>
                   </div>
-                  <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 md:w-6 md:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                 </div>
               </div>
               
-              <div className="bg-white rounded-2xl shadow-lg p-6 border-l-4 border-red-500">
+              <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-l-4 border-red-500">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">Declined</p>
-                    <p className="text-3xl font-bold text-red-600 mt-1">{bookingRequests.filter(r => r.status === 'declined').length}</p>
+                    <p className="text-xs md:text-sm font-medium text-gray-600">Declined</p>
+                    <p className="text-2xl md:text-3xl font-bold text-red-600 mt-1">{bookingRequests.filter(r => r.status === 'declined').length}</p>
                   </div>
-                  <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-                    <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 md:w-6 md:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
