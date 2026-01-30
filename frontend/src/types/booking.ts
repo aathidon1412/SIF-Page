@@ -1,3 +1,15 @@
+export interface ConflictingBooking {
+  bookingId: string;
+  userEmail: string;
+  userName?: string;
+  status: string;
+  startDate: string;
+  endDate: string;
+  startTime?: string;
+  endTime?: string;
+  conflictType: 'exact_match' | 'fully_contained' | 'partial_overlap';
+}
+
 export interface BookingRequest {
   id: string;
   userId: string;
@@ -19,6 +31,11 @@ export interface BookingRequest {
   totalCost: number;
   submittedAt: string;
   reviewedAt?: string;
+  // Conflict metadata
+  hasConflict?: boolean;
+  conflictingBookings?: ConflictingBooking[];
+  wasApprovedBefore?: boolean;
+  declinedAfterApproval?: boolean;
 }
 
 export interface BookingFormData {

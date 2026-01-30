@@ -1,5 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
+import logo1 from '../assets/logo_1.png';
+import logo2 from '../assets/logo_2.png';
+import logo3 from '../assets/logo_3.png';
+import { ChevronDownIcon, MenuIcon, XIcon } from './icons';
 
 interface NavItem {
   name: string;
@@ -8,8 +12,16 @@ interface NavItem {
 
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
-  const [isVisible, setIsVisible] = useState<boolean>(true);
-  const [lastScrollY, setLastScrollY] = useState<number>(0);
+  const [currentLogoIndex, setCurrentLogoIndex] = useState<number>(0);
+  const logos = [logo1, logo2, logo3];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentLogoIndex((prev) => (prev + 1) % logos.length);
+    }, 2500);
+
+    return () => clearInterval(interval);
+  }, []);
 
   const toggleMenu = (): void => {
     setIsMenuOpen(!isMenuOpen);
@@ -19,26 +31,7 @@ const Navbar: React.FC = () => {
     setIsMenuOpen(false);
   };
 
-  // Scroll detection logic
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      
-      if (currentScrollY < lastScrollY) {
-        // Scrolling up
-        setIsVisible(true);
-      } else if (currentScrollY > lastScrollY && currentScrollY > 100) {
-        // Scrolling down and past 100px
-        setIsVisible(false);
-        setIsMenuOpen(false); // Close mobile menu when hiding
-      }
-      
-      setLastScrollY(currentScrollY);
-    };
-
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, [lastScrollY]);
+  // Navbar is static/sticky; no scroll-hide behavior.
 
   const navItems: NavItem[] = [
     { name: 'Home', path: '/' },
@@ -48,101 +41,84 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <nav
-      className={`fixed top-4 left-1/2 transform -translate-x-1/2 z-50 transition-all duration-300 ease-in-out ${
-        isVisible ? 'translate-y-0 opacity-100' : '-translate-y-full opacity-0'
-      }`}
-    >
-      {/* Floating navbar container */}
-      <div className="bg-white backdrop-blur-md border-2 border-blue-900/60 rounded-2xl shadow-lg px-4 sm:px-6 py-3 w-full max-w-sm sm:max-w-md md:w-auto md:max-w-6xl">
-        <div className="flex items-center justify-between">
+    <nav className="sticky top-0 z-50 px-0">
+      {/* Full-width navbar container */}
+      <div className="bg-[#fffdeb] px-6 py-4 w-full">
+        <div className="relative flex items-center justify-between">
           {/* Logo/Brand - Desktop */}
-          <div className="hidden md:flex flex-shrink-0">
-            <NavLink 
-              to="/" 
-              className="text-lg font-bold text-blue-900 hover:text-blue-700 transition-colors duration-200"
-              onClick={closeMenu}
-            >
-              SIF-FAB LAB
+          <div className="hidden md:flex flex-shrink-0 items-center">
+            <NavLink to="/" onClick={closeMenu} className="flex items-center gap-3">
+              <div className="relative w-12 h-12" style={{ perspective: '800px' }}>
+                <div
+                  className="absolute w-full h-full transition-transform duration-700 ease-in-out"
+                  style={{ transformStyle: 'preserve-3d', transform: `rotateY(${currentLogoIndex * 120}deg)` }}
+                >
+                  {logos.map((l, i) => (
+                    <div
+                      key={i}
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{ backfaceVisibility: 'hidden', transform: `rotateY(${i * 120}deg) translateZ(26px)` }}
+                    >
+                      <img src={l} alt={`logo-${i}`} className="w-full h-full object-contain" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <span className="text-xl font-bold text-slate-900 hover:text-slate-700 transition-colors duration-200">SIF-FAB LAB</span>
             </NavLink>
           </div>
 
-          {/* Vertical divider between logo and nav - Desktop */}
-          <div className="hidden md:block w-px h-8 bg-blue-900/60 ml-6"></div>
-
-          {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center mx-8">
-            {navItems.map((item, index) => (
-              <React.Fragment key={item.name}>
-                <NavLink
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                      isActive
-                        ? 'bg-blue-900 text-white shadow-md'
-                        : 'text-blue-900 hover:bg-blue-100/50 hover:text-blue-900'
-                    }`
-                  }
-                >
-                  {item.name}
-                </NavLink>
-                {index < navItems.length - 1 && (
-                  <div className="w-px h-6 bg-blue-900 mx-4"></div>
-                )}
-              </React.Fragment>
+          {/* Desktop Navigation (centered) */}
+          <div className="hidden md:flex items-center absolute left-1/2 transform -translate-x-1/2 space-x-6">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.name}
+                to={item.path}
+                className={({ isActive }) =>
+                  `group inline-flex items-center gap-2 px-6 py-3 rounded-xl text-base font-medium transition-all duration-200 ${
+                    isActive
+                      ? 'bg-blue-900 text-white shadow-md'
+                      : 'text-slate-900 hover:bg-blue-100/50 hover:text-slate-900'
+                  }`
+                }
+              >
+                <span>{item.name}</span>
+              </NavLink>
             ))}
           </div>
 
           {/* Mobile: Logo + Menu button */}
           <div className="md:hidden flex items-center justify-between w-full">
-            <NavLink 
-              to="/" 
-              className="text-sm sm:text-lg font-bold text-blue-900 hover:text-blue-700 transition-colors duration-200 whitespace-nowrap mr-40"
-              onClick={closeMenu}
-            >
-              SIF-FAB LAB
+            <NavLink to="/" onClick={closeMenu} className="flex items-center gap-3">
+              <div className="relative w-10 h-10" style={{ perspective: '700px' }}>
+                <div
+                  className="absolute w-full h-full transition-transform duration-700 ease-in-out"
+                  style={{ transformStyle: 'preserve-3d', transform: `rotateY(${currentLogoIndex * 120}deg)` }}
+                >
+                  {logos.map((l, i) => (
+                    <div
+                      key={i}
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{ backfaceVisibility: 'hidden', transform: `rotateY(${i * 120}deg) translateZ(22px)` }}
+                    >
+                      <img src={l} alt={`logo-${i}`} className="w-full h-full object-contain" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <span className="text-base sm:text-lg font-bold text-slate-900 hover:text-slate-700 transition-colors duration-200 whitespace-nowrap">SIF-FAB LAB</span>
             </NavLink>
             
             <button
               onClick={toggleMenu}
               type="button"
-              className="bg-yellow-300/20 backdrop-blur-sm inline-flex items-center justify-center p-2 rounded-full text-blue-900 hover:bg-yellow-300/30 focus:outline-none focus:ring-2 focus:ring-yellow-400/50 transition-all duration-200 mr-2"
+              className="bg-transparent inline-flex items-center justify-center p-2 rounded-full text-slate-900 hover:bg-white/5 focus:outline-none focus:ring-2 focus:ring-white/20 transition-all duration-200 mr-2"
               aria-controls="mobile-menu"
               aria-expanded={isMenuOpen}
             >
               <span className="sr-only">Open main menu</span>
-              {/* Hamburger icon */}
-              <svg
-                className={`${isMenuOpen ? 'hidden' : 'block'} h-5 w-5`}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-              {/* Close icon */}
-              <svg
-                className={`${isMenuOpen ? 'block' : 'hidden'} h-5 w-5`}
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-                aria-hidden="true"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M6 18L18 6M6 6l12 12"
-                />
-              </svg>
+              <MenuIcon className={`${isMenuOpen ? 'hidden' : 'block'} h-5 w-5`} />
+              <XIcon className={`${isMenuOpen ? 'block' : 'hidden'} h-5 w-5`} />
             </button>
           </div>
         </div>
@@ -150,22 +126,25 @@ const Navbar: React.FC = () => {
 
       {/* Mobile Navigation Menu */}
       {isMenuOpen && (
-        <div className="md:hidden absolute top-full left-1/2 transform -translate-x-1/2 mt-2 w-80 sm:w-96">
-          <div className="bg-yellow-200/40 backdrop-blur-md border-2 border-yellow-400/60 rounded-2xl shadow-lg p-2">
+        <div className="md:hidden absolute top-full left-0 right-0 mt-0 px-0">
+          <div className="bg-[#fffdeb] p-2 mx-auto w-full sm:max-w-md">
             {navItems.map((item, index) => (
               <React.Fragment key={item.name}>
                 <NavLink
                   to={item.path}
                   className={({ isActive }) =>
-                    `block px-4 py-3 rounded-xl text-base font-medium text-center transition-all duration-200 ${
+                    `group block px-4 py-3 rounded-xl text-base font-medium text-center transition-all duration-200 ${
                       isActive
                         ? 'bg-blue-900 text-white shadow-md'
-                        : 'text-blue-900 hover:bg-yellow-200/30 hover:text-blue-900'
+                        : 'text-slate-900 hover:bg-yellow-200/30 hover:text-slate-900'
                     }`
                   }
                   onClick={closeMenu}
                 >
-                  {item.name}
+                  <span className="inline-flex items-center justify-center gap-2">
+                    <ChevronDownIcon className="h-4 w-4 transform transition-transform duration-300 group-hover:rotate-90" />
+                    <span>{item.name}</span>
+                  </span>
                 </NavLink>
                 {index < navItems.length - 1 && (
                   <div className="h-px bg-blue-900 mx-2 my-1"></div>

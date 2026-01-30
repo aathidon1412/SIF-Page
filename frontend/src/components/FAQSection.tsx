@@ -103,12 +103,9 @@ const FAQSection: React.FC = () => {
       <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-8 xl:px-12">
         <ScrollReveal>
           <div className="text-center mb-10">
-            <div className="relative inline-block mx-auto mb-6">
-              <h2 className="text-3xl md:text-4xl font-bold text-white">
-                Frequently Asked <span className="text-yellow-300">Questions</span>
-              </h2>
-              <span className="absolute inset-x-0 -bottom-3 h-1 rounded bg-blue-900" />
-            </div>
+            <h2 className="text-3xl md:text-4xl font-bold text-white inline-block border-b-4 border-yellow-300">
+              Frequently Asked <span className="text-yellow-300">Questions</span>
+            </h2>
             <p className="mt-4 text-lg text-blue-100">Have questions? We have answers.</p>
           </div>
         </ScrollReveal>

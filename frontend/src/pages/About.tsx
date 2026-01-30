@@ -1,15 +1,17 @@
 import React from 'react';
+import { FaCircle } from 'react-icons/fa';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import { FaLinkedin, FaXTwitter, FaInstagram } from 'react-icons/fa6';
 
 
 
 const About: React.FC = () => {
   return (
-    <div className="bg-yellow-50 pt-14 dark:bg-yellow-50">
+    <div className="bg-yellow-50 pt-1 dark:bg-yellow-50">
       <div className="w-full ">
         {/* Header Section */}
         <ScrollReveal>
-          <div className="mb-16 mt-8 mx-4 sm:mx-6 lg:mx-8 border-2 border-blue-950 rounded-2xl p-8 lg:p-12">
+          <div className="mb-16 mt-8 mx-4 sm:mx-6 lg:mx-8 rounded-2xl p-8 lg:p-12">
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               <div className="text-left">
                 <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-black inline-block border-b-4 border-blue-950">
@@ -38,11 +40,11 @@ const About: React.FC = () => {
         <div className="w-full mb-0 bg-blue-950">
           <ScrollReveal>
             <div className="mx-4 sm:mx-6 lg:mx-8 py-8">
-              <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center p-8 lg:p-12 border-2 rounded-2xl" style={{ borderColor: '#fffdeb' }}>
-                <div className="flex justify-center">
-                  <img src="https://picsum.photos/800/600?random=2" alt="Mission - Lab collaboration" className="rounded-2xl shadow-lg w-full object-cover"/>
-                </div>
-                <div className="text-white">
+              <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center p-8 lg:p-12 rounded-2xl">
+                <div className="flex justify-center order-last md:order-first">
+                    <img src="https://picsum.photos/800/600?random=2" alt="Mission - Lab collaboration" className="rounded-2xl shadow-lg w-full object-cover"/>
+                  </div>
+                  <div className="text-white order-first md:order-last">
                   <section aria-labelledby="mission-heading">
                     <h2 id="mission-heading" className="text-3xl md:text-4xl font-bold mb-6 text-yellow-300 inline-block border-b-4 border-yellow-300">Our Mission</h2>
                     <p className="text-lg leading-relaxed text-blue-100 mb-6">
@@ -54,19 +56,19 @@ const About: React.FC = () => {
                     <div className="space-y-3 text-blue-100">
                       <ul className="space-y-3 text-base">
                         <li className="flex items-start">
-                          <span className="text-yellow-300 mr-3 mt-1">•</span>
+                          <span className="text-yellow-300 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-yellow-300 font-medium">Universal Access</span> - Making cutting-edge tools available to everyone</span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-yellow-300 mr-3 mt-1">•</span>
+                          <span className="text-yellow-300 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-yellow-300 font-medium">Inclusive Learning</span> - Creating environments where experimentation thrives</span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-yellow-300 mr-3 mt-1">•</span>
+                          <span className="text-yellow-300 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-yellow-300 font-medium">Breaking Barriers</span> - Empowering creators from all backgrounds</span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-yellow-300 mr-3 mt-1">•</span>
+                          <span className="text-yellow-300 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-yellow-300 font-medium">Community Building</span> - Fostering collaboration and knowledge sharing</span>
                         </li>
                       </ul>
@@ -83,7 +85,7 @@ const About: React.FC = () => {
         <div className="w-full mb-0" style={{ backgroundColor: '#fffdeb' }}>
           <ScrollReveal delay={200}>
             <div className="mx-4 sm:mx-6 lg:mx-8 py-8">
-              <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center p-8 lg:p-12 border-2 rounded-2xl border-blue-950">
+              <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center p-8 lg:p-12 rounded-2xl">
                 <div className="text-blue-950">
                   <section aria-labelledby="vision-heading">
                     <h2 id="vision-heading" className="text-3xl md:text-4xl font-bold mb-6 text-blue-950 inline-block border-b-4 border-blue-950">Our Vision</h2>
@@ -96,19 +98,19 @@ const About: React.FC = () => {
                     <div className="space-y-3 text-blue-900">
                       <ul className="space-y-3 text-base">
                         <li className="flex items-start">
-                          <span className="text-blue-950 mr-3 mt-1">•</span>
+                          <span className="text-blue-950 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-blue-950 font-medium">Research Excellence</span> - Driving interdisciplinary innovation and discovery</span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-blue-950 mr-3 mt-1">•</span>
+                          <span className="text-blue-950 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-blue-950 font-medium">Educational Impact</span> - Transforming learning through hands-on experience</span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-blue-950 mr-3 mt-1">•</span>
+                          <span className="text-blue-950 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-blue-950 font-medium">Entrepreneurial Growth</span> - Nurturing startups and business innovation</span>
                         </li>
                         <li className="flex items-start">
-                          <span className="text-blue-950 mr-3 mt-1">•</span>
+                          <span className="text-blue-950 mr-3 mt-1.5"><FaCircle size={8} /></span>
                           <span><span className="text-blue-950 font-medium">Community Leadership</span> - Inspiring regional and global development</span>
                         </li>
                       </ul>
@@ -126,7 +128,7 @@ const About: React.FC = () => {
         <div className="w-full  bg-blue-950">
           <ScrollReveal>
             <div className="mx-4 sm:mx-6 lg:mx-8 py-8">
-              <div className="border-4 rounded-2xl p-6 lg:p-8" style={{ borderColor: '#fffdeb' }}>
+              <div className="rounded-2xl p-6 lg:p-8">
                 {/* Section Header */}
                 <div className="text-center mb-6">
                   <h2 className="text-4xl md:text-5xl font-bold text-yellow-300 inline-block border-b-4 border-yellow-300 pb-2">
@@ -142,21 +144,20 @@ const About: React.FC = () => {
                   {/* Founder Section */}
                   <div className="flex flex-col items-center justify-start p-3 lg:p-4">
                     <div className="w-40 h-40 lg:w-48 lg:h-48 mb-4">
-                      <img 
-                        src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
-                        alt="Dr. Rahman Al-Farisi - Founder" 
-                        className="w-full h-full rounded-full object-cover border-4 shadow-2xl"
-                        style={{ borderColor: '#fffdeb' }}
-                      />
-                    </div>
+                        <img 
+                          src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                          alt="Dr. Rahman Al-Farisi - Founder" 
+                          className="w-full h-full rounded-full object-cover shadow-2xl"
+                        />
+                      </div>
                     <div className="text-center text-white max-w-sm">
                       <h3 className="text-2xl lg:text-3xl font-bold text-yellow-300 mb-2">Dr. Rahman Al-Farisi</h3>
                       <p className="text-lg text-yellow-200 mb-4 font-medium">Founder & Director</p>
                       
                       <div className="space-y-2 text-sm text-blue-200 text-left">
-                        <p>• PhD in Mechanical Engineering</p>
-                        <p>• Former MIT Research Fellow</p>
-                        <p>• 20+ Patents in Digital Fabrication</p>
+                        <p className="flex items-center gap-2"><FaCircle size={6} /> PhD in Mechanical Engineering</p>
+                        <p className="flex items-center gap-2"><FaCircle size={6} /> Former MIT Research Fellow</p>
+                        <p className="flex items-center gap-2"><FaCircle size={6} /> 20+ Patents in Digital Fabrication</p>
                       </div>
 
                       {/* Social connections */}
@@ -164,39 +165,30 @@ const About: React.FC = () => {
                         <a
                           href="#"
                           aria-label="Rahman on LinkedIn"
-                          className="hover:text-yellow-300 transition-colors inline-flex items-center justify-center w-7 h-7"
+                          className="hover:text-yellow-300 transition-colors"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM0 8h5v16H0V8zm7.5 0h4.7v2.2h.1c.7-1.3 2.5-2.7 5.1-2.7 5.5 0 6.5 3.6 6.5 8.4V24h-5v-7.1c0-1.7 0-3.9-2.4-3.9s-2.8 1.9-2.8 3.8V24h-5V8z"/>
-                          </svg>
+                          <FaLinkedin size={24} />
                         </a>
                         <a
                           href="#"
                           aria-label="Rahman on X"
-                          className="hover:text-yellow-300 transition-colors inline-flex items-center justify-center w-7 h-7"
+                          className="hover:text-yellow-300 transition-colors"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M3 3h4.6l4.3 5.7L17.9 3H21l-6.6 8.2L21 21h-4.6l-4.6-6-5 6H3l7-8.4L3 3z"/>
-                          </svg>
+                          <FaXTwitter size={24} />
                         </a>
                         <a
                           href="#"
                           aria-label="Rahman on Instagram"
-                          className="hover:text-yellow-300 transition-colors inline-flex items-center justify-center w-7 h-7"
+                          className="hover:text-yellow-300 transition-colors"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2.2A2.8 2.8 0 1 0 12 16.8 2.8 2.8 0 0 0 12 9.2zm5.5-2.7a1.3 1.3 0 1 1 0 2.6 1.3 1.3 0 0 1 0-2.6z"/>
-                          </svg>
+                          <FaInstagram size={24} />
                         </a>
                       </div>
                     </div>
                   </div>
 
                   {/* Vertical Divider */}
-                  <div className="hidden md:block absolute left-1/2 top-0 bottom-0 w-1 transform -translate-x-1/2" style={{ backgroundColor: '#fffdeb' }}></div>
-                  
-                  {/* Horizontal Divider for Mobile */}
-                  <div className="md:hidden w-full h-1 my-8" style={{ backgroundColor: '#fffdeb' }}></div>
+                  {/* Dividers removed */}
 
                   {/* Co-Founder Section */}
                   <div className="flex flex-col items-center justify-start p-3 lg:p-4">
@@ -204,8 +196,7 @@ const About: React.FC = () => {
                       <img 
                         src="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=3461&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
                         alt="Dr. Maya Patel - Co-Founder" 
-                        className="w-full h-full rounded-full object-cover border-4 shadow-2xl"
-                        style={{ borderColor: '#fffdeb' }}
+                        className="w-full h-full rounded-full object-cover shadow-2xl"
                       />
                     </div>
                     <div className="text-center text-white max-w-sm">
@@ -213,9 +204,9 @@ const About: React.FC = () => {
                       <p className="text-lg text-yellow-200 mb-4 font-medium">Co-Founder & Innovation Lead</p>
                       
                       <div className="space-y-2 text-sm text-blue-200 text-left">
-                        <p>• MBA from Stanford Business School</p>
-                        <p>• Serial Tech Entrepreneur</p>
-                        <p>• 3 Successful Exits in DeepTech</p>
+                        <p className="flex items-center gap-2"><FaCircle size={6} /> MBA from Stanford Business School</p>
+                        <p className="flex items-center gap-2"><FaCircle size={6} /> Serial Tech Entrepreneur</p>
+                        <p className="flex items-center gap-2"><FaCircle size={6} /> 3 Successful Exits in DeepTech</p>
                       </div>
 
                       {/* Social connections */}
@@ -223,29 +214,23 @@ const About: React.FC = () => {
                         <a
                           href="#"
                           aria-label="Maya on LinkedIn"
-                          className="hover:text-yellow-300 transition-colors inline-flex items-center justify-center w-7 h-7"
+                          className="hover:text-yellow-300 transition-colors"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1 4.98 2.12 4.98 3.5zM0 8h5v16H0V8zm7.5 0h4.7v2.2h.1c.7-1.3 2.5-2.7 5.1-2.7 5.5 0 6.5 3.6 6.5 8.4V24h-5v-7.1c0-1.7 0-3.9-2.4-3.9s-2.8 1.9-2.8 3.8V24h-5V8z"/>
-                          </svg>
+                          <FaLinkedin size={24} />
                         </a>
                         <a
                           href="#"
                           aria-label="Maya on X"
-                          className="hover:text-yellow-300 transition-colors inline-flex items-center justify-center w-7 h-7"
+                          className="hover:text-yellow-300 transition-colors"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M3 3h4.6l4.3 5.7L17.9 3H21l-6.6 8.2L21 21h-4.6l-4.6-6-5 6H3l7-8.4L3 3z"/>
-                          </svg>
+                          <FaXTwitter size={24} />
                         </a>
                         <a
                           href="#"
                           aria-label="Maya on Instagram"
-                          className="hover:text-yellow-300 transition-colors inline-flex items-center justify-center w-7 h-7"
+                          className="hover:text-yellow-300 transition-colors"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-                            <path d="M7 2h10a5 5 0 0 1 5 5v10a5 5 0 0 1-5 5H7a5 5 0 0 1-5-5V7a5 5 0 0 1 5-5zm0 2a3 3 0 0 0-3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3V7a3 3 0 0 0-3-3H7zm5 3a5 5 0 1 1 0 10 5 5 0 0 1 0-10zm0 2.2A2.8 2.8 0 1 0 12 16.8 2.8 2.8 0 0 0 12 9.2zm5.5-2.7a1.3 1.3 0 1 1 0 2.6 1.3 1.3 0 0 1 0-2.6z"/>
-                          </svg>
+                          <FaInstagram size={24} />
                         </a>
                       </div>
                     </div>

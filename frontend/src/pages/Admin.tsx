@@ -1,114 +1,411 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useState, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import type { BookingRequest } from '../types/booking';
+import { toast } from 'react-hot-toast';
+import { adminLogin, fetchBookings, updateBookingStatus, fetchItems, createItem, deleteItem, updateItem, createBackup, restoreBackup, verifyBackup } from '../services/api';
+import AdminBookings from './AdminBookings';
+import AdminEquipments from './AdminEquipments';
+import AdminLabs from './AdminLabs';
+import { exportToExcel } from '../lib/exportExcel';
 
-type Item = { id: string; title: string; type: 'lab' | 'equipment'; desc?: string };
-
-const ADMIN_USER = import.meta.env.VITE_ADMIN_USER || 'thiganth';
-const ADMIN_PASS = import.meta.env.VITE_ADMIN_PASS || 'thiganth';
+// Backend API handles admin credentials (seeded); env fallback removed.
 
 const Admin: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
+  
+  // Items managed via backend API instead of local context
+  const [items, setItems] = useState<any[]>([]);
   const [auth, setAuth] = useState(false);
   const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
-  const [activeTab, setActiveTab] = useState<'items' | 'bookings'>('bookings');
-  const [items, setItems] = useState<Item[]>(() => {
+  const [newItemTitle, setNewItemTitle] = useState('');
+  const [newItemType, setNewItemType] = useState<'lab' | 'equipment'>('equipment');
+  const [newItemDesc, setNewItemDesc] = useState('');
+  const [newItemPrice, setNewItemPrice] = useState<number>(0);
+  const [newItemCapacity, setNewItemCapacity] = useState('');
+  const [newItemImage, setNewItemImage] = useState('');
+  const [editingItem, setEditingItem] = useState<any>(null);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  
+  // Separate items by type
+  const equipments = items.filter(i => i.type === 'equipment');
+  const labs = items.filter(i => i.type === 'lab');
+  const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>([]);
+  const [, setSelectedRequest] = useState<BookingRequest | null>(null);
+  const [adminNote, setAdminNote] = useState('');
+  const [adminLogs, setAdminLogs] = useState<{ type: 'login' | 'logout'; timestamp: string }[]>(() => {
     try {
-      const raw = localStorage.getItem('admin_items');
+      const raw = localStorage.getItem('admin_logs');
       return raw ? JSON.parse(raw) : [];
     } catch {
       return [];
     }
   });
-  const [bookingRequests, setBookingRequests] = useState<BookingRequest[]>(() => {
-    try {
-      const raw = localStorage.getItem('booking_requests');
-      if (raw) {
-        const requests = JSON.parse(raw);
-        // Sort by most recent activity (reviewedAt or submittedAt)
-        return requests.sort((a: BookingRequest, b: BookingRequest) => {
-          const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
-          const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
-          return dateB - dateA; // Most recent first
-        });
-      }
-      return [];
-    } catch {
-      return [];
-    }
-  });
-  const [selectedRequest, setSelectedRequest] = useState<BookingRequest | null>(null);
-  const [adminNote, setAdminNote] = useState('');
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState<'all' | 'lab' | 'equipment'>('all');
+  const [filterName, setFilterName] = useState('');
+  const [filterStartDate, setFilterStartDate] = useState('');
+  const [filterEndDate, setFilterEndDate] = useState('');
 
   useEffect(() => {
-    localStorage.setItem('admin_items', JSON.stringify(items));
-  }, [items]);
-
-  useEffect(() => {
-    // Refresh booking requests when admin panel is loaded
     if (auth) {
-      const raw = localStorage.getItem('booking_requests');
-      if (raw) {
-        const requests = JSON.parse(raw);
-        // Sort by most recent activity (reviewedAt or submittedAt)
-        const sortedRequests = requests.sort((a: BookingRequest, b: BookingRequest) => {
-          const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
-          const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
-          return dateB - dateA; // Most recent first
-        });
-        setBookingRequests(sortedRequests);
-      }
+      loadBookings();
     }
   }, [auth]);
 
-  const login = (e: React.FormEvent) => {
+  async function loadBookings() {
+    try {
+      const data = await fetchBookings();
+      const normalized = data.map((b: any) => ({ ...b, id: b.id || b._id }));
+      const sorted = normalized.sort((a: BookingRequest, b: BookingRequest) => {
+        const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
+        const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
+        return dateB - dateA;
+      });
+      setBookingRequests(sorted);
+    } catch {
+      toast.error('Failed to load bookings');
+    }
+  }
+
+  // Auto-refresh bookings every 10 seconds for real-time updates
+  useEffect(() => {
+    if (!auth) return;
+    
+    const interval = setInterval(() => {
+      loadBookings();
+    }, 10000); // 10 seconds
+    
+    return () => clearInterval(interval);
+  }, [auth]);
+
+  // Hydrate saved filters on mount
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('admin_filters');
+      if (raw) {
+        const f = JSON.parse(raw);
+        setSearchTerm(f.searchTerm ?? '');
+        setFilterType(f.filterType ?? 'all');
+        setFilterName(f.filterName ?? '');
+        setFilterStartDate(f.filterStartDate ?? '');
+        setFilterEndDate(f.filterEndDate ?? '');
+      }
+    } catch {
+      // ignore
+    }
+  }, []);
+
+  // Persist filters on change
+  useEffect(() => {
+    const payload = {
+      searchTerm,
+      filterType,
+      filterName,
+      filterStartDate,
+      filterEndDate,
+    };
+    try {
+      localStorage.setItem('admin_filters', JSON.stringify(payload));
+    } catch {
+      // ignore
+    }
+  }, [searchTerm, filterType, filterName, filterStartDate, filterEndDate]);
+
+  const login = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (user === ADMIN_USER && pass === ADMIN_PASS) {
+    try {
+      const token = await adminLogin(user, pass);
+      localStorage.setItem('admin_token', token);
       setAuth(true);
-    } else {
-      alert('Invalid credentials');
+      toast.success('Admin login successful');
+      const newLogs = [
+        ...adminLogs,
+        { type: 'login' as const, timestamp: new Date().toISOString() }
+      ];
+      setAdminLogs(newLogs);
+    } catch {
+      toast.error('Invalid credentials');
     }
   };
 
-  const addItem = () => {
-    const id = 'i' + Date.now();
-    setItems((s) => [...s, { id, title: 'New Item', type: 'equipment', desc: 'Description' }]);
+  const addItem = async (type?: 'lab' | 'equipment') => {
+    if (!newItemTitle.trim()) {
+      toast.error('Please enter a title');
+      return;
+    }
+    const itemTypeToUse = type || newItemType;
+    
+    const itemData: any = {
+      title: newItemTitle,
+      type: itemTypeToUse,
+      desc: newItemDesc || 'No description provided'
+    };
+
+    // Add type-specific properties
+    if (itemTypeToUse === 'equipment') {
+      itemData.pricePerDay = newItemPrice || 50;
+    } else {
+      itemData.pricePerHour = newItemPrice || 25;
+      itemData.capacity = newItemCapacity || '4-8';
+    }
+
+    if (newItemImage) {
+      itemData.image = newItemImage;
+    }
+
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const created = await createItem(token, itemData);
+      // Normalize _id to id for consistency
+      const normalizedItem = { ...created, id: created._id || created.id };
+      setItems(prev => [normalizedItem, ...prev]);
+      toast.success(`${itemTypeToUse} added successfully`);
+    } catch (e:any) {
+      toast.error(e.message || 'Failed to add item');
+      return;
+    }
+    
+    // Reset form
+    setNewItemTitle('');
+    setNewItemDesc('');
+    setNewItemPrice(0);
+    setNewItemCapacity('');
+    setNewItemImage('');
+    
   };
 
-  const removeItem = (id: string) => setItems((s) => s.filter((it) => it.id !== id));
+  const handleEditItem = (item: any) => {
+    setEditingItem(item);
+    setShowEditModal(true);
+  };
 
-  const handleBookingAction = (requestId: string, action: 'approved' | 'declined') => {
-    const updatedRequests = bookingRequests.map(request => {
-      if (request.id === requestId) {
-        return {
-          ...request,
-          status: action,
-          adminNote: adminNote,
-          reviewedAt: new Date().toISOString()
-        };
-      }
-      return request;
-    });
-
-    // Sort updated requests by most recent activity
-    const sortedRequests = updatedRequests.sort((a, b) => {
-      const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
-      const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
-      return dateB - dateA; // Most recent first
-    });
-
-    setBookingRequests(sortedRequests);
-    localStorage.setItem('booking_requests', JSON.stringify(updatedRequests));
-    setSelectedRequest(null);
-    setAdminNote('');
+  const handleSaveEdit = async () => {
+    if (!editingItem) return;
     
-    // In a real app, you would send an email notification to the user here
-    alert(`Booking request ${action}. User will be notified via email.`);
+    const updates: any = {};
+    
+    if ('title' in editingItem) {
+      // Equipment item
+      updates.title = editingItem.title;
+      updates.description = editingItem.description;
+      updates.pricePerDay = editingItem.pricePerDay;
+    } else {
+      // Lab item
+      updates.title = editingItem.name;
+      updates.desc = editingItem.desc;
+      updates.pricePerHour = editingItem.pricePerHour;
+      updates.capacity = editingItem.capacity;
+    }
+    
+    if (editingItem.image) {
+      updates.image = editingItem.image;
+    }
+    
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const updated = await updateItem(token, editingItem.id, updates);
+      // Normalize _id to id for consistency
+      const normalizedItem = { ...updated, id: updated._id || updated.id };
+      setItems(prev => prev.map(i => i._id === editingItem.id || i.id === editingItem.id ? normalizedItem : i));
+      setShowEditModal(false);
+      setEditingItem(null);
+      toast.success('Item updated successfully');
+    } catch (e:any) {
+      toast.error(e.message || 'Failed to update item');
+    }
+  };
+
+  const handleDeleteItem = async (id: string) => {
+    if (!window.confirm('Delete this item permanently?')) return;
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      await deleteItem(token, id);
+      setItems(prev => prev.filter(i => i._id !== id && i.id !== id));
+      toast.success('Item deleted successfully');
+    } catch (e:any) {
+      toast.error(e.message || 'Failed to delete item');
+    }
+  };
+
+  const handleExportData = () => {
+    try {
+      exportToExcel(items, bookingRequests);
+      toast.success('Excel exported successfully');
+    } catch {
+      toast.error('Failed to export Excel');
+    }
+  };
+
+  const handleCreateBackup = async () => {
+    if (!window.confirm('Create a backup of all system data (items and bookings)? This will download a JSON file to your computer.')) {
+      return;
+    }
+    
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const backupData = await createBackup(token);
+      
+      // Download backup as JSON file
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `backup-${backupData.timestamp}.json`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      
+      toast.success(`Backup created successfully! ${backupData.stats.totalItems} items, ${backupData.stats.totalBookings} bookings`);
+    } catch (error: any) {
+      console.error('Backup failed:', error);
+      toast.error(error.message || 'Failed to create backup');
+    }
+  };
+
+  const handleRestoreBackup = async () => {
+    // Create file input
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    
+    input.onchange = async (e: any) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      
+      try {
+        const text = await file.text();
+        const backupData = JSON.parse(text);
+        
+        // Verify backup first
+        const token = localStorage.getItem('admin_token') || '';
+        const verification = await verifyBackup(token, backupData);
+        
+        if (!verification.valid) {
+          toast.error(`Invalid backup file: ${verification.errors.join(', ')}`);
+          return;
+        }
+        
+        // Show warnings if any
+        if (verification.warnings && verification.warnings.length > 0) {
+          const warningMsg = verification.warnings.join('\n');
+          if (!window.confirm(`Backup has warnings:\n${warningMsg}\n\nContinue with restore?`)) {
+            return;
+          }
+        }
+        
+        // Confirm restore action
+        const confirmMsg = `⚠️ WARNING: This will REPLACE ALL existing data!\n\n` +
+          `Backup contains:\n` +
+          `- ${verification.stats.totalItems} items (${verification.stats.labs} labs, ${verification.stats.equipment} equipment)\n` +
+          `- ${verification.stats.totalBookings} bookings (${verification.stats.pendingBookings} pending, ${verification.stats.approvedBookings} approved, ${verification.stats.declinedBookings} declined)\n\n` +
+          `Current data will be PERMANENTLY DELETED.\n\n` +
+          `Are you absolutely sure you want to proceed?`;
+        
+        if (!window.confirm(confirmMsg)) {
+          return;
+        }
+        
+        // Double confirmation
+        if (!window.confirm('This is your FINAL confirmation. Restore backup and delete all current data?')) {
+          return;
+        }
+        
+        // Perform restore
+        const result = await restoreBackup(token, backupData);
+        
+        // Show warnings if any
+        if (result.warnings && result.warnings.length > 0) {
+          console.warn('Restore warnings:', result.warnings);
+        }
+        
+        toast.success(`Restore successful! ${result.restored.items} items, ${result.restored.bookings} bookings restored`);
+        
+        // Reload data
+        await loadBookings();
+        const itemData = await fetchItems();
+        const normalizedItems = itemData.map((d: any) => ({ ...d, id: d._id || d.id }));
+        setItems(normalizedItems);
+        
+      } catch (error: any) {
+        console.error('Restore failed:', error);
+        toast.error(error.message || 'Failed to restore backup');
+      }
+    };
+    
+    input.click();
+  };
+  
+  // Load items when authenticated
+  useEffect(() => {
+    async function load() {
+      if (!auth) return;
+      try {
+        const data = await fetchItems();
+        // Normalize id for React keys
+        const normalized = data.map((d: any) => ({ ...d, id: d._id || d.id }));
+        setItems(normalized);
+      } catch {
+        toast.error('Failed to load items');
+      }
+    }
+    load();
+  }, [auth]);
+
+  const handleBookingAction = async (requestId: string, action: 'approved' | 'declined') => {
+    // Validate request exists and is actionable
+    const target = bookingRequests.find(r => r.id === requestId);
+    if (!target) {
+      toast.error('Request not found');
+      return;
+    }
+    
+    // Allow declining approved bookings (revocation)
+    const isRevocation = target.status === 'approved' && action === 'declined';
+    
+    // Only require admin note for status changes (optional for initial approval)
+    if (isRevocation && !adminNote.trim()) {
+      const confirmed = confirm('You are about to REVOKE a previously approved booking. This will notify the user immediately. Please add a reason in the admin note field before proceeding.');
+      if (!confirmed) {
+        return;
+      }
+      toast.error('Please add a revocation reason in the admin note before proceeding');
+      return;
+    }
+    try {
+      const token = localStorage.getItem('admin_token') || '';
+      const updated = await updateBookingStatus(token, requestId, action, adminNote);
+      const next = bookingRequests.map(r => r.id === requestId ? { ...r, ...updated } : r);
+      const sortedRequests = next.sort((a, b) => {
+        const dateA = new Date(a.reviewedAt || a.submittedAt).getTime();
+        const dateB = new Date(b.reviewedAt || b.submittedAt).getTime();
+        return dateB - dateA;
+      });
+      setBookingRequests(sortedRequests);
+      setSelectedRequest(null);
+      setAdminNote('');
+      toast[action === 'approved' ? 'success' : 'error'](`Booking request ${action}`);
+    } catch {
+      toast.error('Failed to update booking');
+    }
   };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
+  };
+
+  const formatDateTime = (dateString: string, timeString?: string) => {
+    try {
+      const timePart = timeString || '00:00';
+      const dt = new Date(`${dateString}T${timePart}`);
+      return dt.toLocaleString(undefined, { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: true });
+    } catch {
+      return dateString;
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -118,6 +415,103 @@ const Admin: React.FC = () => {
       default: return 'text-yellow-600 bg-yellow-100';
     }
   };
+
+  // Helpers for quick filter presets
+  const formatInputDate = (d: Date) => d.toISOString().slice(0, 10);
+  const getToday = () => formatInputDate(new Date());
+  const getWeekRange = () => {
+    const now = new Date();
+    const day = now.getDay(); // 0 Sun - 6 Sat
+    const diffToMonday = ((day + 6) % 7); // 0 for Mon, 6 for Sun
+    const start = new Date(now);
+    start.setDate(now.getDate() - diffToMonday);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(start);
+    end.setDate(start.getDate() + 6);
+    end.setHours(23, 59, 59, 999);
+    return { start: formatInputDate(start), end: formatInputDate(end) };
+  };
+
+  const applyPreset = (preset: 'pendingThisWeek' | 'labsToday' | 'equipmentToday') => {
+    if (preset === 'pendingThisWeek') {
+      const { start, end } = getWeekRange();
+      setFilterStartDate(start);
+      setFilterEndDate(end);
+      setFilterType('all');
+      setFilterName('');
+      setSearchTerm('pending');
+      return;
+    }
+    if (preset === 'labsToday') {
+      const t = getToday();
+      setFilterStartDate(t);
+      setFilterEndDate(t);
+      setFilterType('lab');
+      setFilterName('');
+      return;
+    }
+    if (preset === 'equipmentToday') {
+      const t = getToday();
+      setFilterStartDate(t);
+      setFilterEndDate(t);
+      setFilterType('equipment');
+      setFilterName('');
+    }
+  };
+
+  // Filter booking requests based on search term + filters (date range, type, name)
+  const filteredRequests = useMemo(() => {
+    const q = searchTerm.trim().toLowerCase();
+    const n = filterName.trim().toLowerCase();
+
+    const hasStart = !!filterStartDate;
+    const hasEnd = !!filterEndDate;
+    const fStart = hasStart ? new Date(filterStartDate + 'T00:00:00') : null;
+    const fEnd = hasEnd ? new Date(filterEndDate + 'T23:59:59') : null;
+
+    const matchesDate = (r: BookingRequest) => {
+      if (!hasStart && !hasEnd) return true;
+      const rs = new Date(r.startDate);
+      const re = new Date(r.endDate);
+      if (hasStart && hasEnd) {
+        // overlap: re >= fStart && rs <= fEnd
+        return (re >= (fStart as Date)) && (rs <= (fEnd as Date));
+      }
+      if (hasStart) return re >= (fStart as Date);
+      // only end
+      return rs <= (fEnd as Date);
+    };
+
+    return bookingRequests.filter(r => {
+      // search across multiple fields
+      const matchesSearch = !q || (
+        r.userName.toLowerCase().includes(q) ||
+        r.userEmail.toLowerCase().includes(q) ||
+        r.itemTitle.toLowerCase().includes(q) ||
+        r.itemType.toLowerCase().includes(q) ||
+        r.status.toLowerCase().includes(q)
+      );
+
+      // type filter
+      const matchesType = filterType === 'all' || r.itemType === filterType;
+
+      // name filter (lab/equipment title)
+      const matchesName = !n || r.itemTitle.toLowerCase().includes(n);
+
+      return matchesSearch && matchesType && matchesName && matchesDate(r);
+    });
+  }, [bookingRequests, searchTerm, filterType, filterName, filterStartDate, filterEndDate]);
+
+  // Pagination for requests (8 per page)
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const itemsPerPage = 8;
+  const totalPages = Math.max(1, Math.ceil(filteredRequests.length / itemsPerPage));
+  const pagedRequests = filteredRequests.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  // Reset to first page when filters/search change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [filteredRequests.length, searchTerm, filterType, filterName, filterStartDate, filterEndDate]);
 
   if (!auth) {
     return (
@@ -184,330 +578,485 @@ const Admin: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-yellow-50">
-      {/* Enhanced Header */}
+      {/* Compact Header */}
       <div className="bg-blue-950 text-white shadow-xl">
-        <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="max-w-1xl mx-auto px-3 md:px-6 py-3 md:py-4">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="w-10 h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="flex items-center space-x-2 md:space-x-3">
+              <div className="w-8 h-8 md:w-10 md:h-10 bg-yellow-400 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                 </svg>
               </div>
-              <div>
-                <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-                <p className="text-blue-100 text-sm">SIF-FAB LAB Management Portal</p>
-              </div>
+              <h1 className="text-lg md:text-2xl font-bold">Admin Dashboard</h1>
             </div>
             
-            <div className="flex items-center space-x-4">
+            <div className="flex items-center space-x-2 md:space-x-3">
               <button
                 onClick={() => navigate('/main-booking')}
-                className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-4 py-2 rounded-xl font-medium transition-all duration-200 flex items-center space-x-2 border border-white border-opacity-30"
+                className="bg-white bg-opacity-20 hover:bg-opacity-30 text-white px-2 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl text-sm md:font-medium transition-all duration-200 flex items-center space-x-1 md:space-x-2 border border-white border-opacity-30"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
-                <span>Back to Booking</span>
+                <span className="hidden sm:inline">Back to Booking</span>
+                <span className="sm:hidden">Back</span>
               </button>
-              <div className="text-right">
-                <div className="text-sm text-blue-100">Welcome, Administrator</div>
-                <div className="text-xs text-blue-200">{new Date().toLocaleDateString()}</div>
-              </div>
               <button 
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-xl transition-colors font-medium shadow-lg flex items-center space-x-2" 
-                onClick={() => setAuth(false)}
+                className="bg-red-600 hover:bg-red-700 text-white px-2 md:px-4 py-1.5 md:py-2 rounded-lg md:rounded-xl transition-colors text-sm md:font-medium shadow-lg flex items-center space-x-1 md:space-x-2" 
+                onClick={() => { 
+                  setAuth(false); 
+                  toast.success('Logged out');
+                  localStorage.removeItem('admin_token');
+                  const newLogs = [
+                    ...adminLogs,
+                    { type: 'logout' as const, timestamp: new Date().toISOString() }
+                  ];
+                  setAdminLogs(newLogs);
+                }}
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                 </svg>
-                <span>Logout</span>
+                <span className="hidden sm:inline">Logout</span>
+                <span className="sm:hidden">Logout</span>
               </button>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Dashboard Stats */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-blue-100">
+      <div className="max-w-1xl mx-auto px-4 md:px-8 lg:px-12 py-6 md:py-8 mt-4 md:mt-6">
+        {/* Welcome Section - only show on /admin root */}
+        {currentPath === '/admin' && (
+          <div className="bg-blue-950 rounded-2xl shadow-xl p-8 mb-8 text-white">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-sm font-medium text-gray-600">Total Requests</p>
-                <p className="text-3xl font-bold text-blue-950">{bookingRequests.length}</p>
+                <h2 className="text-3xl font-bold mb-2">Welcome, Administrator</h2>
+                <p className="text-blue-100 text-lg">SIF-FAB LAB Management Portal</p>
+                <p className="text-blue-200 text-sm mt-1">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
               </div>
-              <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-yellow-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-3xl font-bold text-yellow-600">{bookingRequests.filter(r => r.status === 'pending').length}</p>
-              </div>
-              <div className="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-green-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Approved</p>
-                <p className="text-3xl font-bold text-green-600">{bookingRequests.filter(r => r.status === 'approved').length}</p>
-              </div>
-              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-          
-          <div className="bg-white rounded-2xl shadow-lg p-6 border border-red-100">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-gray-600">Declined</p>
-                <p className="text-3xl font-bold text-red-600">{bookingRequests.filter(r => r.status === 'declined').length}</p>
-              </div>
-              <div className="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center">
-                <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
-        {/* Enhanced Tab Navigation */}
-        <div className="bg-white rounded-2xl shadow-lg p-2 mb-8 border border-blue-100">
-          <div className="flex">
-            <button
-              onClick={() => setActiveTab('bookings')}
-              className={`flex-1 flex items-center justify-center space-x-3 px-6 py-4 rounded-xl font-medium transition-all duration-200 ${
-                activeTab === 'bookings'
-                  ? 'bg-blue-950 text-white shadow-lg'
-                  : 'text-blue-950 hover:bg-blue-50'
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-              <span>Booking Requests</span>
-              {bookingRequests.filter(r => r.status === 'pending').length > 0 && (
-                <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                  activeTab === 'bookings' ? 'bg-yellow-400 text-blue-950' : 'bg-blue-950 text-white'
-                }`}>
-                  {bookingRequests.filter(r => r.status === 'pending').length}
-                </span>
-              )}
-            </button>
-            
-            <button
-              onClick={() => setActiveTab('items')}
-              className={`flex-1 flex items-center justify-center space-x-3 px-6 py-4 rounded-xl font-medium transition-all duration-200 ${
-                activeTab === 'items'
-                  ? 'bg-blue-950 text-white shadow-lg'
-                  : 'text-blue-950 hover:bg-blue-50'
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-              </svg>
-              <span>Manage Items</span>
-              <span className={`px-2 py-1 rounded-full text-xs font-bold ${
-                activeTab === 'items' ? 'bg-yellow-400 text-blue-950' : 'bg-blue-100 text-blue-950'
-              }`}>
-                {items.length}
-              </span>
-            </button>
-          </div>
-        </div>
-
-        {activeTab === 'bookings' ? (
-          /* Booking Requests Tab */
-          <div>
-            <h2 className="text-2xl font-semibold text-blue-950 mb-6">Booking Requests</h2>
-            
-            {bookingRequests.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg">
-                <p className="text-gray-600 text-lg">No booking requests found.</p>
-              </div>
-            ) : (
-              <div className="grid gap-6">
-                {bookingRequests.map((request) => (
-                  <div key={request.id} className="bg-white rounded-2xl shadow-lg p-6 border">
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-3 mb-2">
-                          <h3 className="text-xl font-semibold text-blue-950">{request.itemTitle}</h3>
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(request.status)}`}>
-                            {request.status.toUpperCase()}
-                          </span>
-                          <span className="px-3 py-1 bg-blue-100 text-blue-800 text-sm rounded-full">
-                            {request.itemType.toUpperCase()}
-                          </span>
-                        </div>
-                        <p className="text-gray-600 mb-4">Requested by: <strong>{request.userName}</strong> ({request.userEmail})</p>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <strong>Dates:</strong> {formatDate(request.startDate)} - {formatDate(request.endDate)}
-                          </div>
-                          {request.startTime && (
-                            <div>
-                              <strong>Time:</strong> {request.startTime} - {request.endTime}
-                            </div>
-                          )}
-                          <div>
-                            <strong>Total Cost:</strong> <span className="text-2xl font-bold text-green-600">${request.totalCost.toFixed(2)}</span>
-                          </div>
-                          <div>
-                            <strong>Submitted:</strong> {formatDate(request.submittedAt)}
-                          </div>
-                        </div>
-
-                        <div className="mt-4">
-                          <strong>Purpose:</strong>
-                          <p className="text-gray-600 mt-1">{request.purpose}</p>
-                        </div>
-
-                        {request.additionalNotes && (
-                          <div className="mt-4">
-                            <strong>Additional Notes:</strong>
-                            <p className="text-gray-600 mt-1">{request.additionalNotes}</p>
-                          </div>
-                        )}
-
-                        {request.adminNote && (
-                          <div className="mt-6 p-4 bg-blue-50 border-2 border-blue-200 rounded-xl">
-                            <div className="flex items-start space-x-3">
-                              <div className="p-2 bg-blue-200 rounded-lg">
-                                <svg className="w-4 h-4 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                </svg>
-                              </div>
-                              <div className="flex-1">
-                                <h4 className="font-semibold text-blue-950 mb-2">Admin Note</h4>
-                                <p className="text-blue-800 leading-relaxed">{request.adminNote}</p>
-                                {request.reviewedAt && (
-                                  <p className="text-xs text-blue-600 mt-3 font-medium">
-                                    📅 Reviewed: {formatDate(request.reviewedAt)}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {request.status === 'pending' && (
-                      <div className="border-t border-blue-100 pt-6 mt-6 bg-blue-50 -mx-6 px-6 pb-6 rounded-b-2xl">
-                        <div className="mb-4">
-                          <label className="flex items-center space-x-2 text-sm font-semibold text-blue-950 mb-3">
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                            </svg>
-                            <span>Admin Note (optional)</span>
-                          </label>
-                          <textarea
-                            value={selectedRequest?.id === request.id ? adminNote : ''}
-                            onChange={(e) => {
-                              setAdminNote(e.target.value);
-                              setSelectedRequest(request);
-                            }}
-                            placeholder="Add a personalized note for the client (e.g., special instructions, conditions, or feedback)..."
-                            rows={3}
-                            className="w-full border-2 border-blue-200 text-blue-950 placeholder-blue-400 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-950 focus:border-blue-950 transition-colors resize-none"
-                          />
-                        </div>
-                        <div className="flex gap-4">
-                          <button
-                            onClick={() => {
-                              setSelectedRequest(request);
-                              handleBookingAction(request.id, 'approved');
-                            }}
-                            className="flex-1 bg-green-600 text-white py-3 px-6 rounded-xl hover:bg-green-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>Approve Request</span>
-                          </button>
-                          <button
-                            onClick={() => {
-                              setSelectedRequest(request);
-                              handleBookingAction(request.id, 'declined');
-                            }}
-                            className="flex-1 bg-red-600 text-white py-3 px-6 rounded-xl hover:bg-red-700 transition-all duration-200 font-medium shadow-lg hover:shadow-xl flex items-center justify-center space-x-2"
-                          >
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <span>Decline Request</span>
-                          </button>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        ) : (
-          /* Items Management Tab */
-          <div>
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-2xl font-semibold text-blue-950">Manage Items</h2>
-              <button 
-                className="bg-blue-950 text-white px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors" 
-                onClick={addItem}
-              >
-                Add Item
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {items.map((it) => (
-                <div key={it.id} className="bg-white rounded-2xl shadow-lg p-6 border">
-                  <div className="flex items-center justify-between">
-                    <div className="flex-1">
-                      <h3 className="text-lg font-semibold text-slate-900">{it.title}</h3>
-                      <span className="inline-block px-3 py-1 bg-blue-100 text-blue-800 text-xs rounded-full mt-2">
-                        {it.type.toUpperCase()}
-                      </span>
-                      {it.desc && (
-                        <p className="text-sm text-gray-600 mt-2">{it.desc}</p>
-                      )}
-                    </div>
-                    <button 
-                      className="ml-4 text-red-500 hover:text-red-700 px-3 py-1 border border-red-500 rounded-lg hover:bg-red-50 transition-colors" 
-                      onClick={() => removeItem(it.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
+              <div className="hidden md:block">
+                <div className="w-24 h-24 bg-yellow-400 bg-opacity-20 rounded-full flex items-center justify-center">
+                  <svg className="w-12 h-12 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                  </svg>
                 </div>
-              ))}
-              
-              {items.length === 0 && (
-                <div className="col-span-2 text-center py-12 bg-white rounded-lg">
-                  <p className="text-gray-600 text-lg">No items found. Add some items to get started.</p>
-                </div>
-              )}
+              </div>
             </div>
           </div>
         )}
+
+        {/* Render content based on route */}
+        {currentPath === '/admin' ? (
+          /* Main Dashboard - Card Navigation */
+          <>
+            {/* Dashboard Stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-6 mb-8">
+              <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-l-4 border-blue-950">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs md:text-sm font-medium text-gray-600">Total Requests</p>
+                    <p className="text-2xl md:text-3xl font-bold text-blue-950 mt-1">{bookingRequests.length}</p>
+                  </div>
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 md:w-6 md:h-6 text-blue-950" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-l-4 border-yellow-500">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs md:text-sm font-medium text-gray-600">Pending</p>
+                    <p className="text-2xl md:text-3xl font-bold text-yellow-600 mt-1">{bookingRequests.filter(r => r.status === 'pending').length}</p>
+                  </div>
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 md:w-6 md:h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-l-4 border-green-500">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs md:text-sm font-medium text-gray-600">Approved</p>
+                    <p className="text-2xl md:text-3xl font-bold text-green-600 mt-1">{bookingRequests.filter(r => r.status === 'approved').length}</p>
+                  </div>
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-green-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 md:w-6 md:h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="bg-white rounded-2xl shadow-lg p-4 md:p-6 border-l-4 border-red-500">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs md:text-sm font-medium text-gray-600">Declined</p>
+                    <p className="text-2xl md:text-3xl font-bold text-red-600 mt-1">{bookingRequests.filter(r => r.status === 'declined').length}</p>
+                  </div>
+                  <div className="w-10 h-10 md:w-12 md:h-12 bg-red-100 rounded-xl flex items-center justify-center">
+                    <svg className="w-5 h-5 md:w-6 md:h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Navigation Cards */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-blue-950 mb-6">Management Sections</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                {/* Booking Requests Card */}
+                <div
+                  onClick={() => navigate('/admin/bookings')}
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-200 hover:border-blue-900 transform hover:-translate-y-1 text-left group cursor-pointer"
+                >
+                  <div className="bg-blue-950 p-6 text-white">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-14 h-14 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">Booking Requests</h3>
+                    <p className="text-blue-100 text-xs">Review and manage bookings</p>
+                  </div>
+                  <div className="p-6 space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Total</span>
+                      <span className="font-bold text-blue-950">{bookingRequests.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Pending</span>
+                      <span className="font-bold text-yellow-600">{bookingRequests.filter(r => r.status === 'pending').length}</span>
+                    </div>
+                    <div className="w-full bg-blue-900 hover:bg-blue-950 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+                      <span>Manage Bookings</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Equipment Management Card */}
+                <div
+                  onClick={() => navigate('/admin/equipments')}
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-200 hover:border-blue-900 transform hover:-translate-y-1 text-left group cursor-pointer"
+                >
+                  <div className="bg-blue-950 p-6 text-white">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-14 h-14 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">Equipment</h3>
+                    <p className="text-purple-100 text-xs">Manage equipment inventory</p>
+                  </div>
+                  <div className="p-6 space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Total Items</span>
+                      <span className="font-bold text-blue-950">{equipments.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Available</span>
+                      <span className="font-bold text-green-600">{equipments.filter(i => i.available !== false).length}</span>
+                    </div>
+                    <div className="w-full bg-blue-900 hover:bg-blue-950 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+                      <span>Manage Equipment</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Lab Management Card */}
+                <div
+                  onClick={() => navigate('/admin/labs')}
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-200 hover:border-blue-900 transform hover:-translate-y-1 text-left group cursor-pointer"
+                >
+                  <div className="bg-blue-950 p-6 text-white">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-14 h-14 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">Lab Spaces</h3>
+                    <p className="text-blue-100 text-xs">Manage lab facilities</p>
+                  </div>
+                  <div className="p-6 space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Total Labs</span>
+                      <span className="font-bold text-green-700">{labs.length}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Available</span>
+                      <span className="font-bold text-green-600">{labs.filter(i => i.available !== false).length}</span>
+                    </div>
+                    <div className="w-full bg-blue-900 hover:bg-blue-950 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+                      <span>Manage Labs</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Data Management Card */}
+                <div className="bg-white rounded-2xl shadow-lg overflow-hidden border-2 border-gray-200">
+                  <div className="bg-blue-950 p-6 text-white">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-14 h-14 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="text-2xl font-bold mb-2">Data Management</h3>
+                    <p className="text-gray-100 text-sm">Backup, restore, and export data</p>
+                  </div>
+                  <div className="p-6">
+                    <div className="grid grid-cols-2 gap-3 mb-3">
+                      <button
+                        onClick={handleCreateBackup}
+                        className="w-full bg-blue-200 hover:bg-blue-300 text-blue-950 px-4 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" />
+                        </svg>
+                        Backup
+                      </button>
+
+                      <button
+                        onClick={handleRestoreBackup}
+                        className="w-full bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-4 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        Restore
+                      </button>
+                    </div>
+
+                    <div>
+                      <button
+                        onClick={handleExportData}
+                        className="w-full bg-green-100 hover:bg-green-200 text-green-700 px-4 py-3 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        Export
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </>
+        ) : currentPath === '/admin/bookings' ? (
+          <AdminBookings
+            navigate={navigate}
+            bookingRequests={bookingRequests}
+            filteredRequests={filteredRequests}
+            pagedRequests={pagedRequests}
+            currentPage={currentPage}
+            setCurrentPage={setCurrentPage}
+            totalPages={totalPages}
+            searchTerm={searchTerm}
+            setSearchTerm={setSearchTerm}
+            filterType={filterType}
+            setFilterType={setFilterType}
+            filterName={filterName}
+            setFilterName={setFilterName}
+            filterStartDate={filterStartDate}
+            setFilterStartDate={setFilterStartDate}
+            filterEndDate={filterEndDate}
+            setFilterEndDate={setFilterEndDate}
+            applyPreset={applyPreset}
+            setSelectedRequest={setSelectedRequest}
+            handleBookingAction={handleBookingAction}
+            getStatusColor={getStatusColor}
+            formatDateTime={formatDateTime}
+            formatDate={formatDate}
+            adminNote={adminNote}
+            setAdminNote={setAdminNote}
+            toast={toast}
+          />
+        ) : currentPath === '/admin/equipments' ? (
+          <AdminEquipments
+            navigate={navigate}
+            handleCreateBackup={handleCreateBackup}
+            handleRestoreBackup={handleRestoreBackup}
+            handleExportData={handleExportData}
+            equipments={equipments}
+            labs={labs}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            newItemType={newItemType}
+            setNewItemType={setNewItemType}
+            newItemTitle={newItemTitle}
+            setNewItemTitle={setNewItemTitle}
+            newItemDesc={newItemDesc}
+            setNewItemDesc={setNewItemDesc}
+            newItemPrice={newItemPrice}
+            setNewItemPrice={setNewItemPrice}
+            newItemCapacity={newItemCapacity}
+            setNewItemCapacity={setNewItemCapacity}
+            newItemImage={newItemImage}
+            setNewItemImage={setNewItemImage}
+            addItem={addItem}
+            handleEditItem={handleEditItem}
+            handleDeleteItem={handleDeleteItem}
+            updateItem={updateItem}
+            items={items}
+            setItems={setItems}
+          />
+        ) : currentPath === '/admin/labs' ? (
+          <AdminLabs
+            navigate={navigate}
+            labs={labs}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            handleEditItem={handleEditItem}
+            handleDeleteItem={handleDeleteItem}
+            updateItem={updateItem}
+            setItems={setItems}
+            newItemTitle={newItemTitle}
+            setNewItemTitle={setNewItemTitle}
+            newItemDesc={newItemDesc}
+            setNewItemDesc={setNewItemDesc}
+            newItemPrice={newItemPrice}
+            setNewItemPrice={setNewItemPrice}
+            newItemCapacity={newItemCapacity}
+            setNewItemCapacity={setNewItemCapacity}
+            newItemImage={newItemImage}
+            setNewItemImage={setNewItemImage}
+            addItem={( ) => addItem('lab')}
+            newItemType={newItemType}
+            setNewItemType={setNewItemType}
+          />
+        ) : null}
       </div>
+      
+      {/* Edit Modal */}
+      {showEditModal && editingItem && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+          <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-blue-950">Edit Item</h2>
+              <button
+                onClick={() => setShowEditModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Title/Name</label>
+                <input
+                  type="text"
+                  value={'title' in editingItem ? editingItem.title : editingItem.name}
+                  onChange={(e) => setEditingItem((prev: any) => 
+                    'title' in prev 
+                      ? { ...prev, title: e.target.value }
+                      : { ...prev, name: e.target.value }
+                  )}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 text-gray-900"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                <textarea
+                  value={'description' in editingItem ? editingItem.description : editingItem.desc}
+                  onChange={(e) => setEditingItem((prev: any) => 
+                    'description' in prev 
+                      ? { ...prev, description: e.target.value }
+                      : { ...prev, desc: e.target.value }
+                  )}
+                  rows={3}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 text-gray-900"
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Price ({'title' in editingItem ? 'per day' : 'per hour'})
+                  </label>
+                  <input
+                    type="number"
+                    value={'title' in editingItem ? editingItem.pricePerDay : editingItem.pricePerHour}
+                    onChange={(e) => setEditingItem((prev: any) => 
+                      'title' in prev 
+                        ? { ...prev, pricePerDay: Number(e.target.value) }
+                        : { ...prev, pricePerHour: Number(e.target.value) }
+                    )}
+                    min="0"
+                    step="0.01"
+                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 text-gray-900"
+                  />
+                </div>
+                
+                {'capacity' in editingItem && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Capacity</label>
+                    <input
+                      type="text"
+                      value={editingItem.capacity}
+                      onChange={(e) => setEditingItem((prev: any) => ({ ...prev, capacity: e.target.value }))}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 text-gray-900"
+                    />
+                  </div>
+                )}
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Image URL</label>
+                <input
+                  type="url"
+                  value={editingItem.image || ''}
+                  onChange={(e) => setEditingItem((prev: any) => ({ ...prev, image: e.target.value }))}
+                  placeholder="https://example.com/image.jpg"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-950 focus:border-blue-950 text-gray-900"
+                />
+              </div>
+              
+              <div className="flex gap-4 pt-6">
+                <button
+                  onClick={handleSaveEdit}
+                  className="flex-1 bg-blue-950 text-white py-3 px-6 rounded-lg hover:bg-blue-900 transition-colors font-medium"
+                >
+                  Save Changes
+                </button>
+                <button
+                  onClick={() => setShowEditModal(false)}
+                  className="flex-1 border border-gray-300 text-gray-700 py-3 px-6 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

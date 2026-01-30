@@ -42,77 +42,146 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const signInWithGoogle = async () => {
-    // Use Google Identity Services token client
-    // @ts-ignore
     const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
-    if (!clientId) throw new Error('Missing VITE_GOOGLE_CLIENT_ID');
+    if (!clientId) {
+      console.error('Missing VITE_GOOGLE_CLIENT_ID');
+      throw new Error('Missing VITE_GOOGLE_CLIENT_ID');
+    }
 
     return new Promise<void>((resolve, reject) => {
       try {
-        // @ts-ignore
-        const tokenClient = window.google?.accounts?.oauth2?.initTokenClient
-          ? window.google.accounts.oauth2.initTokenClient({
-              client_id: clientId,
-              scope: 'profile email openid',
-              callback: (resp: any) => {
-                if (resp && resp.access_token) {
-                  // fetch userinfo
-                  fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        // Check if Google API is loaded
+        if (!window.google) {
+          reject(new Error('Google API not loaded'));
+          return;
+        }
+
+        // Use OAuth2 token client for better user experience
+        if (window.google.accounts?.oauth2?.initTokenClient) {
+          const tokenClient = window.google.accounts.oauth2.initTokenClient({
+            client_id: clientId,
+            scope: 'profile email openid',
+            callback: async (resp: any) => {
+              if (resp && resp.access_token) {
+                try {
+                  // Fetch user info
+                  const response = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
                     headers: {
                       Authorization: `Bearer ${resp.access_token}`,
                     },
-                  })
-                    .then((r) => r.json())
-                    .then((data) => {
-                      const u: User = { id: data.sub, name: data.name, email: data.email, picture: data.picture };
-                      setUser(u);
-                      localStorage.setItem('auth_user', JSON.stringify(u));
-                      resolve();
-                    })
-                    .catch((err) => reject(err));
-                } else {
-                  reject(new Error('No access token'));
+                  });
+                  
+                  if (!response.ok) {
+                    throw new Error('Failed to fetch user info');
+                  }
+                  
+                  const data = await response.json();
+                  const user: User = { 
+                    id: data.sub, 
+                    name: data.name, 
+                    email: data.email, 
+                    picture: data.picture 
+                  };
+                  
+                  setUser(user);
+                  localStorage.setItem('auth_user', JSON.stringify(user));
+                  console.log('User signed in successfully:', user.email);
+                  resolve();
+                } catch (err) {
+                  console.error('Auth error:', err);
+                  reject(err);
                 }
-              },
-            })
-          : null;
+              } else {
+                reject(new Error('No access token received'));
+              }
+            },
+            error_callback: (error: any) => {
+              console.error('OAuth error:', error);
+              reject(new Error('OAuth failed'));
+            }
+          });
 
-        if (tokenClient) {
           tokenClient.requestAccessToken();
         } else {
-          // Fallback to popup using google.accounts.id (one-tap)
-          // @ts-ignore
-          window.google.accounts.id.initialize({ client_id: clientId, callback: (r: any) => {
-            // r contains credential JWT
-            const jwt = r?.credential;
-            if (!jwt) {
-              reject(new Error('No credential'));
-              return;
+          // Fallback to ID token method
+          window.google.accounts.id.initialize({
+            client_id: clientId,
+            callback: (response: any) => {
+              try {
+                const jwt = response?.credential;
+                if (!jwt) {
+                  reject(new Error('No credential received'));
+                  return;
+                }
+                
+                // Decode JWT payload
+                const payload = JSON.parse(atob(jwt.split('.')[1]));
+                const user: User = { 
+                  id: payload.sub, 
+                  name: payload.name, 
+                  email: payload.email, 
+                  picture: payload.picture 
+                };
+                
+                setUser(user);
+                localStorage.setItem('auth_user', JSON.stringify(user));
+                console.log('User signed in successfully:', user.email);
+                resolve();
+              } catch (err) {
+                console.error('JWT decode error:', err);
+                reject(err);
+              }
             }
-            // Decode simple base64 payload
-            const payload = JSON.parse(atob(jwt.split('.')[1]));
-            const u: User = { id: payload.sub, name: payload.name, email: payload.email, picture: payload.picture };
-            setUser(u);
-            localStorage.setItem('auth_user', JSON.stringify(u));
-            resolve();
-          }});
-          // @ts-ignore
-          window.google.accounts.id.prompt();
+          });
+          
+          window.google.accounts.id.prompt((notification: any) => {
+            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
+              // Fallback to renderButton if prompt doesn't work
+              const buttonDiv = document.createElement('div');
+              document.body.appendChild(buttonDiv);
+              
+              window.google.accounts.id.renderButton(buttonDiv, {
+                theme: 'outline',
+                size: 'large',
+                width: 250
+              });
+              
+              // Clean up after 10 seconds
+              setTimeout(() => {
+                document.body.removeChild(buttonDiv);
+              }, 10000);
+            }
+          });
         }
       } catch (err) {
+        console.error('Sign-in initialization error:', err);
         reject(err);
       }
     });
   };
 
   const signOut = () => {
+    // Clear user state and local storage
     setUser(null);
     localStorage.removeItem('auth_user');
-    // Redirect to home (using hash router) so app shows the public homepage on sign out
+    
+    // Sign out from Google if available
+    if (window.google?.accounts?.id) {
+      try {
+        window.google.accounts.id.disableAutoSelect();
+      } catch (e) {
+        console.warn('Google sign-out cleanup failed:', e);
+      }
+    }
+    
+    console.log('User signed out successfully');
+    
+    // Redirect to home page
     try {
       window.location.hash = '#/';
     } catch (e) {
-      // ignore
+      // Fallback navigation
+      window.location.href = '/';
     }
   };
 
