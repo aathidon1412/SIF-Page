@@ -1,5 +1,5 @@
-import React from 'react';
-import ScrollReveal from './ui/ScrollReveal';
+import React from "react";
+import ScrollReveal from "./ui/ScrollReveal";
 
 const AboutSection: React.FC = () => {
   return (
@@ -12,16 +12,25 @@ const AboutSection: React.FC = () => {
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 inline-block border-b-4 border-yellow-300">
                 About <span className="text-yellow-300">SIF</span>
               </h2>
-              <p className="text-sm lg:text-base text-blue-100 leading-relaxed mb-6">
-                <span className="font-medium text-yellow-300">Sona Incubation Foundation</span> (SIF) is an initiative focused on nurturing <span className="text-yellow-300 font-medium">innovation</span>, <span className="text-yellow-300 font-medium">entrepreneurship</span>, and research-driven problem solving. We support student founders and researchers with mentorship, infrastructure, and programs that accelerate ideas into impact.
+              <p className="text-base lg:text-lg text-blue-100 leading-relaxed text-justify mb-6">
+                <span className="font-bold text-yellow-300">
+                  Sona Incubation Foundation (SIF)
+                </span>{" "}
+                is a dynamic innovation and entrepreneurship hub that empowers
+                students, startups, and early-stage innovators to transform
+                ideas into scalable ventures. The foundation offers strong
+                value-added support through structured incubation, expert
+                mentorship, and access to advanced infrastructure. By{" "}
+                <span className="font-bold text-yellow-300">
+                  bridging academia, industry, and startups
+                </span>
+                , SIF fosters{" "}
+                <span className="font-bold text-yellow-300">
+                  technology-driven innovation and sustainable entrepreneurship
+                </span>
+                .
               </p>
-              
-              <ul className="list-disc list-inside space-y-2 text-blue-100 text-sm mb-8">
-                <li><span className="font-medium text-white">Mentorship</span> and incubation programs</li>
-                <li>Access to labs, <span className="font-medium text-yellow-300">funding</span>, and industry connects</li>
-                <li>Events, hackathons, and <span className="text-yellow-300 font-medium">startup showcases</span></li>
-              </ul>
-              
+
               <div>
                 <a
                   href="https://www.sonaincubations.com"
@@ -39,7 +48,7 @@ const AboutSection: React.FC = () => {
             <img
               src="https://picsum.photos/800/600?random=11"
               alt="SIF Logo"
-              className="rounded-xl shadow-lg w-full h-auto object-cover max-h-[50vh]"
+              className="rounded-xl shadow-lg w-full h-auto object-cover max-h-[400px]"
             />
           </ScrollReveal>
         </div>
@@ -50,7 +59,7 @@ const AboutSection: React.FC = () => {
             <img
               src="https://picsum.photos/800/600?random=22"
               alt="FABLAB Logo"
-              className="rounded-xl shadow-lg w-full h-auto object-cover max-h-[50vh]"
+              className="rounded-xl shadow-lg w-full h-auto object-cover max-h-[400px]"
             />
           </ScrollReveal>
           <ScrollReveal delay={150} className="order-1 lg:order-2">
@@ -58,16 +67,89 @@ const AboutSection: React.FC = () => {
               <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-white mb-6 inline-block border-b-4 border-yellow-300">
                 About <span className="text-yellow-300">FABLAB</span>
               </h2>
-              <p className="text-sm lg:text-base text-blue-100 leading-relaxed mb-6">
-                The <span className="font-semibold text-yellow-300">FABLAB</span> is a hands-on fabrication space with 3D printers, laser cutters, PCB milling, and a full electronics bench. It enables <span className="font-medium text-yellow-300">rapid prototyping</span>, learning by doing, and transforming ideas into functional products.
+              <p className="text-base lg:text-lg text-blue-100 leading-relaxed text-justify mb-6">
+                <span className="font-bold text-yellow-300">
+                  Fabrication Lab (FAB LAB)
+                </span>{" "}
+                is a space where ideas come to life—an{" "}
+                <span className="font-bold text-yellow-300">
+                  advanced fabrication and innovation facility
+                </span>{" "}
+                designed to support hands-on exploration, rapid prototyping, and
+                product development. Equipped with cutting-edge tools and
+                technologies, it empowers students, startups, and innovators to
+                convert concepts into{" "}
+                <span className="font-bold text-yellow-300">
+                  functional, market-ready prototypes
+                </span>{" "}
+                while nurturing creativity, experimentation, and innovation.
               </p>
-              
-              <ul className="list-disc list-inside space-y-2 text-blue-100 text-sm mb-8">
-                <li>Advanced digital <span className="text-yellow-300 font-medium">fabrication tools</span></li>
-                <li>Safety and <span className="font-medium text-yellow-300">usage trainings</span> for all users</li>
-                <li>Guided workshops and <span className="text-yellow-300 font-medium">project support</span></li>
-              </ul>
-              
+
+              <div className="mb-8">
+                <h3 className="text-lg lg:text-xl font-bold text-yellow-300 mb-4">
+                  Key Advantages of the FABLAB
+                </h3>
+                <div className="space-y-4">
+                  <div className="flex gap-3">
+                    <span className="text-yellow-300 font-bold text-xl flex-shrink-0">
+                      ✓
+                    </span>
+                    <div>
+                      <h4 className="text-base lg:text-lg font-bold text-white mb-1">
+                        Hands-on Innovation Environment
+                      </h4>
+                      <p className="text-sm lg:text-base text-blue-100 leading-relaxed">
+                        Provides practical exposure to{" "}
+                        <span className="font-semibold text-yellow-300">
+                          fabrication, electronics, and digital manufacturing
+                          tools
+                        </span>
+                        , bridging the gap between theory and real-world
+                        application.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <span className="text-yellow-300 font-bold text-xl flex-shrink-0">
+                      ✓
+                    </span>
+                    <div>
+                      <h4 className="text-base lg:text-lg font-bold text-white mb-1">
+                        End-to-End Prototyping Support
+                      </h4>
+                      <p className="text-sm lg:text-base text-blue-100 leading-relaxed">
+                        Enables{" "}
+                        <span className="font-semibold text-yellow-300">
+                          complete product development
+                        </span>{" "}
+                        from idea validation and design to prototyping and
+                        testing under one roof.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3">
+                    <span className="text-yellow-300 font-bold text-xl flex-shrink-0">
+                      ✓
+                    </span>
+                    <div>
+                      <h4 className="text-base lg:text-lg font-bold text-white mb-1">
+                        Startup & Skill Development Focused
+                      </h4>
+                      <p className="text-sm lg:text-base text-blue-100 leading-relaxed">
+                        Supports startups and student innovators with{" "}
+                        <span className="font-semibold text-yellow-300">
+                          technical guidance, mentorship access, and
+                          infrastructure
+                        </span>{" "}
+                        to accelerate innovation and entrepreneurial growth.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <a
                   href="#/about"

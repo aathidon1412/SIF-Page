@@ -1,100 +1,100 @@
-import React, { useState } from 'react';
-import { Accordion } from './ui/Accordion';
-import ScrollReveal from './ui/ScrollReveal';
+import React, { useState } from "react";
+import { Accordion } from "./ui/Accordion";
+import ScrollReveal from "./ui/ScrollReveal";
 
 // Categorized FAQ data
 const faqData: Record<string, { trigger: string; content: string }[]> = {
   general: [
     {
-      trigger: 'Who can use the FABLAB?',
+      trigger: "What is a FABLAB?",
       content:
-        'The lab is open to all students, faculty, and staff of the college. We also offer memberships for external enthusiasts and startups. Contact us for more details on access policies.'
+        "A FABLAB is a hands-on innovation space for fabrication, prototyping, and creative product development.",
     },
     {
-      trigger: 'Are there any costs involved?',
+      trigger: "Who can use the FABLAB?",
       content:
-        'Access to the lab is free for all college members. However, there is a nominal fee for consumables like 3D printing filament, acrylic sheets, and other materials. You can bring your own materials if they are approved by the lab manager.'
+        "Students, faculty members, startups, and innovators are welcome to use the FABLAB.",
     },
     {
-      trigger: 'What are the operating hours?',
+      trigger: "What types of projects are supported?",
       content:
-        'The FABLAB is open Monday through Friday from 9:00 AM to 8:00 PM, and weekends from 10:00 AM to 6:00 PM. Extended hours may be available during project deadlines with prior arrangement.'
+        "The FABLAB supports academic projects, research work, startup ideas, and prototype development.",
     },
     {
-      trigger: 'Is there parking available?',
+      trigger: "Do I need prior experience to use the FABLAB?",
       content:
-        'Yes, free parking is available in the designated areas near the building. Visitor parking passes can be obtained from the main reception desk for external members.'
+        "No prior experience is required. Basic training and guidance will be provided before using the equipment.",
     },
     {
-      trigger: 'Can I work on personal projects?',
-      content:
-        'Absolutely! The FABLAB encourages both academic and personal projects. Personal projects help you learn and explore creativity while developing practical skills with our equipment.'
-    }
+      trigger: "What are the working hours?",
+      content: "The FABLAB operates on working days from 8:00 AM to 8:00 PM.",
+    },
   ],
   equipment: [
     {
-      trigger: 'Do I need prior experience to use the equipment?',
+      trigger: "What equipment is available in the FABLAB?",
       content:
-        'No prior experience is necessary for most equipment. We provide mandatory safety and basic usage training for all new members. For advanced machinery, we offer specialized workshops and one-on-one sessions.'
+        "The lab is equipped with CNC machines, laser cutters, electronics tools, and IoT development equipment.",
     },
     {
-      trigger: 'Is training provided for all machines?',
+      trigger: "Are Arduino and Raspberry Pi kits available?",
       content:
-        'Yes. Each machine has a corresponding introductory module. Completion unlocks booking privileges for that specific equipment.'
+        "Yes, Arduino and Raspberry Pi boards are available along with sensors, motors, and supporting modules.",
     },
     {
-      trigger: 'What equipment is available in the FABLAB?',
+      trigger: "Is training mandatory before using the machines?",
       content:
-        'We have 3D printers, laser cutters, CNC machines, soldering stations, oscilloscopes, PCB fabrication tools, woodworking tools, and a complete electronics prototyping setup with various sensors and microcontrollers.'
+        "Yes, safety instructions and machine-specific training are mandatory for all users.",
     },
     {
-      trigger: 'Can I use my own tools and materials?',
+      trigger: "Can I bring my own materials to use in the FABLAB?",
       content:
-        'Yes, you can bring your own tools and materials as long as they meet our safety standards and are approved by the lab manager. This helps keep your project costs down.'
+        "Yes, you may bring your own materials, subject to safety and compatibility approval.",
     },
     {
-      trigger: 'What if I break or damage equipment?',
+      trigger: "Is technical support available during usage?",
       content:
-        'Accidents happen! Report any damage immediately to lab staff. Minor wear and tear is expected, but deliberate misuse or failure to follow safety protocols may result in repair charges or restricted access.'
-    }
+        "Yes, trained staff members are available to provide technical assistance during lab hours.",
+    },
   ],
   booking: [
     {
-      trigger: 'How do I book a machine?',
+      trigger: "How can I book the FABLAB or its equipment?",
       content:
-        "Machine booking is done through our online portal. Create an account, finish required training modules, then reserve time slots for the equipment you need."
+        "Bookings can be made through the official online booking portal.",
     },
     {
-      trigger: 'Can I cancel or reschedule a booking?',
+      trigger: "Is advance booking required?",
       content:
-        'Yes, up to 2 hours before the slot starts. After that, please contact a lab manager to avoid a no-show penalty.'
+        "Yes, advance booking is recommended to ensure equipment availability.",
     },
     {
-      trigger: 'How far in advance can I book equipment?',
+      trigger: "Are there any usage charges?",
       content:
-        'You can book equipment up to 2 weeks in advance. Popular machines like 3D printers and laser cutters tend to fill up quickly, so we recommend booking as early as possible for your project timeline.'
+        "Usage charges depend on the type of equipment and the duration of use.",
     },
     {
-      trigger: 'What happens if I run over my booked time?',
+      trigger: "Can I cancel or reschedule my booking?",
       content:
-        'You have a 15-minute grace period. Beyond that, if no one else is waiting, you can continue working. However, if someone has the next slot booked, you must wrap up and clean your workspace.'
+        "Yes, cancellations and rescheduling are allowed as per the booking policy.",
     },
     {
-      trigger: 'Can I book multiple machines at once?',
+      trigger: "Can external users access the FABLAB?",
       content:
-        'Yes, you can book multiple machines simultaneously if your project requires it. However, you must be physically present to operate each machine and cannot leave them unattended during your booking slot.'
-    }
-  ]
+        "Yes, external users can book the FABLAB, subject to approval and usage guidelines.",
+    },
+  ],
 };
 
 const categoryLabels: { key: keyof typeof faqData; label: string }[] = [
-  { key: 'general', label: 'General' },
-  { key: 'equipment', label: 'Equipment' },
-  { key: 'booking', label: 'Booking' }
+  { key: "general", label: "General" },
+  { key: "equipment", label: "Equipment" },
+  { key: "booking", label: "Booking" },
 ];
 
 const FAQSection: React.FC = () => {
-  const [activeCategory, setActiveCategory] = useState<keyof typeof faqData>('general');
+  const [activeCategory, setActiveCategory] =
+    useState<keyof typeof faqData>("general");
 
   const items = faqData[activeCategory];
 
@@ -104,9 +104,12 @@ const FAQSection: React.FC = () => {
         <ScrollReveal>
           <div className="text-center mb-10">
             <h2 className="text-3xl md:text-4xl font-bold text-white inline-block border-b-4 border-yellow-300">
-              Frequently Asked <span className="text-yellow-300">Questions</span>
+              Frequently Asked{" "}
+              <span className="text-yellow-300">Questions</span>
             </h2>
-            <p className="mt-4 text-lg text-blue-100">Have questions? We have answers.</p>
+            <p className="mt-4 text-lg text-blue-100">
+              Have questions? We have answers.
+            </p>
           </div>
         </ScrollReveal>
 
@@ -121,10 +124,10 @@ const FAQSection: React.FC = () => {
                   type="button"
                   onClick={() => setActiveCategory(key)}
                   className={
-                    'relative px-5 py-2 rounded-sm text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 ' +
+                    "relative px-5 py-2 rounded-sm text-sm font-medium transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-400 " +
                     (active
-                      ? 'bg-yellow-300 text-blue-950 shadow-md'
-                      : 'bg-blue-900 text-blue-100 hover:bg-blue-800 border border-blue-700 shadow-sm hover:shadow-md transform hover:-translate-y-0.5')
+                      ? "bg-yellow-300 text-blue-950 shadow-md"
+                      : "bg-blue-900 text-blue-100 hover:bg-blue-800 border border-blue-700 shadow-sm hover:shadow-md transform hover:-translate-y-0.5")
                   }
                 >
                   {label}

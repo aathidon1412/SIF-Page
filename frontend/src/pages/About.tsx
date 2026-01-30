@@ -1,7 +1,5 @@
 import React from 'react';
-import { FaCircle } from 'react-icons/fa';
 import ScrollReveal from '../components/ui/ScrollReveal';
-import { FaLinkedin, FaXTwitter, FaInstagram } from 'react-icons/fa6';
 
 
 
@@ -15,20 +13,20 @@ const About: React.FC = () => {
             <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
               <div className="text-left">
                 <h1 className="text-4xl md:text-5xl font-extrabold text-slate-900 dark:text-black inline-block border-b-4 border-blue-950">
-                  About <span className="text-blue-950 dark:text-blue-950">SIF-FABLAB</span>
+                  About <span className="text-blue-950 dark:text-blue-950">FABLAB</span>
                 </h1>
-                <p className="mt-10 text-xl max-w-4xl text-black dark:text-black leading-loose">
-                Discover our mission, our history, and the team that makes innovation happen every day.
-                At SIF-FABLAB, we are passionate about <span className="bg-blue-950/20 px-2 py-0 rounded border border-blue-950/30">empowering creators and entrepreneurs</span> by providing access to <span className="bg-blue-950/20 px-2 py-0 rounded border border-blue-950/30">cutting-edge digital fabrication tools</span> and collaborative spaces. 
-                Our journey began with a vision to bridge the gap between ideas and execution, fostering a vibrant community where innovation thrives. 
-                Through workshops, mentorship, and interdisciplinary projects, we nurture creativity and drive <span className="bg-blue-950/20 px-2 py-0  rounded border border-blue-950/30">impactful solutions</span> that reshape industries and enrich lives.
+                <p className="mt-10 text-lg max-w-4xl text-black dark:text-black leading-relaxed text-justify">
+                The FABLAB is an <span className="bg-blue-950/20 px-2 py-0 rounded border border-blue-950/30 font-semibold">innovation and fabrication space</span> designed to support hands-on learning, rapid prototyping, and product development. It enables students, innovators, startups, and project developers to transform ideas into <span className="bg-blue-950/20 px-2 py-0 rounded border border-blue-950/30 font-semibold">functional prototypes</span> using advanced fabrication, electronics, and digital manufacturing tools. The lab bridges the gap between theoretical knowledge and real-world application by providing practical exposure, modern infrastructure, and expert guidance.
+              </p>
+              <p className="mt-6 text-lg max-w-4xl text-black dark:text-black leading-relaxed text-justify">
+                The FABLAB supports academic projects, research activities, startup prototyping, and skill development initiatives. By fostering <span className="bg-blue-950/20 px-2 py-0 rounded border border-blue-950/30 font-semibold">creativity, collaboration, and experimentation</span>, the lab plays a key role in developing industry-relevant skills, encouraging innovation, and nurturing an entrepreneurial mindset among learners and innovators.
               </p>
               </div>
               <div className="flex justify-center lg:justify-end">
                 <img 
                   src="https://picsum.photos/600/500?random=10" 
                   alt="SIF-FABLAB Innovation" 
-                  className="rounded-xl shadow-lg w-full max-w-md lg:max-w-lg object-cover"
+                  className="rounded-xl shadow-lg w-full max-w-lg lg:max-w-2xl object-cover h-[350px]"
                 />
               </div>
             </div>
@@ -42,37 +40,14 @@ const About: React.FC = () => {
             <div className="mx-4 sm:mx-6 lg:mx-8 py-8">
               <div className="grid md:grid-cols-2 gap-8 lg:gap-12 items-center p-8 lg:p-12 rounded-2xl">
                 <div className="flex justify-center order-last md:order-first">
-                    <img src="https://picsum.photos/800/600?random=2" alt="Mission - Lab collaboration" className="rounded-2xl shadow-lg w-full object-cover"/>
+                    <img src="https://picsum.photos/800/600?random=2" alt="Mission - Lab collaboration" className="rounded-2xl shadow-lg w-full object-cover h-[280px]"/>
                   </div>
                   <div className="text-white order-first md:order-last">
                   <section aria-labelledby="mission-heading">
                     <h2 id="mission-heading" className="text-3xl md:text-4xl font-bold mb-6 text-yellow-300 inline-block border-b-4 border-yellow-300">Our Mission</h2>
-                    <p className="text-lg leading-relaxed text-blue-100 mb-6">
-                      To democratize access to digital fabrication technologies, fostering innovation, collaboration, and lifelong learning.
+                    <p className="text-lg leading-relaxed text-blue-100 text-justify mb-6">
+                      The mission of the FABLAB is to promote <span className="font-bold text-yellow-300">innovation, creativity, and experiential learning</span> by providing access to advanced fabrication and prototyping facilities. The lab empowers users to design, build, test, and refine ideas in a practical environment, enabling <span className="font-bold text-yellow-300">real-world problem-solving and skill development</span>. It supports multidisciplinary collaboration, academic excellence, and startup innovation while fostering a safe, inclusive, and technology-driven culture.
                     </p>
-                    <p className="text-base leading-relaxed text-blue-100 mb-6">
-                      We envision a world where creative ideas are not limited by access to tools or technical expertise, where every individual has the opportunity to transform concepts into reality through hands-on experimentation and digital fabrication.
-                    </p>
-                    <div className="space-y-3 text-blue-100">
-                      <ul className="space-y-3 text-base">
-                        <li className="flex items-start">
-                          <span className="text-yellow-300 mr-3 mt-1.5"><FaCircle size={8} /></span>
-                          <span><span className="text-yellow-300 font-medium">Universal Access</span> - Making cutting-edge tools available to everyone</span>
-                        </li>
-                        <li className="flex items-start">
-                          <span className="text-yellow-300 mr-3 mt-1.5"><FaCircle size={8} /></span>
-                          <span><span className="text-yellow-300 font-medium">Inclusive Learning</span> - Creating environments where experimentation thrives</span>
-                        </li>
-                        <li className="flex items-start">
-                          <span className="text-yellow-300 mr-3 mt-1.5"><FaCircle size={8} /></span>
-                          <span><span className="text-yellow-300 font-medium">Breaking Barriers</span> - Empowering creators from all backgrounds</span>
-                        </li>
-                        <li className="flex items-start">
-                          <span className="text-yellow-300 mr-3 mt-1.5"><FaCircle size={8} /></span>
-                          <span><span className="text-yellow-300 font-medium">Community Building</span> - Fostering collaboration and knowledge sharing</span>
-                        </li>
-                      </ul>
-                    </div>
                   </section>
                 </div>
               </div>
@@ -89,36 +64,13 @@ const About: React.FC = () => {
                 <div className="text-blue-950">
                   <section aria-labelledby="vision-heading">
                     <h2 id="vision-heading" className="text-3xl md:text-4xl font-bold mb-6 text-blue-950 inline-block border-b-4 border-blue-950">Our Vision</h2>
-                    <p className="text-lg leading-relaxed text-blue-900 mb-6">
-                      To be a <span className="bg-blue-950/20 px-2 py-0 rounded border border-blue-950/30">leading hub for digital fabrication</span> and interdisciplinary research, recognized for its contribution to education, entrepreneurship, and community development.
+                    <p className="text-lg leading-relaxed text-blue-900 text-justify mb-6">
+                      The vision of the FABLAB is to become a <span className="bg-blue-950/20 px-2 py-0 rounded border border-blue-950/30 font-bold">center of excellence for innovation and technology-driven creation</span>. The lab aspires to build a dynamic ecosystem where ideas evolve into <span className="bg-blue-950/20 px-2 py-0 rounded border border-blue-950/30 font-bold">impactful solutions</span> that address real-world challenges. By encouraging collaboration, embracing emerging technologies, and supporting sustainable innovation, the FABLAB aims to develop <span className="bg-blue-950/20 px-2 py-0 rounded border border-blue-950/30 font-bold">future-ready innovators</span> and contribute to technological and entrepreneurial growth.
                     </p>
-                    <p className="text-base leading-relaxed text-blue-900 mb-6">
-                      We strive to become a beacon of innovation where groundbreaking research meets practical application, inspiring the <span className="bg-blue-950/20 px-2 py-0 rounded border border-blue-950/30">next generation of makers</span>, researchers, and entrepreneurs to shape the future.
-                    </p>
-                    <div className="space-y-3 text-blue-900">
-                      <ul className="space-y-3 text-base">
-                        <li className="flex items-start">
-                          <span className="text-blue-950 mr-3 mt-1.5"><FaCircle size={8} /></span>
-                          <span><span className="text-blue-950 font-medium">Research Excellence</span> - Driving interdisciplinary innovation and discovery</span>
-                        </li>
-                        <li className="flex items-start">
-                          <span className="text-blue-950 mr-3 mt-1.5"><FaCircle size={8} /></span>
-                          <span><span className="text-blue-950 font-medium">Educational Impact</span> - Transforming learning through hands-on experience</span>
-                        </li>
-                        <li className="flex items-start">
-                          <span className="text-blue-950 mr-3 mt-1.5"><FaCircle size={8} /></span>
-                          <span><span className="text-blue-950 font-medium">Entrepreneurial Growth</span> - Nurturing startups and business innovation</span>
-                        </li>
-                        <li className="flex items-start">
-                          <span className="text-blue-950 mr-3 mt-1.5"><FaCircle size={8} /></span>
-                          <span><span className="text-blue-950 font-medium">Community Leadership</span> - Inspiring regional and global development</span>
-                        </li>
-                      </ul>
-                    </div>
                   </section>
                 </div>
                 <div className="flex justify-center">
-                  <img src="https://picsum.photos/800/600?random=3" alt="Vision - Future innovation" className="rounded-2xl shadow-lg w-full object-cover"/>
+                  <img src="https://picsum.photos/800/600?random=3" alt="Vision - Future innovation" className="rounded-2xl shadow-lg w-full object-cover h-[280px]"/>
                 </div>
               </div>
             </div>
@@ -130,108 +82,94 @@ const About: React.FC = () => {
             <div className="mx-4 sm:mx-6 lg:mx-8 py-8">
               <div className="rounded-2xl p-6 lg:p-8">
                 {/* Section Header */}
-                <div className="text-center mb-6">
+                <div className="text-center mb-8">
                   <h2 className="text-4xl md:text-5xl font-bold text-yellow-300 inline-block border-b-4 border-yellow-300 pb-2">
                     Our Team
                   </h2>
                   <p className="mt-6 text-xl text-blue-100 max-w-3xl mx-auto">
-                    Meet the visionary leaders driving innovation and fostering the next generation of makers at SIF-FABLAB.
+                    Meet the dedicated team driving innovation and supporting makers at the FABLAB.
                   </p>
                 </div>
 
-                {/* Team Grid with Divider */}
-                <div className="relative grid md:grid-cols-2 gap-0 min-h-[400px]">
-                  {/* Founder Section */}
-                  <div className="flex flex-col items-center justify-start p-3 lg:p-4">
-                    <div className="w-40 h-40 lg:w-48 lg:h-48 mb-4">
+                {/* Team Grid */}
+                <div className="max-w-6xl mx-auto">
+                  {/* First 3 members */}
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+                    {/* Head & CEO */}
+                    <div className="flex flex-col items-center justify-start p-4">
+                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4">
                         <img 
                           src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
-                          alt="Dr. Rahman Al-Farisi - Founder" 
+                          alt="Mr. Sathya Murthy V" 
                           className="w-full h-full rounded-full object-cover shadow-2xl"
                         />
                       </div>
-                    <div className="text-center text-white max-w-sm">
-                      <h3 className="text-2xl lg:text-3xl font-bold text-yellow-300 mb-2">Dr. Rahman Al-Farisi</h3>
-                      <p className="text-lg text-yellow-200 mb-4 font-medium">Founder & Director</p>
-                      
-                      <div className="space-y-2 text-sm text-blue-200 text-left">
-                        <p className="flex items-center gap-2"><FaCircle size={6} /> PhD in Mechanical Engineering</p>
-                        <p className="flex items-center gap-2"><FaCircle size={6} /> Former MIT Research Fellow</p>
-                        <p className="flex items-center gap-2"><FaCircle size={6} /> 20+ Patents in Digital Fabrication</p>
+                      <div className="text-center text-white">
+                        <h3 className="text-xl lg:text-2xl font-bold text-yellow-300 mb-2">Mr. Sathya Murthy V</h3>
+                        <p className="text-base text-yellow-200 font-medium">Head & CEO</p>
                       </div>
+                    </div>
 
-                      {/* Social connections */}
-                      <div className="mt-4 flex items-center justify-center gap-4 text-[#fffdeb]">
-                        <a
-                          href="#"
-                          aria-label="Rahman on LinkedIn"
-                          className="hover:text-yellow-300 transition-colors"
-                        >
-                          <FaLinkedin size={24} />
-                        </a>
-                        <a
-                          href="#"
-                          aria-label="Rahman on X"
-                          className="hover:text-yellow-300 transition-colors"
-                        >
-                          <FaXTwitter size={24} />
-                        </a>
-                        <a
-                          href="#"
-                          aria-label="Rahman on Instagram"
-                          className="hover:text-yellow-300 transition-colors"
-                        >
-                          <FaInstagram size={24} />
-                        </a>
+                    {/* Incubations Manager 1 */}
+                    <div className="flex flex-col items-center justify-start p-4">
+                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4">
+                        <img 
+                          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                          alt="Mr. Brabasuthan M" 
+                          className="w-full h-full rounded-full object-cover shadow-2xl"
+                        />
+                      </div>
+                      <div className="text-center text-white">
+                        <h3 className="text-xl lg:text-2xl font-bold text-yellow-300 mb-2">Mr. Brabasuthan M</h3>
+                        <p className="text-base text-yellow-200 font-medium">Incubations Manager</p>
+                      </div>
+                    </div>
+
+                    {/* Incubations Manager 2 */}
+                    <div className="flex flex-col items-center justify-start p-4">
+                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4">
+                        <img 
+                          src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                          alt="Mr. Sharveshwar R" 
+                          className="w-full h-full rounded-full object-cover shadow-2xl"
+                        />
+                      </div>
+                      <div className="text-center text-white">
+                        <h3 className="text-xl lg:text-2xl font-bold text-yellow-300 mb-2">Mr. Sharveshwar R</h3>
+                        <p className="text-base text-yellow-200 font-medium">Incubations Manager</p>
                       </div>
                     </div>
                   </div>
 
-                  {/* Vertical Divider */}
-                  {/* Dividers removed */}
-
-                  {/* Co-Founder Section */}
-                  <div className="flex flex-col items-center justify-start p-3 lg:p-4">
-                    <div className="w-40 h-40 lg:w-48 lg:h-48 mb-4">
-                      <img 
-                        src="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=3461&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
-                        alt="Dr. Maya Patel - Co-Founder" 
-                        className="w-full h-full rounded-full object-cover shadow-2xl"
-                      />
-                    </div>
-                    <div className="text-center text-white max-w-sm">
-                      <h3 className="text-2xl lg:text-3xl font-bold text-yellow-300 mb-2">Dr. Maya Patel</h3>
-                      <p className="text-lg text-yellow-200 mb-4 font-medium">Co-Founder & Innovation Lead</p>
-                      
-                      <div className="space-y-2 text-sm text-blue-200 text-left">
-                        <p className="flex items-center gap-2"><FaCircle size={6} /> MBA from Stanford Business School</p>
-                        <p className="flex items-center gap-2"><FaCircle size={6} /> Serial Tech Entrepreneur</p>
-                        <p className="flex items-center gap-2"><FaCircle size={6} /> 3 Successful Exits in DeepTech</p>
+                  {/* Last 2 members - centered */}
+                  <div className="flex flex-wrap justify-center gap-8">
+                    {/* Project Associate 1 */}
+                    <div className="flex flex-col items-center justify-start p-4">
+                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4">
+                        <img 
+                          src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                          alt="Mr. Jayasurya M" 
+                          className="w-full h-full rounded-full object-cover shadow-2xl"
+                        />
                       </div>
+                      <div className="text-center text-white">
+                        <h3 className="text-xl lg:text-2xl font-bold text-yellow-300 mb-2">Mr. Jayasurya M</h3>
+                        <p className="text-base text-yellow-200 font-medium">Project Associate</p>
+                      </div>
+                    </div>
 
-                      {/* Social connections */}
-                      <div className="mt-4 flex items-center justify-center gap-4 text-[#fffdeb]">
-                        <a
-                          href="#"
-                          aria-label="Maya on LinkedIn"
-                          className="hover:text-yellow-300 transition-colors"
-                        >
-                          <FaLinkedin size={24} />
-                        </a>
-                        <a
-                          href="#"
-                          aria-label="Maya on X"
-                          className="hover:text-yellow-300 transition-colors"
-                        >
-                          <FaXTwitter size={24} />
-                        </a>
-                        <a
-                          href="#"
-                          aria-label="Maya on Instagram"
-                          className="hover:text-yellow-300 transition-colors"
-                        >
-                          <FaInstagram size={24} />
-                        </a>
+                    {/* Project Associate 2 */}
+                    <div className="flex flex-col items-center justify-start p-4">
+                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4">
+                        <img 
+                          src="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=3461&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                          alt="Ms. Sakthi Priyadarshini" 
+                          className="w-full h-full rounded-full object-cover shadow-2xl"
+                        />
+                      </div>
+                      <div className="text-center text-white">
+                        <h3 className="text-xl lg:text-2xl font-bold text-yellow-300 mb-2">Ms. Sakthi Priyadarshini</h3>
+                        <p className="text-base text-yellow-200 font-medium">Project Associate</p>
                       </div>
                     </div>
                   </div>
