@@ -1,12 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import ScrollReveal from './ui/ScrollReveal';
+import ScrollReveal from '../ui/ScrollReveal';
 import { HoverEffect } from "@/components/ui/card-hover-effect";
-import { fetchItems } from '../services/api';
-import { useAuth } from '../lib/auth';
+import { fetchItems } from '../../services/api';
+import { useAuth } from '../../lib/auth';
 
 interface Service {
-  icon: string;
   title: string;
   description: string;
   searchTerm: string; // Term to match equipment/lab
@@ -15,47 +14,47 @@ interface Service {
 
 const services: Service[] = [
   {
-    icon: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
-    title: '3D Printing',
-    description: 'Bring digital models to life with our high-precision FDM and Resin 3D printers.',
-    searchTerm: '3D Printer',
+    title: 'Digital Fabrication Facilities',
+    description: 'Advanced fabrication tools including CNC milling machines, CNC laser cutters, 3-axis CNC routers, FDM and DLP 3D printers, along with power and woodworking tools for precision cutting and finishing.',
+    searchTerm: 'Fabrication',
     type: 'equipment'
   },
   {
-    icon: 'M5 13l4 4L19 7',
-    title: 'Laser Cutting & Engraving',
-    description: 'Cut and engrave intricate designs on various materials like wood, acrylic, and fabric.',
-    searchTerm: 'Laser',
-    type: 'equipment'
-  },
-  {
-    icon: 'M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M12 6V4m0 16v-2M8 9a4 4 0 100-8 4 4 0 000 8z',
-    title: 'Electronics Workbench',
-    description: 'Access soldering stations, oscilloscopes, and components for your electronic projects.',
+    title: 'Electronics & Embedded Systems Lab',
+    description: 'Comprehensive electronics lab with Arduino, Raspberry Pi, IoT boards, sensors, testing instruments, and soldering tools for embedded and IoT development.',
     searchTerm: 'Electronics',
     type: 'lab'
   },
   {
-    icon: 'M13 10V3L4 14h7v7l9-11h-7z',
-    title: 'PCB Milling',
-    description: 'Create custom printed circuit boards for your prototypes and final products.',
-    searchTerm: 'PCB',
+    title: 'Prototyping & Product Development Tools',
+    description: 'Complete set of electronic components, motors, robotic parts, hand tools, and measuring instruments to build and refine functional prototypes.',
+    searchTerm: 'Prototyping',
     type: 'equipment'
   },
   {
-    icon: 'M17 20h5V4h-5v16zM3 20h5V4H3v16z',
-    title: 'Workshops & Training',
-    description: 'Join our regular workshops to learn new skills and master the lab equipment.',
-    searchTerm: 'Workshop',
+    title: 'Mechanical & Fabrication Tools',
+    description: 'Mechanical tools including drilling machines, grinders, welding equipment, air compressors, workbenches, and precision alignment tools.',
+    searchTerm: 'Mechanical',
+    type: 'equipment'
+  },
+  {
+    title: 'Design & Innovation Resources',
+    description: 'Dedicated space for design thinking, ideation, CAD/CAM-based workflows, rapid iteration, and prototype testing.',
+    searchTerm: 'Design',
     type: 'lab'
   },
   {
-    icon: 'M12 6.253v11.494m-9-5.747h18',
-    title: 'Project Consultation',
-    description: 'Get expert advice and guidance from our lab managers for your projects.',
-    searchTerm: 'Makerspace',
+    title: 'Student, Startup & Innovator Support Services',
+    description: 'Technical guidance, mentorship, prototype validation, and access to incubation, co-working spaces, and innovation ecosystems.',
+    searchTerm: 'Startup',
     type: 'lab'
   },
+  {
+    title: 'Training & Skill Development',
+    description: 'Hands-on workshops, machine operation and safety training, project-based learning, and industry-oriented skill development programs.',
+    searchTerm: 'Training',
+    type: 'lab'
+  }
 ];
 
 
@@ -121,9 +120,13 @@ const ServicesSection: React.FC = () => {
     link: "#",
     onClick: () => handleServiceClick(s),
   }));
+  
+  const topItems = items.slice(0, 4);
+  const bottomItems = items.slice(4, 7);
+  
   return (
     <section className="py-20" style={{ backgroundColor: '#fffdeb' }}>
-      <div className="w-full max-w-full mx-auto px-4 sm:px-6 lg:px-10">
+      <div className=".container-fluid mx-auto px-4">
         <ScrollReveal>
           <div className="text-center mb-12">
             <h2 className="text-3xl md:text-4xl font-bold text-blue-900 inline-block border-b-4 border-blue-900">
@@ -135,7 +138,10 @@ const ServicesSection: React.FC = () => {
           </div>
         </ScrollReveal>
         <ScrollReveal delay={100}>
-          <HoverEffect items={items} className="gap-6" />
+          <div className="max-w-7xl mx-auto">
+            <HoverEffect items={topItems} className="gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-4" />
+            <HoverEffect items={bottomItems} className="gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 max-w-5xl mx-auto" />
+          </div>
         </ScrollReveal>
       </div>
     </section>

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { Accordion } from "./ui/Accordion";
-import ScrollReveal from "./ui/ScrollReveal";
+import { Accordion } from "../ui/Accordion";
+import ScrollReveal from "../ui/ScrollReveal";
 
 // Categorized FAQ data
 const faqData: Record<string, { trigger: string; content: string }[]> = {

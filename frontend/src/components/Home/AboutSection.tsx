@@ -1,5 +1,5 @@
 import React from "react";
-import ScrollReveal from "./ui/ScrollReveal";
+import ScrollReveal from "../ui/ScrollReveal";
 
 const AboutSection: React.FC = () => {
   return (

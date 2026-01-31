@@ -1,5 +1,6 @@
 import React from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
+import { FaLinkedin } from 'react-icons/fa6';
 
 
 
@@ -97,46 +98,55 @@ const About: React.FC = () => {
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
                     {/* Head & CEO */}
                     <div className="flex flex-col items-center justify-start p-4">
-                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4">
+                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4 relative">
                         <img 
-                          src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                          src="/src/assets/OurTeam/sathya_murthy.jpeg" 
                           alt="Mr. Sathya Murthy V" 
                           className="w-full h-full rounded-full object-cover shadow-2xl"
                         />
                       </div>
                       <div className="text-center text-white">
                         <h3 className="text-xl lg:text-2xl font-bold text-yellow-300 mb-2">Mr. Sathya Murthy V</h3>
-                        <p className="text-base text-yellow-200 font-medium">Head & CEO</p>
+                        <p className="text-base text-yellow-200 font-medium mb-2">Head & CEO</p>
+                        <a href="https://www.linkedin.com/in/sathyavibes/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center hover:opacity-80 transition-opacity">
+                          <FaLinkedin className="w-6 h-6 text-yellow-50" />
+                        </a>
                       </div>
                     </div>
 
                     {/* Incubations Manager 1 */}
                     <div className="flex flex-col items-center justify-start p-4">
-                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4">
+                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4 relative">
                         <img 
-                          src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?q=80&w=3540&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                          src="/src/assets/OurTeam/brabasuthan.jpeg" 
                           alt="Mr. Brabasuthan M" 
                           className="w-full h-full rounded-full object-cover shadow-2xl"
                         />
                       </div>
                       <div className="text-center text-white">
                         <h3 className="text-xl lg:text-2xl font-bold text-yellow-300 mb-2">Mr. Brabasuthan M</h3>
-                        <p className="text-base text-yellow-200 font-medium">Incubations Manager</p>
+                        <p className="text-base text-yellow-200 font-medium mb-2">Incubations Manager</p>
+                        <a href="https://www.linkedin.com/in/brabasuthan-murugesan/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center hover:opacity-80 transition-opacity">
+                          <FaLinkedin className="w-6 h-6 text-yellow-50" />
+                        </a>
                       </div>
                     </div>
 
                     {/* Incubations Manager 2 */}
                     <div className="flex flex-col items-center justify-start p-4">
-                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4">
+                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4 relative">
                         <img 
-                          src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                          src="/src/assets/OurTeam/sharveshwar.jpeg" 
                           alt="Mr. Sharveshwar R" 
                           className="w-full h-full rounded-full object-cover shadow-2xl"
                         />
                       </div>
                       <div className="text-center text-white">
                         <h3 className="text-xl lg:text-2xl font-bold text-yellow-300 mb-2">Mr. Sharveshwar R</h3>
-                        <p className="text-base text-yellow-200 font-medium">Incubations Manager</p>
+                        <p className="text-base text-yellow-200 font-medium mb-2">Incubations Manager</p>
+                        <a href="https://www.linkedin.com/in/sharveshwar/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center hover:opacity-80 transition-opacity">
+                          <FaLinkedin className="w-6 h-6 text-yellow-50" />
+                        </a>
                       </div>
                     </div>
                   </div>
@@ -145,16 +155,19 @@ const About: React.FC = () => {
                   <div className="flex flex-wrap justify-center gap-8">
                     {/* Project Associate 1 */}
                     <div className="flex flex-col items-center justify-start p-4">
-                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4">
+                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4 relative">
                         <img 
-                          src="https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?q=80&w=3387&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                          src="/src/assets/OurTeam/jayasurya.jpeg" 
                           alt="Mr. Jayasurya M" 
                           className="w-full h-full rounded-full object-cover shadow-2xl"
                         />
                       </div>
                       <div className="text-center text-white">
                         <h3 className="text-xl lg:text-2xl font-bold text-yellow-300 mb-2">Mr. Jayasurya M</h3>
-                        <p className="text-base text-yellow-200 font-medium">Project Associate</p>
+                        <p className="text-base text-yellow-200 font-medium mb-2">Project Associate</p>
+                        <a href="https://www.linkedin.com/in/jayasurya-marudhasalamoorthi-06516027b/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center hover:opacity-80 transition-opacity">
+                          <FaLinkedin className="w-6 h-6 text-yellow-50" />
+                        </a>
                       </div>
                     </div>
 
@@ -170,6 +183,9 @@ const About: React.FC = () => {
                       <div className="text-center text-white">
                         <h3 className="text-xl lg:text-2xl font-bold text-yellow-300 mb-2">Ms. Sakthi Priyadarshini</h3>
                         <p className="text-base text-yellow-200 font-medium">Project Associate</p>
+                        <a href="#" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center hover:opacity-80 transition-opacity">
+                          <FaLinkedin className="w-6 h-6 text-yellow-50" />
+                        </a>
                       </div>
                     </div>
                   </div>
