@@ -26,21 +26,43 @@ export const validateWeekday = (dateString) => {
   if (!dateString) {
     return { isValid: false, error: 'Date is required' };
   }
-
-  const date = new Date(dateString);
-  
-  if (isNaN(date.getTime())) {
-    return { isValid: false, error: 'Invalid date format' };
+  // Accept either ISO (YYYY-MM-DD) or DD/MM/YYYY
+  const isoMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const ddmmyyyyMatch = dateString.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  let date = null;
+  if (isoMatch) {
+    date = new Date(dateString);
+  } else if (ddmmyyyyMatch) {
+    const [, dd, mm, yyyy] = ddmmyyyyMatch;
+    date = new Date(parseInt(yyyy, 10), parseInt(mm, 10) - 1, parseInt(dd, 10));
+  } else {
+    return { isValid: false, error: 'Invalid date format. Use DD/MM/YYYY or YYYY-MM-DD' };
   }
 
-  if (!isWeekday(date)) {
-    return { 
-      isValid: false, 
-      error: `Bookings are only available Monday-Friday. ${getDayName(date)} is not allowed.` 
-    };
-  }
-
+  if (!date || isNaN(date.getTime())) return { isValid: false, error: 'Invalid date' };
+  if (!isWeekday(date)) return { isValid: false, error: `Bookings are only available Monday-Friday. ${getDayName(date)} is not allowed.` };
   return { isValid: true };
+};
+
+// Parse a date string in DD/MM/YYYY or YYYY-MM-DD into a Date object (local timezone)
+const parseDateString = (dateString) => {
+  if (!dateString) return null;
+  const isoMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  const ddmmyyyyMatch = dateString.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+  let date = null;
+  if (isoMatch) {
+    // YYYY-MM-DD -> safe ISO date
+    const [y, m, d] = [parseInt(isoMatch[1], 10), parseInt(isoMatch[2], 10), parseInt(isoMatch[3], 10)];
+    date = new Date(y, m - 1, d);
+  } else if (ddmmyyyyMatch) {
+    const [, dd, mm, yyyy] = ddmmyyyyMatch;
+    date = new Date(parseInt(yyyy, 10), parseInt(mm, 10) - 1, parseInt(dd, 10));
+  } else {
+    // Fallback to Date constructor (best-effort)
+    const d = new Date(dateString);
+    if (!isNaN(d.getTime())) date = d;
+  }
+  return date && !isNaN(date.getTime()) ? date : null;
 };
 
 /**
@@ -93,8 +115,8 @@ export const validateDateRange = (startDate, endDate) => {
     return { isValid: false, error: `End date: ${endValidation.error}` };
   }
 
-  const start = new Date(startDate);
-  const end = new Date(endDate);
+  const start = parseDateString(startDate);
+  const end = parseDateString(endDate);
 
   if (end < start) {
     return { isValid: false, error: 'End date must be after or equal to start date' };
@@ -151,12 +173,36 @@ export const validateDateTimeCombination = (startDate, endDate, startTime, endTi
     return { isValid: false, error: 'Start date and end date are required' };
   }
 
+  // Helper to parse DD/MM/YYYY HH:MM -> Date or null
+  const parseDDMMYYYY_HHMM = (dateStr, timeStr) => {
+    if (!dateStr || !timeStr) return null;
+    const combined = `${dateStr.trim()} ${timeStr.trim()}`;
+    const re = /^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/;
+    const m = combined.match(re);
+    if (!m) return null;
+    const [, dd, mm, yyyy, HH, MM] = m;
+    const day = parseInt(dd, 10);
+    const month = parseInt(mm, 10) - 1;
+    const year = parseInt(yyyy, 10);
+    const hour = parseInt(HH, 10);
+    const minute = parseInt(MM, 10);
+    const d = new Date(year, month, day, hour, minute, 0);
+    if (
+      d.getFullYear() !== year ||
+      d.getMonth() !== month ||
+      d.getDate() !== day ||
+      d.getHours() !== hour ||
+      d.getMinutes() !== minute
+    ) return null;
+    return d;
+  };
+
   // For equipment bookings (date only)
   if (itemType === 'equipment') {
-    const start = new Date(startDate);
-    const end = new Date(endDate);
+    const start = parseDateString(startDate);
+    const end = parseDateString(endDate);
     
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    if (!start || !end) {
       return { isValid: false, error: 'Invalid date format' };
     }
     
@@ -180,69 +226,38 @@ export const validateDateTimeCombination = (startDate, endDate, startTime, endTi
       return { isValid: false, error: 'Start time and end time are required for lab bookings' };
     }
 
-    // Validate time format
-    const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
-    if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
-      return { isValid: false, error: 'Invalid time format. Use HH:mm format' };
+    // Parse using DD/MM/YYYY HH:MM (strict)
+    const startDT = parseDDMMYYYY_HHMM(startDate, startTime);
+    const endDT = parseDDMMYYYY_HHMM(endDate, endTime);
+    if (!startDT || !endDT) {
+      return { isValid: false, error: 'Date and time must be in format DD/MM/YYYY HH:MM' };
     }
 
-    // Create complete date-time objects
-    const startDateTime = new Date(`${startDate}T${startTime}:00`);
-    const endDateTime = new Date(`${endDate}T${endTime}:00`);
+    // Strict: end must be after start
+    if (endDT <= startDT) return { isValid: false, error: 'End date-time must be later than start date-time' };
 
-    if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
-      return { isValid: false, error: 'Invalid date or time combination' };
-    }
-
-    // Single unified check: end date-time must be after start date-time
-    if (endDateTime <= startDateTime) {
-      return { 
-        isValid: false, 
-        error: 'End date and time must be after start date and time' 
-      };
-    }
-
-    // Check if booking is in the past
+    // Not allowed in the past
     const now = new Date();
-    if (startDateTime < now) {
-      return { isValid: false, error: 'Booking cannot be in the past' };
-    }
+    if (startDT < now) return { isValid: false, error: 'Booking cannot be in the past' };
 
-    // Validate business hours (9 AM - 6 PM)
-    const [startHour, startMinute] = startTime.split(':').map(Number);
-    const [endHour, endMinute] = endTime.split(':').map(Number);
-    const startTotalMinutes = startHour * 60 + startMinute;
-    const endTotalMinutes = endHour * 60 + endMinute;
-
-    if (startTotalMinutes < 540 || startTotalMinutes > 1080) {
-      return { isValid: false, error: 'Start time must be between 9:00 AM and 6:00 PM' };
-    }
-    if (endTotalMinutes < 540 || endTotalMinutes > 1080) {
-      return { isValid: false, error: 'End time must be between 9:00 AM and 6:00 PM' };
-    }
+    // Business hours checks (both must be within 09:00-18:00)
+    const startTotal = startDT.getHours() * 60 + startDT.getMinutes();
+    const endTotal = endDT.getHours() * 60 + endDT.getMinutes();
+    if (startTotal < 9 * 60 || startTotal > 18 * 60) return { isValid: false, error: 'Start time must be between 09:00 and 18:00' };
+    if (endTotal < 9 * 60 || endTotal > 18 * 60) return { isValid: false, error: 'End time must be between 09:00 and 18:00' };
 
     // Minimum 1 hour duration
-    const durationHours = (endDateTime - startDateTime) / (1000 * 60 * 60);
-    if (durationHours < 1) {
-      return { isValid: false, error: 'Minimum booking duration is 1 hour' };
-    }
+    const durationHours = (endDT - startDT) / (1000 * 60 * 60);
+    if (durationHours < 1) return { isValid: false, error: 'Minimum booking duration is 1 hour' };
 
-    // Maximum 9 hours for single day
-    if (startDate === endDate && durationHours > 9) {
-      return { isValid: false, error: 'Maximum booking duration per day is 9 hours' };
-    }
+    // Maximum 9 hours same-day
+    if (startDate === endDate && durationHours > 9) return { isValid: false, error: 'Maximum booking duration per day is 9 hours' };
 
-    // Validate weekdays in range
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-    const currentDate = new Date(start);
-    while (currentDate <= end) {
-      if (!isWeekday(currentDate)) {
-        return {
-          isValid: false,
-          error: `Booking includes ${getDayName(currentDate)}. Only Monday-Friday allowed.`
-        };
-      }
+    // Ensure weekdays across range
+    const currentDate = new Date(startDT);
+    const endBoundary = new Date(endDT);
+    while (currentDate <= endBoundary) {
+      if (!isWeekday(currentDate)) return { isValid: false, error: `Booking includes ${getDayName(currentDate)}. Only Monday-Friday allowed.` };
       currentDate.setDate(currentDate.getDate() + 1);
     }
   }

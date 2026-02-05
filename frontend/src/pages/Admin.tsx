@@ -389,6 +389,20 @@ const Admin: React.FC = () => {
       setSelectedRequest(null);
       setAdminNote('');
       toast[action === 'approved' ? 'success' : 'error'](`Booking request ${action}`);
+
+      // Inform admin about email delivery status
+      try {
+        if ((updated as any).notificationSent) {
+          toast.success('Confirmation email sent to the user');
+        } else if ((updated as any).notificationHistory && (updated as any).notificationHistory.length > 0) {
+          const last = (updated as any).notificationHistory.slice(-1)[0];
+          if (last && last.status === 'failed') {
+            toast.error(`Email delivery failed: ${last.message || 'see server logs'}`);
+          }
+        }
+      } catch (e) {
+        // swallow UI notification errors
+      }
     } catch {
       toast.error('Failed to update booking');
     }
@@ -809,6 +823,36 @@ const Admin: React.FC = () => {
                     </div>
                     <div className="w-full bg-blue-900 hover:bg-blue-950 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
                       <span>Manage Labs</span>
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
+
+                {/* QR Verification Card */}
+                <div
+                  onClick={() => navigate('/admin/qrverify')}
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-gray-200 hover:border-blue-900 transform hover:-translate-y-1 text-left group cursor-pointer"
+                >
+                  <div className="bg-blue-950 p-6 text-white">
+                    <div className="flex items-center justify-between mb-4">
+                      <div className="w-14 h-14 bg-white bg-opacity-20 rounded-xl flex items-center justify-center">
+                        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v6h6M20 20v-6h-6M4 20h6v-6M20 4h-6v6" />
+                        </svg>
+                      </div>
+                    </div>
+                    <h3 className="text-xl font-bold mb-2">QR Verification</h3>
+                    <p className="text-blue-100 text-xs">Scan and verify booking QR codes</p>
+                  </div>
+                  <div className="p-6 space-y-3">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Verify</span>
+                      <span className="font-bold text-blue-950">QR</span>
+                    </div>
+                    <div className="w-full bg-blue-900 hover:bg-blue-950 text-white px-4 py-2.5 rounded-xl font-medium transition-colors flex items-center justify-center gap-2">
+                      <span>Open Verifier</span>
                       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 5l7 7-7 7" />
                       </svg>

@@ -8,6 +8,39 @@ export interface ValidationResult {
   error?: string;
 }
 
+// Parse combined date-time string in DD/MM/YYYY HH:MM -> Date | null
+export const parseDDMMYYYY_HHMM = (dateStr: string, timeStr?: string): Date | null => {
+  if (!dateStr) return null;
+  // If caller passed a single combined string in dateStr, attempt to split
+  let ds = dateStr;
+  let ts = timeStr;
+  const combinedAttempt = /^\s*\d{2}\/\d{2}\/\d{4}\s+\d{2}:\d{2}\s*$/;
+  if (!ts && combinedAttempt.test(ds)) {
+    const parts = ds.trim().split(/\s+/);
+    ds = parts[0];
+    ts = parts[1];
+  }
+  if (!ts) return null;
+  const re = /^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/;
+  const m = `${ds} ${ts}`.match(re);
+  if (!m) return null;
+  const [, dd, mm, yyyy, HH, MM] = m;
+  const day = parseInt(dd, 10);
+  const month = parseInt(mm, 10) - 1;
+  const year = parseInt(yyyy, 10);
+  const hour = parseInt(HH, 10);
+  const minute = parseInt(MM, 10);
+  const d = new Date(year, month, day, hour, minute, 0);
+  if (
+    d.getFullYear() !== year ||
+    d.getMonth() !== month ||
+    d.getDate() !== day ||
+    d.getHours() !== hour ||
+    d.getMinutes() !== minute
+  ) return null;
+  return d;
+};
+
 /**
  * Check if a date is a weekday (Monday-Friday)
  */
@@ -41,18 +74,8 @@ export const validateWeekday = (dateString: string): ValidationResult => {
   }
 
   const date = new Date(dateString);
-  
-  if (isNaN(date.getTime())) {
-    return { isValid: false, error: 'Invalid date format' };
-  }
-
-  if (!isWeekday(date)) {
-    return { 
-      isValid: false, 
-      error: `Bookings are only available Monday-Friday. ${getDayName(date)} is not allowed.` 
-    };
-  }
-
+  if (isNaN(date.getTime())) return { isValid: false, error: 'Invalid date format' };
+  if (!isWeekday(date)) return { isValid: false, error: `Bookings are only available Monday-Friday. ${getDayName(date)} is not allowed.` };
   return { isValid: true };
 };
 
@@ -89,6 +112,19 @@ export const validateBusinessHours = (timeString: string): ValidationResult => {
     };
   }
 
+  return { isValid: true };
+};
+
+/**
+ * Validate a combined date-time (DD/MM/YYYY HH:MM) for weekday and business hours
+ */
+export const validateCombinedDateTime = (dateStr: string, timeStr: string): ValidationResult => {
+  const dt = parseDDMMYYYY_HHMM(dateStr, timeStr);
+  if (!dt) return { isValid: false, error: 'Date and time must be in format DD/MM/YYYY HH:MM' };
+  if (!isWeekday(dt)) return { isValid: false, error: `Date ${getDayName(dt)} is not allowed; bookings are Monday-Friday only.` };
+  const total = dt.getHours() * 60 + dt.getMinutes();
+  if (total < 9 * 60) return { isValid: false, error: 'Time must be at or after 09:00' };
+  if (total > 18 * 60) return { isValid: false, error: 'Time must be at or before 18:00' };
   return { isValid: true };
 };
 
@@ -166,17 +202,32 @@ export const validateBooking = (
   isLabBooking: boolean = false
 ): ValidationResult => {
   // Validate dates
+  // Keep existing date-range semantic (supports ISO date strings used elsewhere)
   const dateValidation = validateDateRange(startDate, endDate);
-  if (!dateValidation.isValid) {
-    return dateValidation;
-  }
+  if (!dateValidation.isValid) return dateValidation;
 
-  // Validate times for lab bookings
-  if (isLabBooking && startTime && endTime) {
-    const timeValidation = validateTimeRange(startTime, endTime);
-    if (!timeValidation.isValid) {
-      return timeValidation;
-    }
+  // For bookings with times, validate combined date+time in DD/MM/YYYY HH:MM
+  if (startTime && endTime) {
+    // If startDate is ISO (YYYY-MM-DD), convert to DD/MM/YYYY for combined check
+    const isoToDDMM = (iso: string) => {
+      const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+      if (!m) return iso; // return as-is if not ISO
+      return `${m[3]}/${m[2]}/${m[1]}`;
+    };
+
+    const startDateForCheck = isoToDDMM(startDate);
+    const endDateForCheck = isoToDDMM(endDate);
+
+    const startCheck = validateCombinedDateTime(startDateForCheck, startTime);
+    if (!startCheck.isValid) return { isValid: false, error: `Start: ${startCheck.error}` };
+
+    const endCheck = validateCombinedDateTime(endDateForCheck, endTime);
+    if (!endCheck.isValid) return { isValid: false, error: `End: ${endCheck.error}` };
+
+    // Strict start < end check using parsed Date objects
+    const startDT = parseDDMMYYYY_HHMM(startDateForCheck, startTime)!;
+    const endDT = parseDDMMYYYY_HHMM(endDateForCheck, endTime)!;
+    if (endDT <= startDT) return { isValid: false, error: 'End date-time must be later than start date-time' };
   }
 
   return { isValid: true };

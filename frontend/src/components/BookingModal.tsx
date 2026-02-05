@@ -173,8 +173,19 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
       itemId: item.id,
       itemTitle: item.title || item.name || '',
       itemType,
-      startDate: formData.startDate,
-      endDate: formData.endDate,
+      // Send dates to backend in DD/MM/YYYY format
+      startDate: (function isoToDDMM(iso?: string) {
+        if (!iso) return '';
+        const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!m) return iso;
+        return `${m[3]}/${m[2]}/${m[1]}`;
+      })(formData.startDate),
+      endDate: (function isoToDDMM(iso?: string) {
+        if (!iso) return '';
+        const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (!m) return iso;
+        return `${m[3]}/${m[2]}/${m[1]}`;
+      })(formData.endDate),
       startTime: formData.startTime,
       endTime: formData.endTime,
       purpose: formData.purpose,

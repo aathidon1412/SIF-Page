@@ -142,16 +142,27 @@ router.patch('/:id', adminAuth, async (req, res) => {
 
     console.log(`[STATUS UPDATE] Booking ${req.params.id}: ${oldStatus} → ${status} ${declinedAfterApproval ? '(REVOKED)' : ''}`);
 
-    // Send notification to user
+    // If status did not change, skip notifications and cascading effects
+    const statusChanged = oldStatus !== status;
+    let notification = { success: false };
+    if (!statusChanged) {
+      console.log(`[STATUS UPDATE] No status change for booking ${req.params.id} — skipping notifications`);
+      return res.json({
+        ...updated.toObject(),
+        notification: 'No status change - no notification sent'
+      });
+    }
+
+    // Send notification to user (only when status changed)
     const { notifyBookingStatusChange, recordNotification } = await import('../utils/notifications.js');
-    const notification = await notifyBookingStatusChange(updated, oldStatus);
+    notification = await notifyBookingStatusChange(updated, oldStatus);
     await recordNotification(Booking, updated._id, notification);
-    
+
     // Enhanced logging for revoked bookings
     if (declinedAfterApproval) {
       console.log(`[REVOCATION NOTIFICATION] User ${updated.userEmail} notified about revoked booking ${updated._id}`);
-      console.log(`[REVOCATION DETAILS] Item: ${updated.itemTitle}, Dates: ${updated.startDate} - ${updated.endDate}`);
-      console.log(`[ADMIN NOTE] Reason: ${updated.adminNote || 'No reason provided'}`);
+      console.log(`[REVOCATION_DETAILS] Item: ${updated.itemTitle}, Dates: ${updated.startDate} - ${updated.endDate}`);
+      console.log(`[ADMIN_NOTE] Reason: ${updated.adminNote || 'No reason provided'}`);
     }
 
     // Handle cascading effects based on status change
@@ -252,7 +263,7 @@ router.patch('/:id', adminAuth, async (req, res) => {
 
     res.json({
       ...updated.toObject(),
-      notification: notification.success ? 'Notification sent' : 'Notification failed'
+      notification: notification && notification.success ? 'Notification sent' : 'Notification failed'
     });
 
   } catch (error) {
