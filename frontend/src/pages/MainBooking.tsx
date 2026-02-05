@@ -363,7 +363,7 @@ const MainBooking: React.FC = () => {
       )}
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-6 py-8">
+      <div className="max-w-8xl mx-auto px-6 py-8">
         {!user && (
           <div className="bg-blue-50 border-l-4 border-blue-950 p-6 mb-8 rounded-lg">
             <div className="flex items-start">

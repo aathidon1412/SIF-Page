@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import adminRoutes from './src/routes/admin.js';
 import itemRoutes from './src/routes/items.js';
 import bookingRoutes from './src/routes/bookings.js';
+import verifyRoutes from './src/routes/verify.js';
 import { seedAdmin } from './src/utils/seedAdmin.js';
 import { seedItems } from './src/utils/seed.js';
 
@@ -36,6 +37,7 @@ async function start() {
     app.use('/api/admin', adminRoutes);
     app.use('/api/items', itemRoutes);
     app.use('/api/bookings', bookingRoutes);
+    app.use('/api/verify', verifyRoutes);
 
     app.listen(PORT, () => console.log(`Backend running on http://localhost:${PORT}`));
   } catch (err) {

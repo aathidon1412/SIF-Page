@@ -198,6 +198,14 @@ const AdminBookings: React.FC<Props> = (props) => {
                         <td className="px-6 py-5 align-top min-w-[200px]">
                           <div className="text-sm font-medium text-gray-900 break-words whitespace-normal">{request.userName}</div>
                           <div className="text-xs text-gray-500 break-words whitespace-normal">{request.userEmail}</div>
+                          <div className="mt-1">
+                            {request.notificationSent === true && (
+                              <span className="inline-block text-xs text-green-700 bg-green-100 px-2 py-0.5 rounded">Email: Sent</span>
+                            )}
+                            {request.notificationSent === false && request.notificationHistory && request.notificationHistory.length > 0 && (
+                              <span className="inline-block text-xs text-red-700 bg-red-100 px-2 py-0.5 rounded">Email: Failed</span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-6 py-5 align-top min-w-[220px]">
                           <div className="text-sm font-medium text-blue-950 break-words whitespace-normal" title={request.itemTitle}>{request.itemTitle}</div>
@@ -258,7 +266,7 @@ const AdminBookings: React.FC<Props> = (props) => {
               <button onClick={() => setLocalSelected(null)} className="text-gray-400 hover:text-gray-600">Close</button>
             </div>
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-gray-500">Requested By</p>
                   <p className="font-medium">{localSelected.userName} — <span className="text-xs text-gray-500">{localSelected.userEmail}</span></p>
@@ -267,6 +275,12 @@ const AdminBookings: React.FC<Props> = (props) => {
                   <p className="text-xs text-gray-500">Status</p>
                   <p className="font-medium capitalize">{localSelected.status}</p>
                 </div>
+                    <div>
+                      <p className="text-xs text-gray-500">Email</p>
+                      <p className="font-medium">
+                        {localSelected.notificationSent === true ? <span className="text-green-700">Sent</span> : (localSelected.notificationSent === false ? <span className="text-red-700">Failed</span> : <span className="text-gray-600">—</span>)}
+                      </p>
+                    </div>
                 <div>
                   <p className="text-xs text-gray-500">Time Slot</p>
                   <p className="font-medium">

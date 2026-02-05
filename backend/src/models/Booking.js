@@ -1,18 +1,43 @@
 import mongoose from 'mongoose';
 
-// Helper: Check if date is a weekday
-const isWeekday = (dateString) => {
-  const date = new Date(dateString);
+// Helper: Parse a date/time in DD/MM/YYYY HH:MM and return a Date or null
+const parseDDMMYYYY_HHMM = (dateString, timeString) => {
+  if (!dateString || !timeString) return null;
+  const combined = `${dateString.trim()} ${timeString.trim()}`;
+  const re = /^(\d{2})\/(\d{2})\/(\d{4})\s+(\d{2}):(\d{2})$/;
+  const m = combined.match(re);
+  if (!m) return null;
+  const [, dd, mm, yyyy, HH, MM] = m;
+  const day = parseInt(dd, 10);
+  const month = parseInt(mm, 10) - 1;
+  const year = parseInt(yyyy, 10);
+  const hour = parseInt(HH, 10);
+  const minute = parseInt(MM, 10);
+  const d = new Date(year, month, day, hour, minute, 0);
+  if (
+    d.getFullYear() !== year ||
+    d.getMonth() !== month ||
+    d.getDate() !== day ||
+    d.getHours() !== hour ||
+    d.getMinutes() !== minute
+  ) {
+    return null;
+  }
+  return d;
+};
+
+// Helper: Check if a Date is a weekday (Mon-Fri)
+const isWeekdayDate = (date) => {
   const day = date.getDay();
   return day >= 1 && day <= 5;
 };
 
-// Helper: Check if time is within business hours (9 AM - 6 PM)
-const isBusinessHours = (timeString) => {
-  if (!timeString) return true; // Optional field
-  const [hours, minutes] = timeString.split(':').map(Number);
-  const totalMinutes = hours * 60 + minutes;
-  return totalMinutes >= 9 * 60 && totalMinutes <= 18 * 60;
+// Helper: Check if time (in minutes) is within business hours (9:00 - 18:00)
+const isWithinBusinessHours = (date) => {
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
+  const total = hours * 60 + minutes;
+  return total >= 9 * 60 && total <= 18 * 60;
 };
 
 const bookingSchema = new mongoose.Schema({
@@ -22,36 +47,10 @@ const bookingSchema = new mongoose.Schema({
   itemId: String,
   itemTitle: String,
   itemType: { type: String, enum: ['lab', 'equipment'] },
-  startDate: { 
-    type: String,
-    required: true,
-    validate: {
-      validator: isWeekday,
-      message: 'Start date must be a weekday (Monday-Friday)'
-    }
-  },
-  endDate: { 
-    type: String,
-    required: true,
-    validate: {
-      validator: isWeekday,
-      message: 'End date must be a weekday (Monday-Friday)'
-    }
-  },
-  startTime: {
-    type: String,
-    validate: {
-      validator: isBusinessHours,
-      message: 'Start time must be between 9:00 AM and 6:00 PM'
-    }
-  },
-  endTime: {
-    type: String,
-    validate: {
-      validator: isBusinessHours,
-      message: 'End time must be between 9:00 AM and 6:00 PM'
-    }
-  },
+  startDate: { type: String, required: true },
+  endDate: { type: String, required: true },
+  startTime: { type: String, required: true },
+  endTime: { type: String, required: true },
   purpose: String,
   contactInfo: String,
   additionalNotes: String,
@@ -85,90 +84,65 @@ const bookingSchema = new mongoose.Schema({
   notificationSent: { type: Boolean, default: false },
   lastNotificationAt: String,
   notificationHistory: [{
-    type: String,
+    type: { type: String },
     sentAt: String,
     status: String,
     message: String
   }],
   
+  // QR Code verification fields
+  verificationToken: { type: String, unique: true, sparse: true },
+  qrCodeData: String,
+  tokenGeneratedAt: String,
+  verifiedAt: String,
+  verifiedBy: String,
+  verificationCount: { type: Number, default: 0 },
+  
   createdAt: { type: Date, default: Date.now }
 });
 
-// Additional validation to ensure date range doesn't span weekends
+// Validation: ensure combined date+time strings are valid DD/MM/YYYY HH:MM,
+// fall on weekdays (Mon-Fri), within 9:00-18:00, and that start < end.
 bookingSchema.pre('save', function(next) {
-  const start = new Date(this.startDate);
-  const end = new Date(this.endDate);
-  
-  // Check all dates in range are weekdays
-  const current = new Date(start);
-  while (current <= end) {
-    const day = current.getDay();
-    if (day === 0 || day === 6) {
+  // Parse start and end date-times in DD/MM/YYYY HH:MM format
+  const startDateTime = parseDDMMYYYY_HHMM(this.startDate, this.startTime);
+  const endDateTime = parseDDMMYYYY_HHMM(this.endDate, this.endTime);
+
+  if (!startDateTime || !endDateTime) {
+    return next(new Error('Date and time must be in format DD/MM/YYYY HH:MM'));
+  }
+
+  // Weekday checks
+  if (!isWeekdayDate(startDateTime)) {
+    return next(new Error('Start date must be a weekday (Monday-Friday)'));
+  }
+  if (!isWeekdayDate(endDateTime)) {
+    return next(new Error('End date must be a weekday (Monday-Friday)'));
+  }
+
+  // Business hours checks (both start and end must be within 9:00-18:00)
+  if (!isWithinBusinessHours(startDateTime)) {
+    return next(new Error('Start time must be between 09:00 and 18:00'));
+  }
+  if (!isWithinBusinessHours(endDateTime)) {
+    return next(new Error('End time must be between 09:00 and 18:00'));
+  }
+
+  // Ensure start < end strictly
+  if (endDateTime <= startDateTime) {
+    return next(new Error('End date-time must be later than start date-time'));
+  }
+
+  // Ensure no weekend days in the entire date range
+  const current = new Date(startDateTime);
+  const endDayBoundary = new Date(endDateTime);
+  while (current <= endDayBoundary) {
+    if (!isWeekdayDate(current)) {
       return next(new Error('Booking range cannot include weekends. Only Monday-Friday bookings are allowed.'));
     }
     current.setDate(current.getDate() + 1);
   }
-  
-  // Validate time range for lab bookings
-  if (this.itemType === 'lab' && this.startTime && this.endTime) {
-    // Validate complete date-time combination
-    const startDateTime = new Date(`${this.startDate}T${this.startTime}:00`);
-    const endDateTime = new Date(`${this.endDate}T${this.endTime}:00`);
-    
-    // Check date-time validity
-    if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
-      return next(new Error('Invalid date or time format'));
-    }
-    
-    // Critical: Check end date-time is after start date-time
-    if (endDateTime <= startDateTime) {
-      if (this.startDate === this.endDate) {
-        return next(new Error('End time must be after start time on the same date'));
-      } else {
-        return next(new Error('End date-time must be after start date-time'));
-      }
-    }
-    
-    // Validate business hours (9 AM - 6 PM)
-    const [startHours, startMinutes] = this.startTime.split(':').map(Number);
-    const [endHours, endMinutes] = this.endTime.split(':').map(Number);
-    
-    const startTotal = startHours * 60 + startMinutes;
-    const endTotal = endHours * 60 + endMinutes;
-    const businessStart = 9 * 60;
-    const businessEnd = 18 * 60;
-    
-    if (startTotal < businessStart || startTotal > businessEnd) {
-      return next(new Error('Start time must be between 9:00 AM and 6:00 PM'));
-    }
-    if (endTotal < businessStart || endTotal > businessEnd) {
-      return next(new Error('End time must be between 9:00 AM and 6:00 PM'));
-    }
-    
-    // Check minimum duration (1 hour)
-    const durationMs = endDateTime.getTime() - startDateTime.getTime();
-    const durationHours = durationMs / (1000 * 60 * 60);
-    
-    if (durationHours < 1) {
-      return next(new Error('Minimum booking duration is 1 hour'));
-    }
-    
-    // Check maximum single-day duration (9 hours)
-    if (this.startDate === this.endDate && durationHours > 9) {
-      return next(new Error('Maximum booking duration per day is 9 hours'));
-    }
-  }
-  
-  // For equipment bookings, validate date order
-  if (this.itemType === 'equipment') {
-    const start = new Date(this.startDate);
-    const end = new Date(this.endDate);
-    
-    if (end < start) {
-      return next(new Error('End date cannot be before start date'));
-    }
-  }
-  
+
   next();
 });
 

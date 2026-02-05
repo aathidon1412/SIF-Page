@@ -45,18 +45,18 @@ const Booking: React.FC = () => {
 
   return (
     <div className="bg-yellow-50 pt-5 dark:bg-yellow-50 min-h-screen">
-      <div className="w-full">
+      <div className="w-full max-w-8xl mx-auto px-6">
         {/* Hero block removed per request */}
         
         {/* Equipment section (separate) */}
         <section className="w-full px-6 pb-12">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-8xl mx-auto">
             <div className="flex items-center justify-between mb-6">
               <h2 className="text-2xl font-semibold text-blue-900 underline decoration-blue-950 decoration-2">Available Equipment</h2>
-              <div>
+                <div>
                 <button
                   type="button"
-                  onClick={handleCardClick}
+                  onClick={() => handleCardClick()}
                   className="bg-blue-950 text-[#fffdeb] px-4 py-2 rounded-lg hover:bg-blue-900 transition-colors"
                 >
                   View more
@@ -117,15 +117,15 @@ const Booking: React.FC = () => {
         </section>
 
         {/* Labs section (separate) - full-bleed (no left/right space) */}
-        <section className="w-full">
+        <section className="w-full px-0 pb-12">
           <div className="w-full rounded-xl overflow-hidden bg-blue-950 text-white">
-            <div className="max-w-7xl mx-auto px-6 py-10">
+            <div className="max-w-8xl mx-auto px-6 py-10">
               <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-semibold underline decoration-blue-950 decoration-2">Available Labs</h2>
                 <div>
                   <button
                     type="button"
-                    onClick={handleCardClick}
+                    onClick={() => handleCardClick()}
                     className="bg-yellow-50 text-blue-950 px-4 py-2 rounded-lg hover:bg-yellow-100 transition-colors"
                   >
                     View more

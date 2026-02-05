@@ -9,6 +9,7 @@ import Booking from './pages/Booking';
 import Contact from './pages/Contact';
 import MainBooking from './pages/MainBooking';
 import Admin from './pages/Admin';
+import QRVerification from './pages/QRVerification';
 import { AuthProvider } from './lib/auth';
 import { ThemeProvider, useTheme } from './hooks/useTheme';
 import { ItemsProvider } from './lib/itemsContext';
@@ -38,8 +39,8 @@ const AppContent: React.FC = () => {
 
     // Handle page navigation loading
     useEffect(() => {
-      // Don't show loader for main-booking or any /admin routes
-      if (pathname === '/main-booking' || pathname.startsWith('/admin')) {
+      // Don't show loader for main-booking or any /admin routes or qrverify
+      if (pathname === '/main-booking' || pathname.startsWith('/admin') || pathname === '/admin/qrverify') {
         setIsLoading(false);
         return;
       }
@@ -52,8 +53,8 @@ const AppContent: React.FC = () => {
       return () => clearTimeout(timer);
     }, [pathname]);
 
-  const hideFooter = pathname === '/main-booking' || pathname.startsWith('/admin');
-  const hideNavbar = pathname === '/main-booking' || pathname.startsWith('/admin');
+  const hideFooter = pathname === '/main-booking' || pathname.startsWith('/admin') || pathname === '/admin/qrverify';
+  const hideNavbar = pathname === '/main-booking' || pathname.startsWith('/admin') || pathname === '/admin/qrverify';
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -69,6 +70,7 @@ const AppContent: React.FC = () => {
           <Route path="/admin/bookings" element={<Admin />} />
           <Route path="/admin/equipments" element={<Admin />} />
           <Route path="/admin/labs" element={<Admin />} />
+          <Route path="/admin/qrverify" element={<QRVerification />} />
           <Route path="/contact" element={<Contact />} />
         </Routes>
       </main>
