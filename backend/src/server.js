@@ -2,12 +2,12 @@ import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import adminRoutes from './src/routes/admin.js';
-import itemRoutes from './src/routes/items.js';
-import bookingRoutes from './src/routes/bookings.js';
-import verifyRoutes from './src/routes/verify.js';
-import { seedAdmin } from './src/utils/seedAdmin.js';
-import { seedItems } from './src/utils/seed.js';
+import adminRoutes from './routes/admin.js';
+import itemRoutes from './routes/items.js';
+import bookingRoutes from './routes/bookings.js';
+import verifyRoutes from './routes/verify.js';
+import { seedAdmin } from './utils/seedAdmin.js';
+import { seedItems } from './utils/seed.js';
 
 dotenv.config();
 
