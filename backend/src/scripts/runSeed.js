@@ -2,7 +2,7 @@
 
 import dotenv from 'dotenv';
 import mongoose from 'mongoose';
-import { seedItems, clearItems, reseedItems } from './src/utils/seed.js';
+import { seedItems, clearItems, reseedItems } from './seed.js';
 
 // Load environment variables
 dotenv.config();
