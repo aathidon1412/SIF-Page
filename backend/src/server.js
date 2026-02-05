@@ -6,8 +6,8 @@ import adminRoutes from './routes/admin.js';
 import itemRoutes from './routes/items.js';
 import bookingRoutes from './routes/bookings.js';
 import verifyRoutes from './routes/verify.js';
-import { seedAdmin } from './utils/seedAdmin.js';
-import { seedItems } from './utils/seed.js';
+import { seedAdmin } from './scripts/seedAdmin.js';
+import { seedItems } from './scripts/seed.js';
 
 dotenv.config();
 
