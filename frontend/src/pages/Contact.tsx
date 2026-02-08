@@ -32,16 +32,16 @@ const Contact: React.FC = () => {
             <div className="space-y-8 h-full flex flex-col md:pr-8 md:border-r md:border-yellow-100">
               <div className="p-6 rounded-2xl bg-transparent flex-1 flex flex-col pb-6 md:pb-0 border-b md:border-b-0 border-blue-950">
                 <h2 className="text-2xl font-bold mb-4 text-[#fffdeb] underline decoration-[#fffdeb] underline-offset-4">Contact <span className="text-yellow-300">Details</span></h2>
-                <p className="text-sm text-[#fffdeb] mb-4 max-w-prose">Reach out to our team for questions about workshops, lab access, or partnerships. We typically respond <span className="bg-yellow-300 text-blue-950 px-2 rounded font-semibold">within 1–2 business days</span> — please include a short summary of your request.</p>
+                <p className="text-sm text-[#fffdeb] mb-4 max-w-prose text-justify">Reach out to our team for questions about workshops, lab access, or partnerships. We typically respond <span className="bg-yellow-300 text-blue-950 px-2 rounded font-semibold">within 1–2 business days</span> — please include a short summary of your request.</p>
                 <ul className="space-y-4 text-lg text-[#fffdeb] mt-auto">
-                  <li className="flex items-center">
-                    <MdEmail className="mr-3 text-[#fffdeb]" /> <span className="font-medium">Email:</span>&nbsp; info@sif-fablab.edu
+                  <li className="flex items-start">
+                    <MdEmail className="mr-3 text-[#fffdeb] mt-1 flex-shrink-0" /> <div><span className="font-medium">Email:</span>&nbsp; info@sif-fablab.edu</div>
                   </li>
-                  <li className="flex items-center">
-                    <MdPhone className="mr-3 text-[#fffdeb]" /> <span className="font-medium">Phone:</span>&nbsp; (123) 456-7890
+                  <li className="flex items-start">
+                    <MdPhone className="mr-3 text-[#fffdeb] mt-1 flex-shrink-0" /> <div><span className="font-medium">Phone:</span>&nbsp; 90808 95742, 9025282825</div>
                   </li>
-                  <li className="flex items-center">
-                    <MdLocationOn className="mr-3 text-[#fffdeb]" /> <span className="font-medium">Address:</span>&nbsp; 123 Innovation Drive, Tech Campus, Sonipat
+                  <li className="flex items-start">
+                    <MdLocationOn className="mr-3 text-[#fffdeb] mt-1 flex-shrink-0" /> <div className="text-justify"><span className="font-medium">Address:</span>&nbsp; 2nd floor, Sona College of Technology, Sona Valliappa Block, Sona Incubation Foundation, Junction Main Rd, Salem, Tamil Nadu 636005</div>
                   </li>
                 </ul>
 
@@ -112,8 +112,8 @@ const Contact: React.FC = () => {
 
                 </div>
 
-                <p className="mt-4 text-[#fffdeb]">
-                  Our lab is located at <span className="font-semibold">123 Innovation Drive, Tech Campus, Sonipat</span>. We welcome visitors <span className="bg-yellow-300 text-blue-950 px-2 rounded font-semibold">Monday–Friday, 9:00 AM — 6:00 PM</span>. Drop by for hands-on <span className="bg-blue-950 text-[#fffdeb] px-2 rounded">workshops</span>, <span className="bg-blue-950 text-[#fffdeb] px-2 rounded">prototyping help</span>, and <span className="bg-blue-950 text-[#fffdeb] px-2 rounded">community meetups</span> — or reach out to <span className="bg-yellow-300 text-blue-950 px-2 rounded font-semibold">schedule a dedicated session</span>.
+                <p className="mt-4 text-[#fffdeb] text-justify">
+                  Our lab is located at <span className="font-semibold">2nd floor, Sona College of Technology, Sona Valliappa Block, Sona Incubation Foundation, Junction Main Rd, Salem, Tamil Nadu 636005</span>. We welcome visitors <span className="bg-yellow-300 text-blue-950 px-2 rounded font-semibold">Monday–Friday, 9:00 AM — 6:00 PM</span>. Drop by for hands-on <span className="bg-blue-950 text-[#fffdeb] px-2 rounded">workshops</span>, <span className="bg-blue-950 text-[#fffdeb] px-2 rounded">prototyping help</span>, and <span className="bg-blue-950 text-[#fffdeb] px-2 rounded">community meetups</span> — or reach out to <span className="bg-yellow-300 text-blue-950 px-2 rounded font-semibold">schedule a dedicated session</span>.
                 </p>
               </div>
             </div>

@@ -1,9 +1,9 @@
 
 import React from 'react';
-import HeroSection from '../components/HeroSection';
-import AboutSection from '../components/AboutSection';
-import ServicesSection from '../components/ServicesSection';
-import FAQSection from '../components/FAQSection';
+import HeroSection from '../components/Home/HeroSection';
+import AboutSection from '../components/Home/AboutSection';
+import ServicesSection from '../components/Home/ServicesSection';
+import FAQSection from '../components/Home/FAQSection';
 
 const Home: React.FC = () => {
   return (
