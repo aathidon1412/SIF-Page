@@ -50,6 +50,14 @@ const Admin: React.FC = () => {
   const [filterStartDate, setFilterStartDate] = useState('');
   const [filterEndDate, setFilterEndDate] = useState('');
 
+  // Check for existing auth token on mount
+  useEffect(() => {
+    const token = localStorage.getItem('admin_token');
+    if (token) {
+      setAuth(true);
+    }
+  }, []);
+
   useEffect(() => {
     if (auth) {
       loadBookings();
@@ -576,7 +584,7 @@ const Admin: React.FC = () => {
           <div className="mt-6 text-center space-y-4">
             <p className="text-sm text-gray-600">Secure access to booking management</p>
             <button
-              onClick={() => navigate('/main-booking')}
+              onClick={() => navigate('/')}
               className="inline-flex items-center space-x-2 text-blue-950 hover:text-blue-800 transition-colors font-medium text-sm border border-blue-200 hover:border-blue-300 px-4 py-2 rounded-lg hover:bg-blue-50"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
