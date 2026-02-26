@@ -17,7 +17,7 @@ const Contact: React.FC = () => {
           <div className="mx-4 sm:mx-6 lg:mx-8 rounded-2xl p-4 lg:p-6 bg-transparent">
             <div className="text-center">
               <h1 className="text-4xl md:text-5xl font-extrabold text-[#fffdeb] inline-block">
-                Get In <span className="text-yellow-300">Touch</span>
+                Get In Touch
               </h1>
               <p className="mt-3 text-lg max-w-3xl mx-auto text-[#fffdeb]">
                 We're here to help and answer any questions you might have. We look forward to hearing from you.
@@ -31,22 +31,25 @@ const Contact: React.FC = () => {
           <ScrollReveal>
             <div className="space-y-8 h-full flex flex-col md:pr-8 md:border-r md:border-yellow-100">
               <div className="p-6 rounded-2xl bg-transparent flex-1 flex flex-col pb-6 md:pb-0 border-b md:border-b-0 border-blue-950">
-                <h2 className="text-2xl font-bold mb-4 text-[#fffdeb] underline decoration-[#fffdeb] underline-offset-4">Contact <span className="text-yellow-300">Details</span></h2>
-                <p className="text-sm text-[#fffdeb] mb-4 max-w-prose text-justify">Reach out to our team for questions about workshops, lab access, or partnerships. We typically respond <span className="bg-yellow-300 text-blue-950 px-2 rounded font-semibold">within 1–2 business days</span> — please include a short summary of your request.</p>
-                <ul className="space-y-4 text-lg text-[#fffdeb] mt-auto">
-                  <li className="flex items-start">
-                    <MdEmail className="mr-3 text-[#fffdeb] mt-1 flex-shrink-0" /> <div><span className="font-medium">Email:</span>&nbsp; info@sif-fablab.edu</div>
-                  </li>
-                  <li className="flex items-start">
-                    <MdPhone className="mr-3 text-[#fffdeb] mt-1 flex-shrink-0" /> <div><span className="font-medium">Phone:</span>&nbsp; 90808 95742, 9025282825</div>
-                  </li>
-                  <li className="flex items-start">
-                    <MdLocationOn className="mr-3 text-[#fffdeb] mt-1 flex-shrink-0" /> <div className="text-justify"><span className="font-medium">Address:</span>&nbsp; 2nd floor, Sona College of Technology, Sona Valliappa Block, Sona Incubation Foundation, Junction Main Rd, Salem, Tamil Nadu 636005</div>
-                  </li>
-                </ul>
+                <h2 className="text-2xl font-bold mb-4 text-[#fffdeb] underline decoration-[#fffdeb] underline-offset-4">Contact Details</h2>
+                <p className="text-md text-[#fffdeb] ">Reach out to our team for questions about workshops, lab access, or partnerships. We typically respond <span className="bg-yellow-300 text-blue-950 px-2 rounded font-semibold">within 1–2 business days</span> — please include a short summary of your request.</p>
+                <div className="flex flex-wrap items-center gap-6 text-lg text-[#fffdeb] mt-10">
+                  <a href="mailto:info@sif-fablab.edu" className="flex items-center gap-2 hover:underline">
+                    <MdEmail className="text-[#fffdeb] text-2xl flex-shrink-0" />
+                    <span className="font-medium">Email</span>
+                  </a>
+                  <a href="tel:+919080895742" className="flex items-center gap-2 hover:underline">
+                    <MdPhone className="text-[#fffdeb] text-2xl flex-shrink-0" />
+                    <span className="font-medium">Phone</span>
+                  </a>
+                  <a href="https://www.google.com/maps/search/?api=1&query=Sona+College+of+Technology+Sona+Valliappa+Block+Salem+Tamil+Nadu" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 hover:underline">
+                    <MdLocationOn className="text-[#fffdeb] text-2xl flex-shrink-0" />
+                    <span className="font-medium">Address</span>
+                  </a>
+                </div>
 
                 {/* Social media connections */}
-                <div className="mt-6 pt-4">
+                <div className="mt-16 pt-4">
                   <h3 className="text-lg font-semibold mb-3 text-[#fffdeb]">Follow us</h3>
                   <div className="flex items-center gap-4">
                     <a
@@ -122,7 +125,7 @@ const Contact: React.FC = () => {
           {/* Contact Form */}
           <ScrollReveal delay={200}>
             <div className="p-6 md:p-8 rounded-2xl shadow-xl bg-transparent h-full flex flex-col md:pl-8">
-              <h2 className="text-3xl md:text-4xl font-extrabold mb-4 text-[#fffdeb] tracking-tight leading-tight underline decoration-[#fffdeb] underline-offset-4">Send us a <span className="text-yellow-300">Message</span></h2>
+              <h2 className="text-3xl md:text-4xl font-extrabold mb-4 text-[#fffdeb] tracking-tight leading-tight underline decoration-[#fffdeb] underline-offset-4">Send us a Message</h2>
               <p className="text-sm text-[#fffdeb] mb-6 max-w-xl">Have a question, project idea or need assistance? Send us a message and our team will get back to you shortly.</p>
 
               <form onSubmit={handleSubmit} className="space-y-6">

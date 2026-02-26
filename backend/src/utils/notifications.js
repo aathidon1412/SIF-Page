@@ -39,7 +39,11 @@ const getTransporter = () => {
     host,
     port,
     secure,
-    auth: user && pass ? { user, pass } : undefined
+    auth: user && pass ? { user, pass } : undefined,
+    tls: {
+      // Allow self-signed / corporate-proxy certificates
+      rejectUnauthorized: false
+    }
   });
 
   return transporter;

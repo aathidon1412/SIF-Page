@@ -48,7 +48,7 @@ const Navbar: React.FC = () => {
           {/* Logo/Brand - Desktop */}
           <div className="hidden md:flex flex-shrink-0 items-center">
             <NavLink to="/" onClick={closeMenu} className="flex items-center gap-3">
-              <div className="relative w-12 h-12" style={{ perspective: '800px' }}>
+              <div className="relative w-20 h-20" style={{ perspective: '800px' }}>
                 <div
                   className="absolute w-full h-full transition-transform duration-700 ease-in-out"
                   style={{ transformStyle: 'preserve-3d', transform: `rotateY(${currentLogoIndex * 120}deg)` }}
@@ -57,14 +57,14 @@ const Navbar: React.FC = () => {
                     <div
                       key={i}
                       className="absolute inset-0 flex items-center justify-center"
-                      style={{ backfaceVisibility: 'hidden', transform: `rotateY(${i * 120}deg) translateZ(26px)` }}
+                      style={{ backfaceVisibility: 'hidden', transform: `rotateY(${i * 120}deg) translateZ(44px)` }}
                     >
                       <img src={l} alt={`logo-${i}`} className="w-full h-full object-contain" />
                     </div>
                   ))}
                 </div>
               </div>
-              <span className="text-xl font-bold text-slate-900 hover:text-slate-700 transition-colors duration-200">SIF-FAB LAB</span>
+              <span className="text-2xl font-bold text-slate-900 hover:text-slate-700 transition-colors duration-200">SIF-FAB LAB</span>
             </NavLink>
           </div>
 
@@ -75,7 +75,7 @@ const Navbar: React.FC = () => {
                 key={item.name}
                 to={item.path}
                 className={({ isActive }) =>
-                  `group inline-flex items-center gap-2 px-6 py-3 rounded-xl text-base font-medium transition-all duration-200 ${
+                  `group inline-flex items-center gap-2 px-6 py-3 rounded-xl text-lg font-semibold transition-all duration-200 ${
                     isActive
                       ? 'bg-blue-900 text-white shadow-md'
                       : 'text-slate-900 hover:bg-blue-100/50 hover:text-slate-900'
@@ -90,7 +90,7 @@ const Navbar: React.FC = () => {
           {/* Mobile: Logo + Menu button */}
           <div className="md:hidden flex items-center justify-between w-full">
             <NavLink to="/" onClick={closeMenu} className="flex items-center gap-3">
-              <div className="relative w-10 h-10" style={{ perspective: '700px' }}>
+              <div className="relative w-14 h-14" style={{ perspective: '700px' }}>
                 <div
                   className="absolute w-full h-full transition-transform duration-700 ease-in-out"
                   style={{ transformStyle: 'preserve-3d', transform: `rotateY(${currentLogoIndex * 120}deg)` }}
@@ -99,7 +99,7 @@ const Navbar: React.FC = () => {
                     <div
                       key={i}
                       className="absolute inset-0 flex items-center justify-center"
-                      style={{ backfaceVisibility: 'hidden', transform: `rotateY(${i * 120}deg) translateZ(22px)` }}
+                      style={{ backfaceVisibility: 'hidden', transform: `rotateY(${i * 120}deg) translateZ(30px)` }}
                     >
                       <img src={l} alt={`logo-${i}`} className="w-full h-full object-contain" />
                     </div>
@@ -133,7 +133,7 @@ const Navbar: React.FC = () => {
                 <NavLink
                   to={item.path}
                   className={({ isActive }) =>
-                    `group block px-4 py-3 rounded-xl text-base font-medium text-center transition-all duration-200 ${
+                    `group block px-4 py-3 rounded-xl text-lg font-semibold text-center transition-all duration-200 ${
                       isActive
                         ? 'bg-blue-900 text-white shadow-md'
                         : 'text-slate-900 hover:bg-yellow-200/30 hover:text-slate-900'

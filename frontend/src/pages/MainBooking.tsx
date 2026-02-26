@@ -4,6 +4,9 @@ import { fetchItems, fetchBookings } from '../services/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FaBell, FaCog, FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa';
 import BookingModal from '../components/BookingModal';
+import logo1 from '../assets/logo_1.png';
+import logo2 from '../assets/logo_2.png';
+import logo3 from '../assets/logo_3.png';
 
 const MainBooking: React.FC = () => {
   const { user, signOut, signInWithGoogle } = useAuth();
@@ -20,6 +23,16 @@ const MainBooking: React.FC = () => {
   const [userBookingRequests, setUserBookingRequests] = useState<any[]>([]);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successMessageText, setSuccessMessageText] = useState('');
+  const [currentLogoIndex, setCurrentLogoIndex] = useState<number>(0);
+  const logos = [logo1, logo2, logo3];
+
+  // Logo rotation animation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentLogoIndex((prev) => (prev + 1) % logos.length);
+    }, 2500);
+    return () => clearInterval(interval);
+  }, []);
 
   // Filter results based on active tab, search query, and availability
   const filteredResults = useMemo(() => {
@@ -163,7 +176,30 @@ const MainBooking: React.FC = () => {
       {/* Header */}
       <div className="bg-blue-950 text-white px-10 py-6">
         <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Booking Portal</h1>
+          <div className="flex items-center gap-3">
+            <button 
+              onClick={() => navigate('/')} 
+              className="hover:opacity-80 transition-opacity"
+            >
+              <div className="relative w-16 h-16" style={{ perspective: '800px' }}>
+                <div
+                  className="absolute w-full h-full transition-transform duration-700 ease-in-out"
+                  style={{ transformStyle: 'preserve-3d', transform: `rotateY(${currentLogoIndex * 120}deg)` }}
+                >
+                  {logos.map((l, i) => (
+                    <div
+                      key={i}
+                      className="absolute inset-0 flex items-center justify-center"
+                      style={{ backfaceVisibility: 'hidden', transform: `rotateY(${i * 120}deg) translateZ(35px)` }}
+                    >
+                      <img src={l} alt={`logo-${i}`} className="w-full h-full object-contain" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </button>
+            <h1 className="text-2xl font-bold text-white">FAB-LAB Booking Portal</h1>
+          </div>
           
           <div className="flex items-center gap-4">
             {user && (
