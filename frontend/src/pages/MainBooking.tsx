@@ -4,9 +4,10 @@ import { fetchItems, fetchBookings } from '../services/api';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FaBell, FaCog, FaCheckCircle, FaTimesCircle, FaClock } from 'react-icons/fa';
 import BookingModal from '../components/BookingModal';
-import logo1 from '../assets/logo_1.png';
-import logo2 from '../assets/logo_2.png';
-import logo3 from '../assets/logo_3.png';
+import logo1 from '../assets/logo_1.jpeg';
+import logo2 from '../assets/logo_2.jpeg';
+import logo3 from '../assets/logo_3.jpeg';
+import logo4 from '../assets/logo_4.png';
 
 const MainBooking: React.FC = () => {
   const { user, signOut, signInWithGoogle } = useAuth();
@@ -24,7 +25,7 @@ const MainBooking: React.FC = () => {
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [successMessageText, setSuccessMessageText] = useState('');
   const [currentLogoIndex, setCurrentLogoIndex] = useState<number>(0);
-  const logos = [logo1, logo2, logo3];
+  const logos = [logo1, logo2, logo3, logo4];
 
   // Logo rotation animation
   useEffect(() => {
@@ -178,19 +179,19 @@ const MainBooking: React.FC = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button 
-              onClick={() => navigate('/')} 
+              onClick={() => navigate('/#')} 
               className="hover:opacity-80 transition-opacity"
             >
               <div className="relative w-16 h-16" style={{ perspective: '800px' }}>
                 <div
                   className="absolute w-full h-full transition-transform duration-700 ease-in-out"
-                  style={{ transformStyle: 'preserve-3d', transform: `rotateY(${currentLogoIndex * 120}deg)` }}
+                  style={{ transformStyle: 'preserve-3d', transform: `rotateY(${currentLogoIndex * 90}deg)` }}
                 >
                   {logos.map((l, i) => (
                     <div
                       key={i}
                       className="absolute inset-0 flex items-center justify-center"
-                      style={{ backfaceVisibility: 'hidden', transform: `rotateY(${i * 120}deg) translateZ(35px)` }}
+                      style={{ backfaceVisibility: 'hidden', transform: `rotateY(${i * 90}deg) translateZ(35px)` }}
                     >
                       <img src={l} alt={`logo-${i}`} className="w-full h-full object-contain" />
                     </div>
@@ -537,7 +538,7 @@ const MainBooking: React.FC = () => {
                     <p className="text-sm text-gray-600 mb-3">{eq.description || eq.desc || 'No description'}</p>
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="text-2xl font-bold text-blue-950">Rs: {eq.pricePerDay.toFixed(2)}</div>
+                        <div className="text-2xl font-bold text-blue-950">Rs: {eq.pricePerDay ? eq.pricePerDay.toFixed(2) : '0.00'}</div>
                         <div className="text-xs text-gray-500">/ day</div>
                       </div>
                       <button 
@@ -588,8 +589,8 @@ const MainBooking: React.FC = () => {
                     <p className="text-sm text-gray-600 mb-3">{lab.desc}</p>
                     <div className="flex items-center justify-between">
                       <div>
-                        <div className="text-2xl font-bold text-blue-950">Rs: {lab.pricePerHour.toFixed(0)}</div>
-                        <div className="text-xs text-gray-500">/ hour · Capacity {lab.capacity}</div>
+                        <div className="text-2xl font-bold text-blue-950">Rs: {lab.pricePerHour ? lab.pricePerHour.toFixed(0) : '0'}</div>
+                        <div className="text-xs text-gray-500">/ hour · Capacity {lab.capacity || 'N/A'}</div>
                       </div>
                       <button 
                         onClick={(e) => {

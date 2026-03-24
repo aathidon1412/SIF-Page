@@ -3,8 +3,8 @@ import { NavLink } from "react-router-dom";
 import CountUp from "react-countup";
 
 const stats = [
-  { label: "Available Labs", value: "6", suffix: "" },
-  { label: "Equipment", value: "20", suffix: "+" },
+  { label: "Available Labs", value: "6", suffix: "", to: { pathname: '/main-booking', state: { tab: 'labs' } } },
+  { label: "Equipment", value: "20", suffix: "+", to: { pathname: '/main-booking', state: { tab: 'equipment' } } },
   { label: "Bookings Today", value: "34", suffix: "" },
   { label: "Active Projects", value: "15", suffix: "+" },
 ];
@@ -92,25 +92,25 @@ const HeroSection: React.FC = () => {
               className="mt-6 sm:mt-8 w-full max-w-4xl grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 animate-fade-in-up"
               style={{ animationDelay: "360ms" }}
             >
-              {stats.map((s) => (
-                <div
-                  key={s.label}
-                  className="bg-blue-900 rounded-lg p-3 sm:p-4 lg:p-6 flex flex-col items-center justify-center shadow-md hover:shadow-lg transition-shadow duration-300"
-                >
-                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
-                    <CountUp
-                      start={0}
-                      end={Number(s.value)}
-                      duration={2}
-                      separator=","
-                    />
-                    {s.suffix}
+              {stats.map((s) => {
+                const card = (
+                  <div className="bg-blue-900 rounded-lg p-3 sm:p-4 lg:p-6 flex flex-col items-center justify-center shadow-md hover:shadow-lg transition-shadow duration-300">
+                    <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white">
+                      <CountUp start={0} end={Number(s.value)} duration={2} separator="," />
+                      {s.suffix}
+                    </div>
+                    <div className="text-xs sm:text-sm text-blue-300 mt-1 text-center">{s.label}</div>
                   </div>
-                  <div className="text-xs sm:text-sm text-blue-300 mt-1 text-center">
-                    {s.label}
-                  </div>
-                </div>
-              ))}
+                );
+
+                return s.to ? (
+                  <NavLink key={s.label} to={s.to} aria-label={s.label} className="block">
+                    {card}
+                  </NavLink>
+                ) : (
+                  <div key={s.label}>{card}</div>
+                );
+              })}
             </div>
 
             <div

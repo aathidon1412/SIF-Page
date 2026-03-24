@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import logo1 from '../assets/logo_1.png';
-import logo2 from '../assets/logo_2.png';
-import logo3 from '../assets/logo_3.png';
+import logo1 from '../assets/logo_1.jpeg';
+import logo2 from '../assets/logo_2.jpeg';
+import logo3 from '../assets/logo_3.jpeg';
+import logo4 from '../assets/logo_4.png';
 import { ChevronDownIcon, MenuIcon, XIcon } from './icons';
 
 interface NavItem {
@@ -13,7 +14,7 @@ interface NavItem {
 const Navbar: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   const [currentLogoIndex, setCurrentLogoIndex] = useState<number>(0);
-  const logos = [logo1, logo2, logo3];
+  const logos = [logo1, logo2, logo3, logo4];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -51,13 +52,13 @@ const Navbar: React.FC = () => {
               <div className="relative w-20 h-20" style={{ perspective: '800px' }}>
                 <div
                   className="absolute w-full h-full transition-transform duration-700 ease-in-out"
-                  style={{ transformStyle: 'preserve-3d', transform: `rotateY(${currentLogoIndex * 120}deg)` }}
+                  style={{ transformStyle: 'preserve-3d', transform: `rotateY(${currentLogoIndex * 90}deg)` }}
                 >
                   {logos.map((l, i) => (
                     <div
                       key={i}
                       className="absolute inset-0 flex items-center justify-center"
-                      style={{ backfaceVisibility: 'hidden', transform: `rotateY(${i * 120}deg) translateZ(44px)` }}
+                      style={{ backfaceVisibility: 'hidden', transform: `rotateY(${i * 90}deg) translateZ(44px)` }}
                     >
                       <img src={l} alt={`logo-${i}`} className="w-full h-full object-contain" />
                     </div>
@@ -93,13 +94,13 @@ const Navbar: React.FC = () => {
               <div className="relative w-14 h-14" style={{ perspective: '700px' }}>
                 <div
                   className="absolute w-full h-full transition-transform duration-700 ease-in-out"
-                  style={{ transformStyle: 'preserve-3d', transform: `rotateY(${currentLogoIndex * 120}deg)` }}
+                  style={{ transformStyle: 'preserve-3d', transform: `rotateY(${currentLogoIndex * 90}deg)` }}
                 >
                   {logos.map((l, i) => (
                     <div
                       key={i}
                       className="absolute inset-0 flex items-center justify-center"
-                      style={{ backfaceVisibility: 'hidden', transform: `rotateY(${i * 120}deg) translateZ(30px)` }}
+                      style={{ backfaceVisibility: 'hidden', transform: `rotateY(${i * 90}deg) translateZ(30px)` }}
                     >
                       <img src={l} alt={`logo-${i}`} className="w-full h-full object-contain" />
                     </div>

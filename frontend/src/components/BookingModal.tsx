@@ -24,8 +24,8 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
   const [formData, setFormData] = useState<BookingFormData>({
     startDate: '',
     endDate: '',
-    startTime: itemType === 'lab' ? '09:00' : undefined,
-    endTime: itemType === 'lab' ? '10:00' : undefined,
+    startTime: '09:00',
+    endTime: '10:00',
     purpose: '',
     contactInfo: user?.email || '',
     additionalNotes: ''
@@ -41,26 +41,62 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
     if (!startDate) return 'Start date is required';
     if (!endDate) return 'End date is required';
 
-    // For equipment bookings (date only)
+    // For equipment bookings we also require time slots (same rules as labs)
     if (itemType === 'equipment') {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
-      
-      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        return 'Invalid date format';
+      if (!startTime) return 'Start time is required';
+      if (!endTime) return 'End time is required';
+
+      const timeRegex = /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/;
+      if (!timeRegex.test(startTime) || !timeRegex.test(endTime)) {
+        return 'Invalid time format';
       }
-      
-      // Single check: end must be after or equal to start
-      if (end < start) {
-        return 'End date must be after or equal to start date';
+
+      const startDateTime = new Date(`${startDate}T${startTime}:00`);
+      const endDateTime = new Date(`${endDate}T${endTime}:00`);
+
+      if (isNaN(startDateTime.getTime()) || isNaN(endDateTime.getTime())) {
+        return 'Invalid date or time combination';
       }
-      
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      if (start < today) {
-        return 'Start date cannot be in the past';
+
+      if (endDateTime <= startDateTime) {
+        return 'End date and time must be after start date and time';
       }
-      
+
+      const now = new Date();
+      if (startDateTime < now) {
+        return 'Booking cannot be in the past';
+      }
+
+      // Validate business hours (9 AM - 6 PM)
+      const [startHour, startMinute] = startTime.split(':').map(Number);
+      const [endHour, endMinute] = endTime.split(':').map(Number);
+      const startTotalMinutes = startHour * 60 + startMinute;
+      const endTotalMinutes = endHour * 60 + endMinute;
+
+      if (startTotalMinutes < 540 || startTotalMinutes > 1080) {
+        return 'Start time must be between 9:00 AM and 6:00 PM';
+      }
+      if (endTotalMinutes < 540 || endTotalMinutes > 1080) {
+        return 'End time must be between 9:00 AM and 6:00 PM';
+      }
+
+      const durationHours = (endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60 * 60);
+      if (durationHours < 1) {
+        return 'Minimum booking duration is 1 hour';
+      }
+
+      if (startDate === endDate && durationHours > 9) {
+        return 'Maximum booking duration per day is 9 hours';
+      }
+
+      // Validate weekdays
+      if (!isWeekdayString(startDate)) {
+        return 'Start date must be a weekday (Monday-Friday)';
+      }
+      if (!isWeekdayString(endDate)) {
+        return 'End date must be a weekday (Monday-Friday)';
+      }
+
       return null;
     }
 
@@ -137,6 +173,14 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
     const end = new Date(formData.endDate);
     
     if (itemType === 'equipment' && item.pricePerDay) {
+      // If times are provided, charge pro-rata based on hours; otherwise charge per day
+      if (formData.startTime && formData.endTime) {
+        const startTime = new Date(`${formData.startDate}T${formData.startTime}`);
+        const endTime = new Date(`${formData.endDate}T${formData.endTime}`);
+        const hours = (endTime.getTime() - startTime.getTime()) / (1000 * 60 * 60);
+        const hourlyRate = item.pricePerDay / 24;
+        return Math.ceil(hours) * hourlyRate;
+      }
       const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24));
       return days * item.pricePerDay;
     } else if (itemType === 'lab' && item.pricePerHour && formData.startTime && formData.endTime) {
@@ -383,7 +427,7 @@ const BookingModal: React.FC<BookingModalProps> = ({ isOpen, onClose, onSuccess,
               </div>
             </div>
 
-            {itemType === 'lab' && (
+            {(itemType === 'lab' || itemType === 'equipment') && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <TimePicker
                   label="Start Time"

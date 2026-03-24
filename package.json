@@ -1,0 +1,25 @@
+{
+  "name": "sif-page",
+  "version": "1.0.0",
+  "description": "A robust, TypeScript-based booking and scheduling management system. This project features advanced conflict detection, automated revocation handling, and a strictly typed validation architecture.",
+  "main": "index.js",
+  "scripts": {
+    "dev": "concurrently \"npm --prefix backend run dev\" \"npm --prefix frontend run dev\"",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aathidon1412/SIF-Page.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  },
+  "bugs": {
+    "url": "https://github.com/aathidon1412/SIF-Page/issues"
+  },
+  "homepage": "https://github.com/aathidon1412/SIF-Page#readme"
+}

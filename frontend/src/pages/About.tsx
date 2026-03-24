@@ -93,98 +93,119 @@ const About: React.FC = () => {
                 </div>
 
                 {/* Team Grid */}
-                <div className="max-w-6xl mx-auto">
-                  {/* First 3 members */}
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-8">
+                <div className="max-w-7xl mx-auto">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6 justify-items-center">
                     {/* Head & CEO */}
-                    <div className="flex flex-col items-center justify-start p-4">
-                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4 relative">
+                    <div className="bg-blue-900 rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full max-w-[280px]">
+                      <div className="relative h-64 overflow-hidden">
                         <img 
                           src="/src/assets/OurTeam/sathya_murthy.jpeg" 
                           alt="Mr. Sathya Murthy V" 
-                          className="w-full h-full rounded-full object-cover shadow-2xl"
+                          className="w-full h-full object-cover"
                         />
                       </div>
-                      <div className="text-center text-white">
-                        <h3 className="text-xl lg:text-2xl font-bold text-yellow-300 mb-2">Mr. Sathya Murthy V</h3>
-                        <p className="text-base text-yellow-200 font-medium mb-2">Head & CEO</p>
-                        <a href="https://www.linkedin.com/in/sathyavibes/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center hover:opacity-80 transition-opacity">
-                          <FaLinkedin className="w-6 h-6 text-yellow-50" />
+                      <div className="px-4 py-3 text-center bg-gradient-to-b from-blue-950 to-blue-900">
+                        <h3 className="text-lg font-bold text-yellow-300 mb-0.5">Mr. Sathya Murthy V</h3>
+                        <p className="text-sm text-yellow-200 font-medium mb-2">Head & CEO</p>
+                        <a 
+                          href="https://www.linkedin.com/in/sathyavibes/" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-yellow-300 hover:bg-yellow-400 transition-colors"
+                        >
+                          <FaLinkedin className="w-5 h-5 text-blue-950" />
                         </a>
                       </div>
                     </div>
 
                     {/* Incubations Manager 1 */}
-                    <div className="flex flex-col items-center justify-start p-4">
-                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4 relative">
+                    <div className="bg-blue-900 rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full max-w-[280px]">
+                      <div className="relative h-64 overflow-hidden">
                         <img 
                           src="/src/assets/OurTeam/brabasuthan.jpeg" 
                           alt="Mr. Brabasuthan M" 
-                          className="w-full h-full rounded-full object-cover shadow-2xl"
+                          className="w-full h-full object-cover"
                         />
                       </div>
-                      <div className="text-center text-white">
-                        <h3 className="text-xl lg:text-2xl font-bold text-yellow-300 mb-2">Mr. Brabasuthan M</h3>
-                        <p className="text-base text-yellow-200 font-medium mb-2">Incubations Manager</p>
-                        <a href="https://www.linkedin.com/in/brabasuthan-murugesan/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center hover:opacity-80 transition-opacity">
-                          <FaLinkedin className="w-6 h-6 text-yellow-50" />
+                      <div className="px-4 py-3 text-center bg-gradient-to-b from-blue-950 to-blue-900">
+                        <h3 className="text-lg font-bold text-yellow-300 mb-0.5">Mr. Brabasuthan M</h3>
+                        <p className="text-sm text-yellow-200 font-medium mb-2">Incubations Manager</p>
+                        <a 
+                          href="https://www.linkedin.com/in/brabasuthan-murugesan/" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-yellow-300 hover:bg-yellow-400 transition-colors"
+                        >
+                          <FaLinkedin className="w-5 h-5 text-blue-950" />
                         </a>
                       </div>
                     </div>
 
                     {/* Incubations Manager 2 */}
-                    <div className="flex flex-col items-center justify-start p-4">
-                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4 relative">
+                    <div className="bg-blue-900 rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full max-w-[280px]">
+                      <div className="relative h-64 overflow-hidden">
                         <img 
                           src="/src/assets/OurTeam/sharveshwar.jpeg" 
                           alt="Mr. Sharveshwar R" 
-                          className="w-full h-full rounded-full object-cover shadow-2xl"
+                          className="w-full h-full object-cover"
                         />
                       </div>
-                      <div className="text-center text-white">
-                        <h3 className="text-xl lg:text-2xl font-bold text-yellow-300 mb-2">Mr. Sharveshwar R</h3>
-                        <p className="text-base text-yellow-200 font-medium mb-2">Incubations Manager</p>
-                        <a href="https://www.linkedin.com/in/sharveshwar/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center hover:opacity-80 transition-opacity">
-                          <FaLinkedin className="w-6 h-6 text-yellow-50" />
+                      <div className="px-4 py-3 text-center bg-gradient-to-b from-blue-950 to-blue-900">
+                        <h3 className="text-lg font-bold text-yellow-300 mb-0.5">Mr. Sharveshwar R</h3>
+                        <p className="text-sm text-yellow-200 font-medium mb-2">Incubations Manager</p>
+                        <a 
+                          href="https://www.linkedin.com/in/sharveshwar/" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-yellow-300 hover:bg-yellow-400 transition-colors"
+                        >
+                          <FaLinkedin className="w-5 h-5 text-blue-950" />
                         </a>
                       </div>
                     </div>
-                  </div>
 
-                  {/* Last 2 members - centered */}
-                  <div className="flex flex-wrap justify-center gap-8">
                     {/* Project Associate 1 */}
-                    <div className="flex flex-col items-center justify-start p-4">
-                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4 relative">
+                    <div className="bg-blue-900 rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full max-w-[280px]">
+                      <div className="relative h-64 overflow-hidden">
                         <img 
                           src="/src/assets/OurTeam/jayasurya.jpeg" 
                           alt="Mr. Jayasurya M" 
-                          className="w-full h-full rounded-full object-cover shadow-2xl"
+                          className="w-full h-full object-cover"
                         />
                       </div>
-                      <div className="text-center text-white">
-                        <h3 className="text-xl lg:text-2xl font-bold text-yellow-300 mb-2">Mr. Jayasurya M</h3>
-                        <p className="text-base text-yellow-200 font-medium mb-2">Project Associate</p>
-                        <a href="https://www.linkedin.com/in/jayasurya-marudhasalamoorthi-06516027b/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center hover:opacity-80 transition-opacity">
-                          <FaLinkedin className="w-6 h-6 text-yellow-50" />
+                      <div className="px-4 py-3 text-center bg-gradient-to-b from-blue-950 to-blue-900">
+                        <h3 className="text-lg font-bold text-yellow-300 mb-0.5">Mr. Jayasurya M</h3>
+                        <p className="text-sm text-yellow-200 font-medium mb-2">Project Associate</p>
+                        <a 
+                          href="https://www.linkedin.com/in/jayasurya-marudhasalamoorthi-06516027b/" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-yellow-300 hover:bg-yellow-400 transition-colors"
+                        >
+                          <FaLinkedin className="w-5 h-5 text-blue-950" />
                         </a>
                       </div>
                     </div>
 
                     {/* Project Associate 2 */}
-                    <div className="flex flex-col items-center justify-start p-4">
-                      <div className="w-32 h-32 lg:w-40 lg:h-40 mb-4">
+                    <div className="bg-blue-900 rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full max-w-[280px]">
+                      <div className="relative h-64 overflow-hidden">
                         <img 
-                          src="https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=3461&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D" 
+                          src="/src/assets/OurTeam/priyadharshini.png" 
                           alt="Ms. Sakthi Priyadarshini" 
-                          className="w-full h-full rounded-full object-cover shadow-2xl"
+                          className="w-full h-full object-cover"
                         />
                       </div>
-                      <div className="text-center text-white">
-                        <h3 className="text-xl lg:text-2xl font-bold text-yellow-300 mb-2">Ms. Sakthi Priyadarshini</h3>
-                        <p className="text-base text-yellow-200 font-medium">Project Associate</p>
-                        <a href="#" target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center hover:opacity-80 transition-opacity">
-                          <FaLinkedin className="w-6 h-6 text-yellow-50" />
+                      <div className="px-4 py-3 text-center bg-gradient-to-b from-blue-950 to-blue-900">
+                        <h3 className="text-lg font-bold text-yellow-300 mb-0.5">Ms. Sakthi Priyadarshini</h3>
+                        <p className="text-sm text-yellow-200 font-medium mb-2">Project Associate</p>
+                        <a 
+                          href="https://www.linkedin.com/in/sakthipriyadharsini-panneerselvam-443509246" 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="inline-flex items-center justify-center w-9 h-9 rounded-full bg-yellow-300 hover:bg-yellow-400 transition-colors"
+                        >
+                          <FaLinkedin className="w-5 h-5 text-blue-950" />
                         </a>
                       </div>
                     </div>
