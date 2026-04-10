@@ -4,7 +4,7 @@ import logo1 from '../assets/logo_1.jpeg';
 import logo2 from '../assets/logo_2.jpeg';
 import logo3 from '../assets/logo_3.jpeg';
 import logo4 from '../assets/logo_4.png';
-import { ChevronDownIcon, MenuIcon, XIcon } from './icons';
+import {  MenuIcon, XIcon } from './icons';
 
 interface NavItem {
   name: string;
@@ -142,13 +142,12 @@ const Navbar: React.FC = () => {
                   }
                   onClick={closeMenu}
                 >
-                  <span className="inline-flex items-center justify-center gap-2">
-                    <ChevronDownIcon className="h-4 w-4 transform transition-transform duration-300 group-hover:rotate-90" />
+                  <span className="inline-flex items-left justify-left gap-2">
                     <span>{item.name}</span>
                   </span>
                 </NavLink>
                 {index < navItems.length - 1 && (
-                  <div className="h-px bg-blue-900 mx-2 my-1"></div>
+                  <div className="h-px bg-[#fffdeb] mx-2 my-1"></div>
                 )}
               </React.Fragment>
             ))}

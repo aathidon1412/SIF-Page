@@ -36,6 +36,13 @@ export interface BookingRequest {
   conflictingBookings?: ConflictingBooking[];
   wasApprovedBefore?: boolean;
   declinedAfterApproval?: boolean;
+  notificationSent?: boolean;
+  notificationHistory?: Array<{
+    type?: string;
+    status?: string;
+    sentAt?: string;
+    error?: string;
+  }>;
 }
 
 export interface BookingFormData {

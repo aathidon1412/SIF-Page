@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "dev": "nodemon ./src/server.js",
+    "build": "echo Backend has no transpile step",
     "start": "node ./src/server.js",
     "seed": "node runSeed.js seed",
     "seed:clear": "node runSeed.js clear",

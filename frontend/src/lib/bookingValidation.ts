@@ -199,7 +199,7 @@ export const validateBooking = (
   endDate: string,
   startTime?: string,
   endTime?: string,
-  isLabBooking: boolean = false
+  _isLabBooking: boolean = false
 ): ValidationResult => {
   // Validate dates
   // Keep existing date-range semantic (supports ISO date strings used elsewhere)

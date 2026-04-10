@@ -175,14 +175,14 @@ const MainBooking: React.FC = () => {
   return (
     <div className="min-h-screen bg-yellow-50">
       {/* Header */}
-      <div className="bg-blue-950 text-white px-10 py-6">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+      <div className="bg-blue-950 text-white px-4 sm:px-6 lg:px-10 py-4 sm:py-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div className="flex items-center gap-3 min-w-0">
             <button 
               onClick={() => navigate('/#')} 
-              className="hover:opacity-80 transition-opacity"
+              className="hover:opacity-80 transition-opacity shrink-0"
             >
-              <div className="relative w-16 h-16" style={{ perspective: '800px' }}>
+              <div className="relative w-14 h-14 sm:w-16 sm:h-16" style={{ perspective: '800px' }}>
                 <div
                   className="absolute w-full h-full transition-transform duration-700 ease-in-out"
                   style={{ transformStyle: 'preserve-3d', transform: `rotateY(${currentLogoIndex * 90}deg)` }}
@@ -199,13 +199,13 @@ const MainBooking: React.FC = () => {
                 </div>
               </div>
             </button>
-            <h1 className="text-2xl font-bold text-white">FAB-LAB Booking Portal</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-white leading-tight break-words">FAB-LAB Booking Portal</h1>
           </div>
           
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 lg:gap-4">
             {user && (
               <button 
-                className="relative hover:text-yellow-200 transition-colors" 
+                className="relative hover:text-yellow-200 transition-colors p-1" 
                 onClick={() => setShowNotifications(!showNotifications)}
               >
                 <FaBell size={20} />
@@ -220,7 +220,7 @@ const MainBooking: React.FC = () => {
             {/* Admin Login Button */}
             <button
               onClick={() => navigate('/admin')}
-              className="flex items-center gap-2 text-sm border border-yellow-200 rounded-lg bg-transparent text-yellow-200 hover:text-yellow-400 hover:border-yellow-400 px-3 py-2 transition-colors"
+              className="flex items-center gap-2 text-xs sm:text-sm border border-yellow-200 rounded-lg bg-transparent text-yellow-200 hover:text-yellow-400 hover:border-yellow-400 px-3 py-2 transition-colors"
               title="Admin Panel"
             >
               <FaCog size={16} />
@@ -228,12 +228,12 @@ const MainBooking: React.FC = () => {
             </button>
             
             {user ? (
-              <div className="flex items-center gap-2">
-                <img src={user.picture} alt={user.name} className="w-8 h-8 rounded-full" />
-                <div className="text-sm">{user.name}</div>
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <img src={user.picture} alt={user.name} className="w-8 h-8 rounded-full shrink-0" />
+                <div className="text-sm max-w-[130px] sm:max-w-[180px] truncate" title={user.name}>{user.name}</div>
                 <button
                   onClick={signOut}
-                  className="text-md border border-yellow-200 rounded-sm bg-transparent text-yellow-200 hover:text-yellow-400 hover:border-yellow-400 px-4 py-2 transition-colors"
+                  className="text-sm border border-yellow-200 rounded-sm bg-transparent text-yellow-200 hover:text-yellow-400 hover:border-yellow-400 px-3 py-2 transition-colors"
                   >
                   Sign out
                 </button>
@@ -241,7 +241,7 @@ const MainBooking: React.FC = () => {
             ) : (
               <button
                 onClick={signInWithGoogle}
-                className="flex items-center gap-2 bg-yellow-200 text-blue-950 px-4 py-2 rounded-lg hover:bg-yellow-300 transition-colors font-medium"
+                className="flex items-center gap-2 bg-yellow-200 text-blue-950 px-3 sm:px-4 py-2 rounded-lg hover:bg-yellow-300 transition-colors font-medium text-sm sm:text-base"
               >
                 <svg className="w-4 h-4" viewBox="0 0 24 24">
                   <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>

@@ -1,6 +1,11 @@
 import React from 'react';
 import ScrollReveal from '../components/ui/ScrollReveal';
 import { FaLinkedin } from 'react-icons/fa6';
+import sathyaMurthyImage from '../assets/OurTeam/sathya_murthy.jpeg';
+import brabasuthanImage from '../assets/OurTeam/brabasuthan.jpeg';
+import sharveshwarImage from '../assets/OurTeam/sharveshwar.jpeg';
+import jayasuryaImage from '../assets/OurTeam/jayasurya.jpeg';
+import priyadharshiniImage from '../assets/OurTeam/priyadharshini.png';
 
 
 
@@ -99,7 +104,7 @@ const About: React.FC = () => {
                     <div className="bg-blue-900 rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full max-w-[280px]">
                       <div className="relative h-64 overflow-hidden">
                         <img 
-                          src="/src/assets/OurTeam/sathya_murthy.jpeg" 
+                          src={sathyaMurthyImage}
                           alt="Mr. Sathya Murthy V" 
                           className="w-full h-full object-cover"
                         />
@@ -122,7 +127,7 @@ const About: React.FC = () => {
                     <div className="bg-blue-900 rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full max-w-[280px]">
                       <div className="relative h-64 overflow-hidden">
                         <img 
-                          src="/src/assets/OurTeam/brabasuthan.jpeg" 
+                          src={brabasuthanImage}
                           alt="Mr. Brabasuthan M" 
                           className="w-full h-full object-cover"
                         />
@@ -145,7 +150,7 @@ const About: React.FC = () => {
                     <div className="bg-blue-900 rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full max-w-[280px]">
                       <div className="relative h-64 overflow-hidden">
                         <img 
-                          src="/src/assets/OurTeam/sharveshwar.jpeg" 
+                          src={sharveshwarImage}
                           alt="Mr. Sharveshwar R" 
                           className="w-full h-full object-cover"
                         />
@@ -168,7 +173,7 @@ const About: React.FC = () => {
                     <div className="bg-blue-900 rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full max-w-[280px]">
                       <div className="relative h-64 overflow-hidden">
                         <img 
-                          src="/src/assets/OurTeam/jayasurya.jpeg" 
+                          src={jayasuryaImage}
                           alt="Mr. Jayasurya M" 
                           className="w-full h-full object-cover"
                         />
@@ -191,7 +196,7 @@ const About: React.FC = () => {
                     <div className="bg-blue-900 rounded-2xl shadow-xl overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-2xl w-full max-w-[280px]">
                       <div className="relative h-64 overflow-hidden">
                         <img 
-                          src="/src/assets/OurTeam/priyadharshini.png" 
+                          src={priyadharshiniImage}
                           alt="Ms. Sakthi Priyadarshini" 
                           className="w-full h-full object-cover"
                         />

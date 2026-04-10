@@ -1,6 +1,9 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import CountUp from "react-countup";
+import hero1Image from "../../assets/hero1.jpeg";
+import hero2Image from "../../assets/hero2.png";
+import hero3Image from "../../assets/hero3.png";
 
 const stats = [
   { label: "Available Labs", value: "6", suffix: "", to: { pathname: '/main-booking', state: { tab: 'labs' } } },
@@ -66,19 +69,19 @@ const HeroSection: React.FC = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div className="space-y-3">
                     <img
-                      src="/api/placeholder/280/200"
+                      src={hero1Image}
                       alt="Laboratory Equipment"
                       className="w-full h-32 sm:h-40 object-cover rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-105"
                     />
                     <img
-                      src="/api/placeholder/280/200"
+                      src={hero2Image}
                       alt="Research Workspace"
                       className="w-full h-32 sm:h-40 object-cover rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-105"
                     />
                   </div>
                   <div className="flex items-center justify-center">
                     <img
-                      src="/api/placeholder/280/400"
+                      src={hero3Image}
                       alt="Advanced Lab Setup"
                       className="w-full h-64 sm:h-80 object-cover rounded-lg shadow-lg transform transition-transform duration-300 hover:scale-105"
                     />
@@ -157,19 +160,19 @@ const HeroSection: React.FC = () => {
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-6">
                   <img
-                    src="../src/assets/hero1.jpeg"
+                    src={hero1Image}
                     alt="Laboratory Equipment"
                     className="w-full h-56 object-cover rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105"
                   />
                   <img
-                    src="../src/assets/hero2.png"
+                    src={hero2Image}
                     alt="Research Workspace"
                     className="w-full h-56 object-cover rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105"
                   />
                 </div>
                 <div className="flex items-center justify-center">
                   <img
-                    src="../src/assets/hero3.png"
+                    src={hero3Image}
                     alt="Advanced Lab Setup"
                     className="w-full h-[28rem] object-cover rounded-xl shadow-lg transform transition-transform duration-300 hover:scale-105"
                   />
