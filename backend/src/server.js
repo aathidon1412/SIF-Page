@@ -27,7 +27,14 @@ const configuredOrigins = (process.env.FRONTEND_URL || '')
   .map((origin) => origin.trim())
   .filter(Boolean);
 
-const allowedOrigins = Array.from(new Set(['http://localhost:5173', 'http://localhost:5001', ...configuredOrigins]));
+const allowedOrigins = Array.from(
+  new Set([
+    'http://localhost:5173',
+    'http://localhost:5001',
+    process.env.RENDER_EXTERNAL_URL,
+    ...configuredOrigins,
+  ].filter(Boolean))
+);
 
 app.use(
   cors({
